@@ -131,5 +131,23 @@
     <string name="contact">Contact</string>
     <string name="directions">Directions</string>
     <string name="continue_the_task">Continue the task</string>
+    <string name="edit_task">Edit task</string>
+    <string name="please_select_option">Please select Option</string>
+    <string name="delay_task">Delay task</string>
+    <string name="reason_for_delay">Delay reason</string>
+    <string name="cancel_order">Cancel order</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="are_you_sure_you_want_to_add_products">Are you sure you want to add products!</string>
+    <string name="add_products">Add products</string>
+    <string name="task_details">Task details</string>
+    <string name="required_to_be_received">To be received</string>
+    <string name="deleted_products">Deleted products</string>
+    <string name="view_deleted_products">View deleted products</string>
+    <string name="extra_product">Extra products</string>
+    <string name="products_you_can_add_again">Products you can add again</string>
+    <string name="save">products you can add</string>
+    <string name="receive_amount">Receive Amount</string>
+    <string name="change">Change</string>
 
 </resources>

@@ -1,557 +1,984 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation
-import android.util.Log
+
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Text
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
+import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.statusbootmsheets.EditTaskStatusBottomSheetDialog
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.statusbootmsheets.ReasonsBottomSheetDialog
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.statusbootmsheets.StatusDialogType
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
+import com.ovasta.logisticsapp.base.Error700
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray200
+import com.ovasta.logisticsapp.base.Gray300
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
-import com.ovasta.logisticsapp.base.components.sharedComposable.ContactSheet
-import com.ovasta.logisticsapp.base.components.sharedComposable.NavigationAction
-import com.ovasta.logisticsapp.base.components.sharedComposable.SearchBox
-import com.ovasta.logisticsapp.base.components.sharedComposable.ShowLoadingIndicator
-import com.ovasta.logisticsapp.base.components.sharedComposable.ToastMsg
-import com.ovasta.logisticsapp.base.ext.FRACTION_DIGITS
-import com.ovasta.logisticsapp.base.ext.copyPhoneNumber
-import com.ovasta.logisticsapp.base.ext.formatPrice
-import com.ovasta.logisticsapp.base.ext.makePhoneCall
-import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
-import com.ovasta.logisticsapp.base.ext.openWhatsApp
+import com.ovasta.logisticsapp.base.Primary50
+import com.ovasta.logisticsapp.base.Primary500
+import com.ovasta.logisticsapp.base.Primary700
+import com.ovasta.logisticsapp.base.Success50
+import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
+import com.ovasta.logisticsapp.base.ext.orDefault
+import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.mdMedium
-import com.ovasta.logisticsapp.base.mdRegular
-import com.ovasta.logisticsapp.base.smNormal
+import com.ovasta.logisticsapp.base.mdSemiBold
+import com.ovasta.logisticsapp.base.setOnClick
+import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.base.xsMedium
-import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
-import com.ovasta.logisticsapp.presentation.home.data.model.TaskStatus
-import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
-import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
-import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewModel
-import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
+import com.ovasta.logisticsapp.base.xsRegular
+import com.ovasta.logisticsapp.presentation.orderDetails.data.BundleComponentModel
+import com.ovasta.logisticsapp.presentation.orderDetails.data.ProductModel
+import com.ovasta.logisticsapp.presentation.orderDetails.data.ProductUnitModel
+import com.ovasta.logisticsapp.presentation.orderDetails.data.model.DropOfTaskDetailsModel
+
 
 @Composable
-fun HomeScreen(
-    viewModel: HomeViewModel, navController: NavController
-
+fun DropOfOrderDetailsScreen(
+    viewState: DropOfOrderDetailsViewState,
+    onAction: (DropOfOrderDetailsAction) -> Unit
 ) {
-    val context = LocalContext.current
-    val viewState by viewModel.viewState.collectAsState()
-    val searchKey by viewModel.searchKey.collectAsState()
-    val currency by viewModel.currency.collectAsState()
-    val showContactSheet by viewModel.showContactSheet.collectAsState()
 
-
-    LaunchedEffect(Unit) {
-        viewModel.taskItemActions
-            .filterNotNull()
-            .collectLatest { event ->
-                when (event) {
-                    is HomeItemActions.ShowTaskDetails -> {
-
-                    }
-
-                    is HomeItemActions.OpenDirection -> {
-                        context.navigateToLocationClick(event.lat, event.lng)
-                    }
-
-                    is HomeItemActions.CopyPhone -> {
-                        context.copyPhoneNumber(event.retailerPhone)
-                    }
-
-                    is HomeItemActions.CallRetailer -> {
-                        context.makePhoneCall(event.retailerPhone)
-                    }
-
-                    is HomeItemActions.WhatsAppRetailer -> {
-                        context.openWhatsApp(event.retailerPhone)
-                    }
-
-                    else -> Unit
-                }
-                viewModel.clearTasksItemActions()
-            }
-    }
-    if (showContactSheet != null) {
-        ContactSheet(
-            taskId = showContactSheet?.taskId ?: 0,
-            homeTaskInfo = showContactSheet!!,
-            onAction = { viewModel.onTaskItemAction(it) }
-        )
-    }
-
-
-    TasksContent(
+    DropOfOrderDetailsContent(
         viewState = viewState,
-        searchKey = searchKey.orEmpty(),
-        currency,
-        viewModel.startedTaskId,
-        onTasksScreenAction = viewModel::onTasksScreenAction,
-        onTaskItemAction = viewModel::onTaskItemAction
+        onAction = onAction
     )
-}
-
-@Composable
-fun TasksContent(
-    viewState: HomeViewState,
-    searchKey: String,
-    currency: String,
-    startedTaskId: Int,
-    onTasksScreenAction: (HomeScreenActions) -> Unit,
-    onTaskItemAction: (HomeItemActions) -> Unit,
-) {
-    val showToast = remember { mutableStateOf(false) }
-    val toastText = viewState.showToastMessage?.let { stringResource(it) }
-
-    LaunchedEffect(viewState.showToastMessage) {
-        if (viewState.showToastMessage != null) {
-            showToast.value = true
-            delay(2000)
-            showToast.value = false
-            onTasksScreenAction(HomeScreenActions.ClearToastMessage)
-        }
-    }
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            topBar = {
-                CenteredTextAppBar(
-                    title = stringResource(R.string.tasks, Modifier.testTag("title")),
-                    showBackButton = false
-                ) {}
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .background(Gray100)
-                    .padding(
-                        top = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                        start = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                        end = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                    )
-            ) {
-
-                SearchWithFilterBar(
-                    searchKey = searchKey,
-                    onSearchKeyChange = {
-                        onTasksScreenAction(
-                            HomeScreenActions.OnSearchKeyChange(
-                                it
-                            )
-                        )
-                    },
-                    onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
-                )
 
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
-                Tasks(viewState, currency, startedTaskId, onTasksScreenAction, onTaskItemAction)
-
-            }
-        }
-        if (viewState.isLoading) {
-            ShowLoadingIndicator(Modifier)
-        }
-        if (showToast.value) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(
-                        bottom = dimensionResource(com.intuit.sdp.R.dimen._60sdp),
-                        start = dimensionResource(com.intuit.sdp.R.dimen._60sdp),
-                        end = dimensionResource(com.intuit.sdp.R.dimen._60sdp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (toastText != null) {
-                    ToastMsg(text = toastText)
+//    val state = viewState.statusDialogType
+    when (val state = viewState.statusDialogType) {
+        is StatusDialogType.StatusType -> {
+            EditTaskStatusBottomSheetDialog(
+                dialogState = state.dialogState,
+                onDismiss = {
+                    onAction(DropOfOrderDetailsAction.DismissStatusDialogs)
+                },
+                onSelectTaskStatus = {
+                    onAction(DropOfOrderDetailsAction.OnSelectTaskStatus(it))
                 }
-            }
+            )
         }
-    }
-}
 
-@Composable
-fun SearchWithFilterBar(
-    searchKey: String,
-    onSearchKeyChange: (String) -> Unit,
-    onSearchTriggered: () -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
-    ) {
-        SearchBox(
-            modifier = Modifier
-                .weight(1f)
-                .testTag("searchBox"),
-            searchKey,
-            hint = stringResource(R.string.find_order),
-            onSearchKeyChange = onSearchKeyChange,
-            onSearchTriggered = onSearchTriggered,
-            keyboardType = KeyboardType.Number
+        is StatusDialogType.ReasonType -> {
+            ReasonsBottomSheetDialog(
+                dialogState = state.dialogState,
+                onDismiss = {
+                    onAction(DropOfOrderDetailsAction.DismissStatusDialogs)
+                }, onBackToTaskStatus = {
+                    onAction(DropOfOrderDetailsAction.BackToTaskStatus)
+                },
+                onConfirm = { selectedReason ->
+                    if (state.dialogState.isRequestDelay) {
+                        onAction(
+                            DropOfOrderDetailsAction.OnDelaySameDay(selectedReason)
+                        )
+                    } else {
+                        onAction(
+                            DropOfOrderDetailsAction.OnFailTask(selectedReason)
+                        )
+                    }
+                }
+            )
+        }
+
+        is StatusDialogType.None -> {}
+    }
+
+
+    if (viewState.showAddProductsDialog) {
+
+        BaseDialog(
+            icon = painterResource(R.drawable.logo),
+            title = stringResource(R.string.add_products),
+            message = stringResource(R.string.are_you_sure_you_want_to_add_products),
+            dismissOnClickOutside = true,
+            onDismiss = { onAction(DropOfOrderDetailsAction.DismissAddProductsDialog) },
+            primaryButtonText = stringResource(R.string.yes),
+            secondaryButtonText = stringResource(R.string.no),
+            onPrimaryClick = { onAction(DropOfOrderDetailsAction.OnConfirmClick) },
+            onSecondaryClick = { onAction(DropOfOrderDetailsAction.DismissAddProductsDialog) }
         )
     }
+
 }
 
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Tasks(
-    viewState: HomeViewState,
-    currency: String,
-    startedTaskId: Int,
-    onTasksScreenAction: (HomeScreenActions) -> Unit,
-    onTaskItemAction: (HomeItemActions) -> Unit,
+private fun DropOfOrderDetailsContent(
+    viewState: DropOfOrderDetailsViewState,
+    onAction: (DropOfOrderDetailsAction) -> Unit
 ) {
-    val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Gray100),
+        topBar = {
+            CenteredTextAppBar(
+                stringResource(R.string.task_details),
+                onBackButtonPressed = { onAction(DropOfOrderDetailsAction.OnBackPressed) }
+            )
+        }
+    ) { paddingValues ->
 
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-            .filterNotNull()
-            .distinctUntilChanged()
-            .collect { lastVisibleItemIndex ->
-                Log.d("TAG", "Tasks: On Scroll")
-                val totalItems = listState.layoutInfo.totalItemsCount
-                if (lastVisibleItemIndex >= totalItems - 1) {
-                    Log.d("TAG", "Tasks: Load Mode Data")
-                    onTasksScreenAction(HomeScreenActions.LoadTasks)
-                }
-            }
-    }
 
-    val tasks = viewState.filteredTasks
-    if (tasks.isEmpty()) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp))
-                .testTag("emptyState"),
-            contentAlignment = Alignment.TopCenter
+                .padding(paddingValues)
+                .background(Gray100)
         ) {
-            Text(
-                text = stringResource(R.string.no_tasks_available),
-                style = mdRegular.copy(color = Gray500)
-            )
-        }
-    } else {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.testTag("tasksList")
-        ) {
-            itemsIndexed(tasks) { _, task ->
-                TaskCard(
-                    homeTask = task,
-                    currency = currency,
-                    startedTaskId = startedTaskId,
-                    onTaskDetailsClick = { taskId, retailerId ->
-                        onTaskItemAction(
-                            HomeItemActions.ShowTaskDetails(taskId, retailerId)
-                        )
-                    },
-                    onDirectionClick = { lat, long ->
-                        onTaskItemAction(
-                            HomeItemActions.OpenDirection(
-                                lat, long
-                            )
-                        )
-                    },
-                    onContactClick = {
-                        onTaskItemAction(
-                            HomeItemActions.OpenContactBottomSheet(
-                                task
-                            )
-                        )
-                    },
-                    onClick = {
-                        onTaskItemAction(HomeItemActions.TaskClicked(task))
-                    })
-            }
-        }
 
-    }
-}
-
-@Composable
-fun TaskCard(
-    homeTask: HomeTask,
-    currency: String,
-    startedTaskId: Int,
-    onTaskDetailsClick: (taskId: Int, retailerId: Int) -> Unit,
-    onDirectionClick: (Float, Float) -> Unit,
-    onContactClick: (String) -> Unit,
-    onClick: () -> Unit,
-) {
-    Card(
-        onClick = onClick,
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
-        colors = CardDefaults.cardColors(containerColor = Base_white),
-        border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
-            color = Gray200
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = dimensionResource(com.intuit.sdp.R.dimen._8sdp))
-            .testTag("taskCard_${homeTask.taskId}")
-    ) {
-        Column(
-            modifier = Modifier.padding(
-                all = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
-            )
-        ) {
-            // Header Row with Task ID and Status Tag
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            LazyColumn(
+                modifier = Modifier.weight(1f)
             ) {
-                InfoRow(
-                    icon = R.drawable.ic_number,
-                    label = homeTask.taskId.toString(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .testTag("taskId")
-                )
+                item {
+                    Row(
+                        modifier = Modifier
+                            .setOnClick {
 
-                StatusTag(
-                    statusId = homeTask.statusId, // Replace with homeTask.status
-                    statusName = homeTask.statusName,
-                    modifier = Modifier.testTag("taskStatus")
-                )
+                            }
+                            .fillMaxWidth()
+                            .background(Base_white)
+                            .padding(
+                                horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
+                                vertical = dimensionResource(com.intuit.sdp.R.dimen._12sdp)
+                            )
+                    ) {
+
+                        Column(
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.required_to_be_received),
+                                style = smMedium.copy(
+                                    color = Gray500
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._2sdp)),
+                                text = "${viewState.taskDetails?.toBeCollectedAmount.orDefault()}",
+                                style = lgSemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                            horizontalAlignment = Alignment.End
+                        ) {
+
+                            Text(
+                                text = "#${viewState.taskDetails?.vendorId.orDefault()}",
+                                style = xsMedium
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                                    .horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                            ) {
+                                viewState.taskDetails?.tags.orEmpty().forEach { tag ->
+                                    DropOffPaymentTag(text = tag)
+                                }
+                            }
+                        }
+                        Image(
+                            modifier = Modifier.setOnClick {
+                                onAction(DropOfOrderDetailsAction.OnInfoClick)
+                            },
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                item {
+                    if (true) {
+                        Column(
+                            modifier = Modifier
+                                .setOnClick {
+                                    onAction(DropOfOrderDetailsAction.NavigateToUpSellingProductsScreen)
+                                }
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
+                                    vertical = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                                )
+                                .background(
+                                    color = Error700,
+                                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                                )
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(
+                                    vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
+                                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                                ),
+                                text = stringResource(R.string.view_deleted_products),
+                                style = xsRegular,
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(
+                                        RoundedCornerShape(
+                                            bottomEnd = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
+                                            bottomStart = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+
+                                        )
+                                    )
+                                    .border(
+                                        width = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
+                                        shape = RoundedCornerShape(
+                                            bottomEnd = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
+                                            bottomStart = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+
+                                        ),
+                                        color = Error700
+                                    )
+                                    .background(Base_white)
+                                    .padding(
+                                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
+                                        vertical = dimensionResource(com.intuit.sdp.R.dimen._12sdp)
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Image(
+                                    painter = painterResource(R.drawable.ic_add_extra_product),
+                                    contentDescription = null
+                                )
+
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.deleted_products),
+                                        style = mdMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+
+                                    Text(
+                                        modifier = Modifier
+                                            .padding(top = dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                                            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+                                            .background(color = Success50)
+                                            .padding(
+                                                vertical = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
+                                                horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                                            ),
+                                        text = stringResource(R.string.products_you_can_add_again),
+                                        style = xsMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+
+                                Text(
+                                    modifier = Modifier.align(Alignment.Top),
+                                    text = buildAnnotatedString {
+
+                                        withStyle(
+                                            style = SpanStyle(
+                                                color = Color.Black,
+                                                fontSize = dimensionResource(com.intuit.ssp.R.dimen._16ssp).value.sp,
+                                                fontWeight = FontWeight(700)
+                                            )
+                                        ) {
+                                            append(
+                                                viewState.taskDetails?.upsellingItemsCount.toString()
+                                            )
+                                        }
+
+                                        withStyle(
+                                            style = SpanStyle(
+                                                color = Color.Black,
+                                                fontSize = dimensionResource(com.intuit.ssp.R.dimen._16ssp).value.sp,
+                                                fontWeight = FontWeight(400)
+                                            )
+                                        ) { append(stringResource(R.string.product)) }
+
+                                    },
+                                )
+
+                            }
+
+                        }
+                    }
+                }
+
+                viewState.categoryToProducts.keys.forEachIndexed { categoryIndex, categoryName ->
+                    stickyHeader {
+                        Title(
+                            categoryName = categoryName,
+                            productsCount = viewState.categoryToProducts[categoryName]?.size.orDefault()
+                        )
+                    }
+
+                    itemsIndexed(viewState.categoryToProducts[categoryName].orEmpty()) { productIndex, product ->
+                        product.units?.forEachIndexed { unitIndex, unit ->
+                            Product(
+                                productIndex = productIndex,
+                                product = product,
+                                unitIndex = unitIndex,
+                                unit = unit,
+                                currency = viewState.currency,
+                            )
+                        }
+                    }
+                }
+
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
-            // Client Name
-            InfoRow(
-                icon = R.drawable.ic_profile,
-                label = homeTask.clientPhone ?: stringResource(R.string.no_address),
-                modifier = Modifier.testTag("clientName")
-            )
-
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
-            // Client Address
-            InfoRow(
-                icon = R.drawable.ic_address,
-                label = homeTask.customerAddress?.ifEmpty { stringResource(R.string.no_address) }
-                    ?: stringResource(R.string.no_address),
-                modifier = Modifier.testTag("clientAddress")
-            )
-
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
-            // Product Count
-            InfoRow(
-                icon = R.drawable.ic_count,
-                label = stringResource(
-                    R.string.products_count,
-                    0
-                ), // Replace 0 with homeTask.productCount
-                modifier = Modifier.testTag("productCount")
-            )
-
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
-            // Total Price
-            InfoRow(
-                icon = R.drawable.ic_price,
-                label = String.format(
-                    stringResource(R.string.price_currency),
-                    homeTask.totalPrice.formatPrice(FRACTION_DIGITS),
-                    currency
-                ),
-                textStyle = mdMedium.copy(color = Gray800),
-                modifier = Modifier.testTag("totalPrice")
-            )
-
-            HorizontalDivider(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
-                thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
-                color = Gray200
-            )
+                    .background(Base_white)
+                    .border(width = dimensionResource(com.intuit.sdp.R.dimen._1sdp), color = Gray200)
+                    .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+            ) {
 
-            // Action Buttons
-            NavigationAction(
-                clickedTaskId = homeTask.taskId,
-                startedTaskId = startedTaskId,
-                onTaskDetailsClick = { onTaskDetailsClick(homeTask.taskId, homeTask.taskId) },
-                onDirectionClick = {
-                    onDirectionClick(
-                        homeTask.clientLang, homeTask.clientLat
-                    )
-                },
-                onContactClick = { onContactClick(homeTask.clientPhone ?: "") }
-            )
+                if (viewState.isSaveButtonAppear) {
+                    androidx.compose.material3.Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = { onAction(DropOfOrderDetailsAction.OnSaveUpSellingClick) },
+                        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = Primary500
+                        ),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.save),
+                            style = mdMedium.copy(color = Base_white),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                } else {
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = { onAction(DropOfOrderDetailsAction.OnReceiveAmountClick) },
+                        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Primary500
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = stringResource(R.string.receive_amount),
+                                style = mdMedium.copy(color = Base_white),
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Text(
+                                text = "${viewState.taskDetails?.toBeCollectedAmount.orDefault()} ${viewState.currency}",
+                                style = mdMedium.copy(color = Base_white),
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                        }
+                    }
+
+                    if (viewState.showUpdateButton) {
+                        OutlinedButton(
+                            modifier = Modifier.padding(start = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                            onClick = { onAction(DropOfOrderDetailsAction.OnChangeStatusClick) },
+                            border = BorderStroke(
+                                width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                                color = Gray300
+                            ),
+                            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Base_white
+
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(R.string.change),
+                                style = mdMedium
+                            )
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
 
 @Composable
-fun InfoRow(
-    icon: Int,
-    label: String,
-    modifier: Modifier = Modifier,
-    textStyle: androidx.compose.ui.text.TextStyle = smNormal.copy(color = Gray500)
+private fun Bundle(
+    index: Int,
+    product: ProductModel,
+    currency: String,
+    showPlusClick: Boolean,
+    showMinusClick: Boolean,
+    onPlusClick: (Int, ProductModel) -> Unit,
+    onMinusClick: (Int, ProductModel) -> Unit,
+) {
+
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Base_white)
+            .border(width = dimensionResource(com.intuit.sdp.R.dimen._1sdp), color = Gray200)
+            .padding(
+                horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
+                vertical = dimensionResource(com.intuit.sdp.R.dimen._12sdp)
+            ),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._60sdp)),
+                painter = rememberAsyncImagePainter(product.image),
+                contentDescription = null,
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(
+                                color = Gray800,
+                                fontSize = dimensionResource(com.intuit.ssp.R.dimen._18ssp).value.sp,
+                                fontWeight = FontWeight(700)
+                            )
+                        ) { append(product.price.toString()) }
+
+                        withStyle(
+                            SpanStyle(
+                                color = Gray800,
+                                fontSize = dimensionResource(com.intuit.ssp.R.dimen._14ssp).value.sp,
+                                fontWeight = FontWeight(400)
+                            )
+                        ) { append(" $currency") }
+
+                        /*withStyle(
+                            SpanStyle(
+                                color = Gray500,
+                                fontSize = dimensionResource(com.intuit.sdp.R.dimen._14ssp).value.sp,
+                                fontWeight = FontWeight(400),
+                                textDecoration = TextDecoration.LineThrough
+                            )
+                        ) { append(" ${item.price} $currency") }*/
+                    }
+                )
+
+                Text(
+                    modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._2sdp)),
+                    text = "${product.name}",
+                    style = smMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+        }
+
+        if (expanded) {
+            product.bundleComponents?.forEachIndexed { index, componentModel ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Text(
+                        text = "${componentModel.quantity}. ",
+                        style = xsMedium
+                    )
+
+                    Text(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = dimensionResource(com.intuit.sdp.R.dimen._4sdp)),
+                        text = "${componentModel.productName} - ${componentModel.unitName}",
+                        style = xsMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Title(
+    categoryName: String,
+    productsCount: Int,
 ) {
     Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Gray100)
+            .padding(
+                horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
+                vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+            ),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Box(
-            modifier = Modifier
-                .size(dimensionResource(com.intuit.sdp.R.dimen._20sdp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                tint = Gray500,
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
-            )
-        }
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-        Text(
-            text = label,
-            style = textStyle
-        )
-    }
-}
 
-private fun fakeHomeViewState(): HomeViewState {
-    return HomeViewState(
-        isLoading = false,
-        filteredTasks = listOf(
-            HomeTask(
-                taskId = 1,
-                statusId = 1,
-                statusName = "in-progress",
-                totalPrice = 250f,
-                clientPhone = "01012345678",
-                customerAddress = "Nasr City, Cairo",
-                clientLang = 30.0444f,
-                clientLat = 31.2357f
-            ),
-            HomeTask(
-                taskId = 3,
-                statusId = 2,
-                statusName = "issued",
-                totalPrice = 250f,
-                clientPhone = "01012345678",
-                customerAddress = "Nasr City, Cairo",
-                clientLang = 30.0444f,
-                clientLat = 31.2357f
-            ),
-            HomeTask(
-                taskId = 2,
-                statusId = 3,
-                statusName = "pending",
-                totalPrice = 480f,
-                clientPhone = "01198765432",
-                customerAddress = "Maadi, Cairo",
-                clientLang = 29.9602f,
-                clientLat = 31.2569f
-            )
-        ),
-        showToastMessage = null
-    )
+        Text(
+            text = categoryName,
+            style = mdSemiBold
+        )
+
+        Text(
+            text = "${productsCount} ${stringResource(R.string.product)}",
+            style = mdSemiBold
+        )
+
+    }
 }
 
 @Composable
-fun StatusTag(
-    statusId: Int,
-    statusName: String,
-    modifier: Modifier = Modifier
+private fun Product(
+    productIndex: Int,
+    product: ProductModel,
+    unitIndex: Int,
+    unit: ProductUnitModel,
+    currency: String,
 ) {
-    val (backgroundColor, textColor) = when (statusId) {
-        TaskStatus.Cancelled.id -> Pair(Color(0xFFFFF4E6), Color(0xFFFF9800))
-        TaskStatus.Completed.id -> Pair(Color(0xFFE8F5E9), Color(0xFF4CAF50))
-        TaskStatus.InProgress.id -> Pair(Color(0xFFE3F2FD), Color(0xFF2196F3))
-        TaskStatus.Pending.id -> Pair(Color(0xFFFFEBEE), Color(0xFFF44336))
-        else -> {
-            Pair(Color(0xFFFFEBEE), Color(0xFFF44336))
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Base_white)
+            .border(width = dimensionResource(com.intuit.sdp.R.dimen._1sdp), color = Gray200)
+            .padding(
+                horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
+                vertical = dimensionResource(com.intuit.sdp.R.dimen._12sdp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Image(
+                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._60sdp)),
+                painter = rememberAsyncImagePainter(product.image),
+                contentDescription = null,
+            )
+
+            /*Text(
+                modifier = Modifier
+                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._2sdp))
+                    .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+                    .background(Success50)
+                    .padding(
+                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
+                        vertical = dimensionResource(com.intuit.sdp.R.dimen._2sdp)
+                    ),
+                text = "item.status",
+                color = Success500
+            )*/
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            horizontalAlignment = Alignment.Start
+        ) {
+
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            color = Gray800,
+                            fontSize = dimensionResource(com.intuit.ssp.R.dimen._18ssp).value.sp,
+                            fontWeight = FontWeight(700)
+                        )
+                    ) { append(unit.price.toString()) }
+
+                    withStyle(
+                        SpanStyle(
+                            color = Gray800,
+                            fontSize = dimensionResource(com.intuit.ssp.R.dimen._14ssp).value.sp,
+                            fontWeight = FontWeight(400)
+                        )
+                    ) { append(" $currency") }
+
+                    /*withStyle(
+                        SpanStyle(
+                            color = Gray500,
+                            fontSize = dimensionResource(com.intuit.sdp.R.dimen._14ssp).value.sp,
+                            fontWeight = FontWeight(400),
+                            textDecoration = TextDecoration.LineThrough
+                        )
+                    ) { append(" ${item.price} $currency") }*/
+                }
+            )
+
+            Text(
+                modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._2sdp)),
+                text = "${product.name} ${unit.name}",
+                style = smMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
         }
     }
+}
 
-    Box(
-        modifier = modifier
+@Composable
+private fun DropOffPaymentTag(text: String) {
+    androidx.compose.material3.Text(
+        modifier = Modifier
             .background(
-                color = backgroundColor,
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                color = Primary50, shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
             )
             .padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp)
-            )
-    ) {
-        Text(
-            text = statusName,
-            style = xsMedium.copy(color = textColor)
-        )
-    }
-}
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun TasksContentPreview() {
-    TasksContent(
-        viewState = fakeHomeViewState(),
-        searchKey = "",
-        currency = "EGP",
-        startedTaskId = -1,
-        onTasksScreenAction = {},
-        onTaskItemAction = {}
+                horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
+                vertical = dimensionResource(com.intuit.sdp.R.dimen._2sdp)
+            ),
+        text = text,
+        style = smMedium.copy(color = Primary700),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
     )
 }
+
+
+@Preview(showBackground = true)
+@Composable
+private fun DropOfOrderDetailsScreenPreview() {
+
+    val tempImage =
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXB62tjHoc2ryZVERvGz_rYDqcy3kNdwZpdf6u-zE9eMllD8ik25CDvsL7Pud137Odqs8&usqp=CAU"
+
+    val productList = listOf(
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        )
+
+    )
+
+
+
+    DropOfOrderDetailsContent(
+        viewState = DropOfOrderDetailsViewState(
+            categoryToProducts = productList.groupBy { it.category }
+        ),
+        onAction = {}
+    )
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DropOfOrderDetailsScreenPreviewWithEnableUpsellingProductOutOfOrder() {
+
+    val tempImage =
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXB62tjHoc2ryZVERvGz_rYDqcy3kNdwZpdf6u-zE9eMllD8ik25CDvsL7Pud137Odqs8&usqp=CAU"
+
+    val productList = listOf(
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = "simple",
+            availableBasicUnitCount = 12,
+            units = listOf(),
+            unit = "",
+            image = tempImage
+        )
+
+    )
+
+    DropOfOrderDetailsContent(
+        viewState = DropOfOrderDetailsViewState(
+            categoryToProducts = productList.groupBy { it.category },
+        ),
+        onAction = {}
+    )
+
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun DropOfOrderDetailsScreenWithShowChangeButtonPreview() {
+
+    val tempImage =
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXB62tjHoc2ryZVERvGz_rYDqcy3kNdwZpdf6u-zE9eMllD8ik25CDvsL7Pud137Odqs8&usqp=CAU"
+
+    val productList = listOf(
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = ProductModel.Type.PRODUCT.type,
+            availableBasicUnitCount = 12,
+            units = listOf(
+                ProductUnitModel(
+                    id = 1,
+                    name = "Bottle",
+                    price = 12.9,
+                    basicUnitCount = 6,
+                    quantity = 12,
+                    packingUnitId = 1,
+
+                    )
+            ),
+            unit = "",
+            image = tempImage
+        ),
+
+        ProductModel(
+            id = 1,
+            name = "Coca Cola",
+            price = 25.0,
+            category = "Drinks",
+            type = ProductModel.Type.BUNDLE.type,
+            image = "",
+            availableGroupQuantity = 4,
+            bundleComponents = listOf(
+                BundleComponentModel(
+                    productName = "Name",
+                    unitName = "unit",
+                    quantity = 4
+                ),
+                BundleComponentModel(
+                    productName = "Name",
+                    unitName = "unit",
+                    quantity = 4
+                ),
+                BundleComponentModel(
+                    productName = "Name Name Name kjskdj jksdj jhsdk ",
+                    unitName = "unit askdjflkjh kajhsdf ",
+                    quantity = 4
+                )
+            )
+        )
+
+    )
+
+    DropOfOrderDetailsContent(
+        viewState = DropOfOrderDetailsViewState(
+            categoryToProducts = productList.groupBy { it.category },
+            showUpdateButton = true),
+        onAction = {}
+    )
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DropOfOrderDetailsScreenWithErrorPreview() {
+
+    val tempImage =
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXB62tjHoc2ryZVERvGz_rYDqcy3kNdwZpdf6u-zE9eMllD8ik25CDvsL7Pud137Odqs8&usqp=CAU"
+
+
+    DropOfOrderDetailsScreen(
+        viewState = DropOfOrderDetailsViewState(
+            showUpdateButton = true,
+            taskDetails = DropOfTaskDetailsModel(
+                taskId = 1,
+                shipmentId = 12,
+                vendorId = 5,
+                totalAmount = 250.0,
+                discounts = 20.0,
+                prepaidAmount = 50.0,
+                toBeCollectedAmount = 180.0,
+                tags = listOf("tag1"),
+                products = listOf(),
+                upsellingItemsCount = 2,
+                hasPendingTransaction = false
+            )
+        ),
+        onAction = {}
+    )
+
+}
+
+
