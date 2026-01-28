@@ -1,0 +1,81 @@
+package com.ovasta.logisticsapp.presentation.home.data
+
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.memoryCacheSettings
+import com.ovasta.logisticsapp.data.FirebaseConstants
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_WORKERS_NAME
+import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+
+class HomeRemoteDataSource(
+    private val db: FirebaseFirestore
+) : IHomeRemoteDataSource {
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getAssignedTasks(
+        userId: Int, branchId: Int, userType: String
+    ): Flow<List<HomeTask>> = callbackFlow {
+        val listenerRegistration =
+            db.collection(FIRESTORE_ROOT_WORKERS_NAME).document(branchId.toString())
+                .collection(userType).document(userId.toString())
+                .collection(FirebaseConstants.FIRESTORE_WORKER_ORDERS_NAME)
+                .addSnapshotListener { value, error ->
+                    if (error != null) {
+                        Log.e("assignedOrders", "Error fetching orders", error)
+                        close(error)
+                        return@addSnapshotListener
+                    }
+
+                    val orderIds = value?.documents?.map { it.id } ?: emptyList()
+                    Log.d("assignedOrderIds", "$orderIds")
+                    trySend(orderIds)
+                }
+
+        awaitClose { listenerRegistration.remove() }
+    }.flatMapLatest { orderIds ->
+        listenToOrdersChanges(orderIds)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun listenToOrdersChanges(
+        orderIds: List<String>
+    ): Flow<List<HomeTask>> = callbackFlow {
+
+        if (orderIds.isEmpty()) {
+            trySend(emptyList())
+            close()
+            return@callbackFlow
+        }
+
+        val ordersCollection = db.collection(FIRESTORE_ROOT_ORDERS_NAME)
+
+        val tasksMap = mutableMapOf<String, HomeTask>()
+        val listeners = mutableListOf<ListenerRegistration>()
+
+        orderIds.forEach { orderId ->
+            val registration =
+                ordersCollection.document(orderId).addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.e("orderDocListener", "Error", error)
+                        return@addSnapshotListener
+                    }
+                    snapshot?.toObject(HomeTask::class.java)?.let { task ->
+                        tasksMap[orderId] = task
+                        trySend(tasksMap.values.toList())
+                    }
+                }
+            listeners.add(registration)
+        }
+        awaitClose {
+            listeners.forEach { it.remove() }
+        }
+    }
+}
