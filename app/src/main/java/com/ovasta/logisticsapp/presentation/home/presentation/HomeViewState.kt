@@ -9,5 +9,6 @@ data class HomeViewState(
     val error: ComposeUIException? = null,
     val showToastMessage: Int? = null,
     val isLoading: Boolean = false,
+    val isTracking: Boolean = false
 
     )

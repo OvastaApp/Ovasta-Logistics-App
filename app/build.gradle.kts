@@ -129,5 +129,6 @@ dependencies {
     implementation(libs.coil.kt.coil.compose)
     implementation(libs.security.crypto)
 
+    implementation (libs.play.services.location)
 
 }

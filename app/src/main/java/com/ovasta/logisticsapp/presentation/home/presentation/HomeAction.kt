@@ -24,5 +24,7 @@ sealed interface HomeScreenActions {
     data object OnSearchTriggered : HomeScreenActions
     data object RefreshTasks : HomeScreenActions
 
+    object ToggleTracking : HomeScreenActions
+
 
 }

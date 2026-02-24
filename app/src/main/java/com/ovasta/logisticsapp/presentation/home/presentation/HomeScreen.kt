@@ -48,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
@@ -69,6 +70,7 @@ import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.openWhatsApp
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.mdRegular
+import com.ovasta.logisticsapp.base.services.LocationManager
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
@@ -78,6 +80,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import okhttp3.internal.platform.PlatformRegistry.applicationContext
 
 @Composable
 fun HomeScreen(
@@ -170,7 +173,7 @@ fun TasksContent(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 CenteredTextAppBar(
-                    title = stringResource(R.string.tasks, Modifier.testTag("title")),
+                    title = stringResource(R.string.home, Modifier.testTag("title")),
                     showBackButton = false
                 ) {}
             }
@@ -191,30 +194,35 @@ fun TasksContent(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Gray100)
-                        .padding(
-                            top = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                            start = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                            end = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                        )
-                ) {
-                    SearchWithFilterBar(
-                        searchKey = searchKey,
-                        onSearchKeyChange = {
-                            onTasksScreenAction(
-                                HomeScreenActions.OnSearchKeyChange(it)
-                            )
-                        },
-                        onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
-                    )
+                TrackingToggleButton(
+                    isSignedIn = viewState.isTracking,
+                    onToggle = { onTasksScreenAction(HomeScreenActions.ToggleTracking) }
+                )
 
-                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
-                    Tasks(viewState, currency, startedTaskId, onTasksScreenAction, onTaskItemAction)
-                }
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .background(Gray100)
+//                        .padding(
+//                            top = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
+//                            start = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
+//                            end = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
+//                        )
+//                ) {
+//                    SearchWithFilterBar(
+//                        searchKey = searchKey,
+//                        onSearchKeyChange = {
+//                            onTasksScreenAction(
+//                                HomeScreenActions.OnSearchKeyChange(it)
+//                            )
+//                        },
+//                        onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+//
+//                    Tasks(viewState, currency, startedTaskId, onTasksScreenAction, onTaskItemAction)
+//                }
             }
         }
 
@@ -239,6 +247,41 @@ fun TasksContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TrackingToggleButton(
+    isSignedIn: Boolean,
+    onToggle: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        androidx.compose.material3.FloatingActionButton(
+            onClick = onToggle,
+            containerColor = if (isSignedIn) Color(0xFF2E7D32) else Color(0xFFB0BEC5),
+            contentColor = Color.White,
+            modifier = Modifier.size(120.dp)
+        ) {
+            Icon(
+                painter = painterResource(
+                    id = if (isSignedIn) R.drawable.ic_start_tracking else R.drawable.ic_stop_tracking
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(48.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = if (isSignedIn) "Tracking Active" else "Start Shift",
+            style = mdMedium.copy(color = Gray800)
+        )
     }
 }
 
