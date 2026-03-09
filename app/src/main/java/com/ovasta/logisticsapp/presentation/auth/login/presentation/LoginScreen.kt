@@ -3,7 +3,6 @@ package com.ovasta.logisticsapp.presentation.auth.login.presentation
 import com.ovasta.logisticsapp.base.UserType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +11,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,7 +46,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
@@ -65,6 +59,7 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.ContextEventHand
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.mdRegular
 import com.ovasta.logisticsapp.base.smMedium
+import com.ovasta.logisticsapp.presentation.auth.login.presentation.components.UserTypeOption
 
 object LoginContentTestTag {
 
@@ -80,7 +75,6 @@ object LoginContentTestTag {
     const val BTN_DELIVERY_AGENT = "$PREFIX.BTN_DELIVERY_AGENT"
     const val BTN_PICKER = "$PREFIX.BTN_PICKER"
 }
-
 
 @Composable
 fun LoginScreen(
@@ -116,8 +110,7 @@ private fun LoginContent(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         modifier = Modifier
-            .fillMaxSize()
-            ,
+            .fillMaxSize(),
         topBar = {
             CenteredTextAppBar(
                 title = stringResource(R.string.login),
@@ -295,6 +288,7 @@ private fun LoginContent(
                         ),
                     horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
                 ) {
+
                     // Delivery Agent Option
                     UserTypeOption(
                         modifier = Modifier
@@ -302,8 +296,8 @@ private fun LoginContent(
                             .testTag(LoginContentTestTag.BTN_DELIVERY_AGENT),
                         icon = R.drawable.ic_delivery_agent,
                         label = stringResource(R.string.courier),
-                        isSelected = viewState.selectedUserType == UserType.DELIVERY_AGENT,
-                        onClick = { onAction(LoginAction.UserTypeChanged(UserType.DELIVERY_AGENT)) }
+                        isSelected = viewState.selectedUserType == UserType.COURIER,
+                        onClick = { onAction(LoginAction.UserTypeChanged(UserType.COURIER)) }
                     )
 
                     // Picker Option
@@ -313,8 +307,18 @@ private fun LoginContent(
                             .testTag(LoginContentTestTag.BTN_PICKER),
                         icon = R.drawable.ic_picker,
                         label = stringResource(R.string.picker),
-                        isSelected = viewState.selectedUserType == UserType.PICKER,
-                        onClick = { onAction(LoginAction.UserTypeChanged(UserType.PICKER)) }
+                        isSelected = viewState.selectedUserType == UserType.WORKER,
+                        onClick = { onAction(LoginAction.UserTypeChanged(UserType.WORKER)) }
+                    )
+                    // Admin Agent Option
+                    UserTypeOption(
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag(LoginContentTestTag.BTN_DELIVERY_AGENT),
+                        icon = R.drawable.ic_admin,
+                        label = stringResource(R.string.admin),
+                        isSelected = viewState.selectedUserType == UserType.ADMIN,
+                        onClick = { onAction(LoginAction.UserTypeChanged(UserType.ADMIN)) }
                     )
                 }
             }
@@ -360,45 +364,6 @@ private fun LoginContent(
 }
 
 @Composable
-private fun UserTypeOption(
-    modifier: Modifier = Modifier,
-    icon: Int,
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-            .background(if (isSelected) Primary.copy(alpha = 0.1f) else Base_white)
-            .border(
-                width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
-                color = if (isSelected) Primary else Gray200,
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
-            )
-            .clickable { onClick() }
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = label,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._32sdp)),
-            tint = if (isSelected) Primary else Gray800
-        )
-        Text(
-            text = label,
-            style = smMedium.copy(
-                color = if (isSelected) Primary else Gray800
-            ),
-            modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
-        )
-    }
-}
-
-
-@Composable
 @Preview(showBackground = true)
 private fun LoginContentPreview() {
     LoginContent(
@@ -407,7 +372,7 @@ private fun LoginContentPreview() {
             password = "password123",
             isPhoneValid = true,
             isPasswordValid = true,
-            selectedUserType = UserType.DELIVERY_AGENT
+            selectedUserType = UserType.COURIER
         ),
         {}
     )

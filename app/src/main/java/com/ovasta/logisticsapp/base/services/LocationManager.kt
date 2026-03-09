@@ -22,7 +22,6 @@ class LocationManager(
     private val fusedLocationClient =
         LocationServices.getFusedLocationProviderClient(context)
 
-
     fun trackLocation(): Flow<Location> {
         return callbackFlow {
             val locationCallback = locationCallback { location ->
@@ -32,9 +31,7 @@ class LocationManager(
             }
 
             val request = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                5000
-            )
+                Priority.PRIORITY_HIGH_ACCURACY, 5000)
                 .setMinUpdateIntervalMillis(3000)
                 .build()
             fusedLocationClient.requestLocationUpdates(

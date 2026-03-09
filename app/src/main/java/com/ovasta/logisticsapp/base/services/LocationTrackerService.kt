@@ -8,14 +8,19 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ovasta.logisticsapp.R
+import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
+import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class LocationTrackerService : Service() {
-
+class LocationTrackerService() : Service(), KoinComponent {
+    private val homeRepository: IHomeRepository by inject()
+    private val settingsRepository: ISettingsRepository by inject()
     private val scope = CoroutineScope(
         SupervisorJob() + Dispatchers.IO
     )
@@ -38,8 +43,7 @@ class LocationTrackerService : Service() {
     }
 
     private fun start() {
-
-        val locationManager = LocationManager(applicationContext)
+        val locationManager: LocationManager by inject()
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -54,14 +58,20 @@ class LocationTrackerService : Service() {
 
         scope.launch {
             locationManager.trackLocation().collect { location ->
-                val latitude = location.latitude.toString()
-                val longitude = location.longitude.toString()
-                Log.d("LocationTracker", "Lat=$latitude, Lng=$longitude")
+                val latitude = location.latitude
+                val longitude = location.longitude
+                try {
+                    homeRepository.sendLocation(lat = latitude, long = longitude)
+                } catch (e: Exception) {
+                    Log.e("LocationTracker", "Failed to send location", e)
+                }
+
 
                 notificationManager.notify(
                     1,
                     notification.setContentText(
-                        "Location: $latitude / $longitude")
+                        "Location: $latitude / $longitude"
+                    )
                         .build()
                 )
 

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.ovasta.logisticsapp.base.exception.ComposeUIException
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
-import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,20 +41,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
 
     private val _composeUILoadingEvent = MutableStateFlow<Boolean>(false)
     val composeUILoadingEvent = _composeUILoadingEvent.asStateFlow()
-
-    private val settingsRepository: ISettingsRepository by inject()
-
-    fun getErrorLiveData(): LiveData<Throwable> = error
-
-    fun getLoading(): LiveData<Boolean> = loading
-
-    fun loadingOn() {
-        loading.postValue(true)
-    }
-
-    fun loadingOff() {
-        loading.postValue(false)
-    }
 
     fun emitNavigationEvent(event: NavControllerEvent) {
         viewModelScope.launch { _navControllerEvent.emit(event) }

@@ -31,11 +31,7 @@ class LoginViewModel(
 
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)
-        _viewState.update { state ->
-            state.copy(
-                error = throwable.toComposeUIException()
-            )
-        }
+        emitComposeUIExceptionEvent(throwable.toComposeUIException())
     }
 
 
@@ -45,12 +41,11 @@ class LoginViewModel(
             is LoginAction.PasswordChanged -> onPasswordChanged(action.password)
             is LoginAction.UserTypeChanged -> onUserTypeChanged(action.type)
             is LoginAction.Login -> with(viewState.value) {
-                emitScreenDirectionEvent(HomeScreen)
-//                login(
-//                    this.phoneNumber,
-//                    this.password,
-//                    this.selectedUserType
-//                )
+                login(
+                    this.phoneNumber,
+                    this.password,
+                    this.selectedUserType
+                )
             }
         }
     }
@@ -119,12 +114,13 @@ class LoginViewModel(
             }.onSuccess { user ->
                 user.userType = userType
                 settingsRepository.saveUserData(user)
-                loginRepository.authenticateWithFirebase(user.firebaseToken, onSuccess = {
-                    setComposeUILoading(false)
-                    emitScreenDirectionEvent(HomeScreen)
-                }, onFailure = {
-                    setComposeUILoading(false)
-                })
+                setComposeUILoading(false)
+//                loginRepository.authenticateWithFirebase(user.firebaseToken, onSuccess = {
+//                    setComposeUILoading(false)
+//                    emitScreenDirectionEvent(HomeScreen)
+//                }, onFailure = {
+//                    setComposeUILoading(false)
+//                })
             }.onFailure {
                 if (it is APIException) {
                     updateViewState { state -> state.copy(isPhoneValid = false) }

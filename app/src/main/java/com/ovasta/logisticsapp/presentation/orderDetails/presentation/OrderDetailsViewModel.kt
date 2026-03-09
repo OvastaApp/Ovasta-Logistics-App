@@ -27,14 +27,12 @@ class OrderDetailsViewModel(
 
     fun getTaskDetails() {
         viewModelScope.launch {
-            loadingOn()
             try {
 //                with(getUserData()) {
 //                    this?.let {
                 orderDetailsRepository.getTaskDetails(
                     1, 1
                 ).collect { tasks ->
-                    loadingOff()
 //                    Log.d("assignedTasksVM", "$tasks")
 //                    _viewState.value = _viewState.value.copy(
 //                        tasks = tasks,
@@ -44,7 +42,6 @@ class OrderDetailsViewModel(
 //                    }
 //                }
             } catch (ex: Exception) {
-                loadingOff()
                 error.value = ex
             }
         }

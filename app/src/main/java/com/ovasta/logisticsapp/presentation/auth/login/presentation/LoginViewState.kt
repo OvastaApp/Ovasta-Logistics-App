@@ -9,7 +9,7 @@ data class LoginViewState(
     val isPhoneValid: Boolean = true,
     val isPasswordValid: Boolean = true,
     val isLoginButtonEnabled: Boolean = false,
-    val selectedUserType: UserType = UserType.DELIVERY_AGENT,
+    val selectedUserType: UserType = UserType.COURIER,
     val error: ComposeUIException? = null,
 
     )

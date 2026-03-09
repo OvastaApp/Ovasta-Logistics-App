@@ -9,7 +9,7 @@ class User(
     @SerializedName("user_id") val userId: Int,
     @SerializedName("userType") var userType: UserType?,
     @SerializedName("token") val token: String,
-    @SerializedName("branch_id") val branchId: Int,
-    @SerializedName("firebase_token") val firebaseToken: String,
+    @SerializedName("branch_id") val branchId: Int?,
+    @SerializedName("firebase_token") val firebaseToken: String?,
 )
 

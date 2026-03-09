@@ -24,6 +24,7 @@ data class SessionPreferences(
     val deviceRam: String = "",
     val accessToken: String = "",
     val deviceId: String = "",
+    val isShiftStarted: Boolean = false,
 )
 
 object SessionPreferencesSerializer : Serializer<SessionPreferences> {
@@ -33,6 +34,7 @@ object SessionPreferencesSerializer : Serializer<SessionPreferences> {
     private val json = Json {
         ignoreUnknownKeys = true
     }
+
     override suspend fun readFrom(input: InputStream): SessionPreferences {
         val encryptedBytes = withContext(Dispatchers.IO) {
             input.use { it.readBytes() }

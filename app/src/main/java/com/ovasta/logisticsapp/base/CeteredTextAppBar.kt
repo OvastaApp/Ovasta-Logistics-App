@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.base
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -18,7 +19,8 @@ import com.ovasta.logisticsapp.R
 fun CenteredTextAppBar(
     title: String,
     showBackButton: Boolean = true,
-    onBackButtonPressed: () -> Unit = {}
+    onBackButtonPressed: () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier, colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -41,6 +43,7 @@ fun CenteredTextAppBar(
                     )
                 }
             }
-        }
+        },
+        actions = actions
     )
 }

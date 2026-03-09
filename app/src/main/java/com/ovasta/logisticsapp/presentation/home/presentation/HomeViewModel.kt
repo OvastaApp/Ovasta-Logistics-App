@@ -1,37 +1,31 @@
 package com.ovasta.logisticsapp.presentation.home.presentation
 
-import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
-import com.ovasta.logisticsapp.base.ext.OrderVibrator
-import com.ovasta.logisticsapp.base.services.LocationManager
-import com.ovasta.logisticsapp.base.services.LocationTrackerService
 import com.ovasta.logisticsapp.data.User
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.internal.platform.PlatformRegistry.applicationContext
+import android.content.Context
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 
 class HomeViewModel(
+    private val context: Context,
     val homeRepository: IHomeRepository,
-    val settingsRepository: ISettingsRepository,
-    private val locationManager: LocationManager
-
+    val settingsRepository: ISettingsRepository
 ) : BaseViewModel() {
     private val _viewState = MutableStateFlow(HomeViewState())
     val viewState = _viewState.asStateFlow()
-
 
     fun getAssignedTasks() {
         viewModelScope.launch {
@@ -46,9 +40,9 @@ class HomeViewModel(
                     _viewState.update { it.copy(tasks = tasks, filteredTasks = tasks) }
 
                     // Vibrate only if there are new orders
-//                    if (tasks.size > previousTasks.size) {
-//                        orderVibrator.vibrateNewOrder()
-//                    }
+                    // if (tasks.size > previousTasks.size) {
+                    //     orderVibrator.vibrateNewOrder()
+                    // }
                 }
             } catch (ex: Exception) {
                 _viewState.update { it.copy(isLoading = false) }
@@ -79,6 +73,7 @@ class HomeViewModel(
 
     init {
         observeSearchKey()
+        observeTracking()
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -96,6 +91,10 @@ class HomeViewModel(
 
             HomeScreenActions.ToggleTracking -> {
                 toggleTracking()
+            }
+
+            is HomeScreenActions.ChangeLogoutDialogStatus -> {
+                _viewState.update { it.copy(isLogoutDialogVisible = tasksScreenAction.isVisible) }
             }
         }
     }
@@ -136,32 +135,52 @@ class HomeViewModel(
     }
 
     private fun toggleTracking() {
-        val currentlyTracking = _viewState.value.isTracking
+        viewModelScope.launch {
+            val isTracking = homeRepository.observeShiftStatus().first()
 
-        if (currentlyTracking) {
-            stopTracking()
-        } else {
-            startTracking()
-        }
-
-        _viewState.update {
-            it.copy(isTracking = !currentlyTracking)
+            if (isTracking) {
+                stopTracking()
+            } else {
+                startTracking()
+            }
         }
     }
 
     private fun startTracking() {
-        Intent(applicationContext, LocationTrackerService::class.java).also { intent ->
-            intent.action =  LocationTrackerService.Action.START.name
-            applicationContext?.startService(intent)
-
+        viewModelScope.launch {
+            try {
+                _viewState.update { it.copy(isLoading = true) }
+                homeRepository.startLocationTracking(context)
+                delay(1000)
+                _viewState.update { it.copy(isTracking = true, isLoading = false) }
+            } catch (ex: Exception) {
+                _viewState.update { it.copy(isTracking = false, isLoading = false) }
+                error.value = ex
+                Log.e("HomeViewModel", "Failed to start tracking", ex)
+            }
         }
     }
 
     private fun stopTracking() {
-        Intent(applicationContext, LocationTrackerService::class.java).also { intent ->
-            intent.action =  LocationTrackerService.Action.START.name
-            applicationContext?.stopService(intent)
+        viewModelScope.launch {
+            try {
+                _viewState.update { it.copy(isLoading = true) }
+                homeRepository.stopLocationTracking(context)
+                delay(1000)
+                _viewState.update { it.copy(isTracking = false, isLoading = false) }
+            } catch (ex: Exception) {
+                _viewState.update { it.copy(isTracking = true, isLoading = false) }
+                error.value = ex
+                Log.e("HomeViewModel", "Failed to stop tracking", ex)
+            }
+        }
+    }
 
+    private fun observeTracking() {
+        viewModelScope.launch {
+            settingsRepository.observeShiftStatus().collect { isTracking ->
+                _viewState.update { it.copy(isTracking = isTracking) }
+            }
         }
     }
 
@@ -204,6 +223,4 @@ class HomeViewModel(
     private fun clearToastMessage() {
         _viewState.update { it.copy(showToastMessage = null) }
     }
-
-
 }

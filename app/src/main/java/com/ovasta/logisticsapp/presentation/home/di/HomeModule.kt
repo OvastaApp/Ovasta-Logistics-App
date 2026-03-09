@@ -11,9 +11,8 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val homeModule = module {
-//    factory { get<Retrofit>().create(LoginApi::class.java) }
     single<IHomeRemoteDataSource> { HomeRemoteDataSource(get()) }
-    single<IHomeRepository> { HomeRepository(get()) }
+    single<IHomeRepository> { HomeRepository(get(), get()) }
     single { LocationManager(androidContext()) }
-    viewModel { HomeViewModel(get(),get() ,get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
 }

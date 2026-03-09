@@ -10,4 +10,6 @@ interface IHomeRemoteDataSource {
         userType: String
     ): Flow<List<HomeTask>>
 
+    suspend fun logLocation(userId: Int, latitude: Double, longitude: Double)
+
 }

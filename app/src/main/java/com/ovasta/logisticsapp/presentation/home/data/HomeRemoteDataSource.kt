@@ -1,11 +1,14 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.memoryCacheSettings
 import com.ovasta.logisticsapp.data.FirebaseConstants
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_WORKERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
@@ -77,5 +80,22 @@ class HomeRemoteDataSource(
         awaitClose {
             listeners.forEach { it.remove() }
         }
+    }
+
+
+    override suspend fun logLocation(userId: Int, latitude: Double, longitude: Double) {
+        val locationData = hashMapOf(
+            "userId" to userId,
+            "latitude" to latitude,
+            "longitude" to longitude,
+            "timestamp" to FieldValue.serverTimestamp()
+
+        )
+        db.collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
+            .document(userId.toString())
+            .set(locationData, SetOptions.merge())
+            .addOnFailureListener {
+                Log.e("logLocation", "Failed to update location", it)
+            }
     }
 }

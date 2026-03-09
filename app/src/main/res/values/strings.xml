@@ -3,6 +3,7 @@
     <string name="login">Login</string>
     <string name="enter_your_phone_number">Enter your phone number</string>
     <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
     <string name="verification_code">Verification Code</string>
     <string name="the_confirmation_code_has_been_sent_to_phone_number">The confirmation code has been sent to phone number %1$s</string>
     <string name="invalid_confirmation_number">Invalid confirmation number</string>
@@ -49,6 +50,7 @@
     <string name="current_order">Current order</string>
     <string name="courier">Courier</string>
     <string name="picker">Picker</string>
+    <string name="admin">Admin</string>
     <string name="pending">Pending</string>
     <string name="canceled">Canceled</string>
     <string name="on_going">Ongoing</string>
@@ -149,5 +151,7 @@
     <string name="save">products you can add</string>
     <string name="receive_amount">Receive Amount</string>
     <string name="change">Change</string>
+
+    <string name="logout_message">Are you sure you want to log out of your account?</string>
 
 </resources>

@@ -25,6 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -49,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
@@ -57,6 +59,8 @@ import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
+import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
+import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.ContactSheet
 import com.ovasta.logisticsapp.base.components.sharedComposable.NavigationAction
 import com.ovasta.logisticsapp.base.components.sharedComposable.SearchBox
@@ -133,6 +137,11 @@ fun HomeScreen(
         )
     }
 
+    LogoutDialog(viewState.isLogoutDialogVisible, onConfirm = {
+//        viewModel.logout()
+    }, onDismiss = {
+        viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
+    })
     TasksContent(
         viewState = viewState,
         searchKey = searchKey.orEmpty(),
@@ -174,8 +183,19 @@ fun TasksContent(
             topBar = {
                 CenteredTextAppBar(
                     title = stringResource(R.string.home, Modifier.testTag("title")),
-                    showBackButton = false
-                ) {}
+                    showBackButton = false,
+                    actions = {
+                        IconButton(onClick = {
+                            onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = true))
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_logout), // Use ic_logout if available
+                                contentDescription = "Logout",
+                                tint = Color.Black
+                            )
+                        }
+                    }
+                )
             }
         ) { padding ->
             PullToRefreshBox(
@@ -251,12 +271,34 @@ fun TasksContent(
 }
 
 @Composable
+fun LogoutDialog(
+    isVisible: Boolean? = false,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (isVisible == true) {
+        ConfirmDialog(
+            title = stringResource(R.string.logout),
+            message = stringResource(R.string.logout_message),
+            onPrimaryClick = {
+                onConfirm
+            },
+            onDismiss = {
+                onDismiss()
+            }
+        )
+    }
+}
+
+@Composable
 fun TrackingToggleButton(
     isSignedIn: Boolean,
     onToggle: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -282,6 +324,8 @@ fun TrackingToggleButton(
             text = if (isSignedIn) "Tracking Active" else "Start Shift",
             style = mdMedium.copy(color = Gray800)
         )
+
+
     }
 }
 

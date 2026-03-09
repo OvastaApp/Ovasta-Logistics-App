@@ -1,6 +1,8 @@
 package com.ovasta.logisticsapp.base
 
 enum class UserType(val typeId: Int) {
-    DELIVERY_AGENT(1),
-    PICKER(2)
+    ADMIN(1),
+    CONSUMER(2),
+    COURIER(3),
+    WORKER(4)
 }

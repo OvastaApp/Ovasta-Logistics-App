@@ -4,7 +4,9 @@ import androidx.datastore.core.DataStore
 import com.ovasta.logisticsapp.base.constants.LocalConstants.LANGUAGE_AR_ISO
 import com.ovasta.logisticsapp.data.setting.data.datastore.SessionPreferences
 import com.ovasta.logisticsapp.data.User
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreferences>) :
     ISettingsLocalDataSource {
@@ -22,10 +24,20 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
     }
 
     override suspend fun saveUserData(user: User) {
-      dataStore.updateData {
-          it.copy(
+        dataStore.updateData {
+            it.copy(
                 user = user
-          )
-      }
+            )
+        }
+    }
+
+    override suspend fun updateShiftStatus(isSignedIn: Boolean) {
+        dataStore.updateData {
+            it.copy(isShiftStarted = isSignedIn)
+        }
+    }
+
+    override fun observeShiftStatus(): Flow<Boolean> {
+        return dataStore.data.map { it.isShiftStarted }
     }
 }

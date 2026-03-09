@@ -8,7 +8,7 @@ class LoginRemoteDataSource(private val loginApi: LoginApi) :
     ILoginRemoteDataSource {
 
     override suspend fun login(phone: String, password: String, userType: Int): User {
-        val loginData = LoginRequest(mobile = phone, password, userType, "xyz")
+        val loginData = LoginRequest(mobile = phone, password, userType)
         return loginApi.login(login = loginData).data
     }
 

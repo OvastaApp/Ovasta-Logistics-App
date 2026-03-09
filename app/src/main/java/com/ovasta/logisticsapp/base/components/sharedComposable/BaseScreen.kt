@@ -53,7 +53,7 @@ fun BaseScreen(
                 message = exceptionState?.getUIMessage(LocalContext.current)
                     ?: stringResource(R.string.generic_unknown_error),
                 dismissOnClickOutside = true,
-                primaryButtonText = stringResource(R.string.try_again),
+                primaryButtonText = stringResource(R.string.dismiss),
                 onPrimaryClick = {
                     exceptionState?.actions?.forEach { it.invoke() }
                     viewModel.emitComposeUIExceptionEvent(null)
