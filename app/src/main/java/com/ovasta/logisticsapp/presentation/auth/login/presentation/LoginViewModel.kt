@@ -111,13 +111,14 @@ class LoginViewModel(
             delay(10000)
             runCatching {
                 loginRepository.login(phone, password, userType.typeId)
-            }.onSuccess { user ->
-                user.userType = userType
+            }.onSuccess { response ->
+                val user = response.data
+                user.token = response.token
                 settingsRepository.saveUserData(user)
                 setComposeUILoading(false)
 //                loginRepository.authenticateWithFirebase(user.firebaseToken, onSuccess = {
 //                    setComposeUILoading(false)
-//                    emitScreenDirectionEvent(HomeScreen)
+                emitScreenDirectionEvent(HomeScreen)
 //                }, onFailure = {
 //                    setComposeUILoading(false)
 //                })

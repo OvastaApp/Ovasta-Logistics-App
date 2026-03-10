@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface IHomeRepository {
     suspend fun getAssignedTasks(
         userId: Int,
-        branchId: Int,
+        districId: Int,
         userType: String
     ): Flow<List<HomeTask>>
 
@@ -28,7 +28,7 @@ interface IHomeRepository {
      * @return Boolean indicating if tracking is active
      */
 
-    suspend fun sendLocation(lat: Double, long: Double)
+    suspend fun sendLocation( lat: Double, long: Double)
 
     fun observeShiftStatus(): Flow<Boolean>
 }

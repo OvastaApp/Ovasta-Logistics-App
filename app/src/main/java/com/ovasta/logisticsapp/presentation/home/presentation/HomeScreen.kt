@@ -60,6 +60,7 @@ import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
+import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.ContactSheet
 import com.ovasta.logisticsapp.base.components.sharedComposable.NavigationAction
@@ -96,60 +97,66 @@ fun HomeScreen(
     val searchKey by viewModel.searchKey.collectAsState()
     val currency by viewModel.currency.collectAsState()
     val showContactSheet by viewModel.showContactSheet.collectAsState()
+    BaseScreen(
+        viewModel = viewModel,
+        navController = navController
+    ) {
+        LaunchedEffect(Unit) {
+//        viewModel.getAssignedTasks()
 
-    LaunchedEffect(Unit) {
-        viewModel.getAssignedTasks()
+            viewModel.taskItemActions
+                .filterNotNull()
+                .collectLatest { event ->
+                    when (event) {
+                        is HomeItemActions.ShowTaskDetails -> {
+                        }
 
-        viewModel.taskItemActions
-            .filterNotNull()
-            .collectLatest { event ->
-                when (event) {
-                    is HomeItemActions.ShowTaskDetails -> {
+                        is HomeItemActions.OpenDirection -> {
+                            context.navigateToLocationClick(event.lat, event.lng)
+                        }
+
+                        is HomeItemActions.CopyPhone -> {
+                            context.copyPhoneNumber(event.retailerPhone)
+                        }
+
+                        is HomeItemActions.CallRetailer -> {
+                            context.makePhoneCall(event.retailerPhone)
+                        }
+
+                        is HomeItemActions.WhatsAppRetailer -> {
+                            context.openWhatsApp(event.retailerPhone)
+                        }
+
+                        else -> Unit
                     }
-
-                    is HomeItemActions.OpenDirection -> {
-                        context.navigateToLocationClick(event.lat, event.lng)
-                    }
-
-                    is HomeItemActions.CopyPhone -> {
-                        context.copyPhoneNumber(event.retailerPhone)
-                    }
-
-                    is HomeItemActions.CallRetailer -> {
-                        context.makePhoneCall(event.retailerPhone)
-                    }
-
-                    is HomeItemActions.WhatsAppRetailer -> {
-                        context.openWhatsApp(event.retailerPhone)
-                    }
-
-                    else -> Unit
+                    viewModel.clearTasksItemActions()
                 }
-                viewModel.clearTasksItemActions()
-            }
-    }
+        }
 
-    if (showContactSheet != null) {
-        ContactSheet(
-            taskId = showContactSheet?.taskId ?: 0,
-            homeTaskInfo = showContactSheet!!,
-            onAction = { viewModel.onTaskItemAction(it) }
+        if (showContactSheet != null) {
+            ContactSheet(
+                taskId = showContactSheet?.taskId ?: 0,
+                homeTaskInfo = showContactSheet!!,
+                onAction = { viewModel.onTaskItemAction(it) }
+            )
+        }
+
+        LogoutDialog(
+            viewState.isLogoutDialogVisible,
+            onConfirm = {
+                viewModel.onTasksScreenAction(HomeScreenActions.OnLogoutClicked)
+            }, onDismiss = {
+                viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
+            })
+        TasksContent(
+            viewState = viewState,
+            searchKey = searchKey.orEmpty(),
+            currency,
+            viewModel.startedTaskId,
+            onTasksScreenAction = viewModel::onTasksScreenAction,
+            onTaskItemAction = viewModel::onTaskItemAction
         )
     }
-
-    LogoutDialog(viewState.isLogoutDialogVisible, onConfirm = {
-//        viewModel.logout()
-    }, onDismiss = {
-        viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
-    })
-    TasksContent(
-        viewState = viewState,
-        searchKey = searchKey.orEmpty(),
-        currency,
-        viewModel.startedTaskId,
-        onTasksScreenAction = viewModel::onTasksScreenAction,
-        onTaskItemAction = viewModel::onTaskItemAction
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -281,7 +288,7 @@ fun LogoutDialog(
             title = stringResource(R.string.logout),
             message = stringResource(R.string.logout_message),
             onPrimaryClick = {
-                onConfirm
+                onConfirm()
             },
             onDismiss = {
                 onDismiss()
@@ -321,7 +328,7 @@ fun TrackingToggleButton(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = if (isSignedIn) "Tracking Active" else "Start Shift",
+            text = if (isSignedIn) stringResource(R.string.work_started) else  stringResource(R.string.start_work),
             style = mdMedium.copy(color = Gray800)
         )
 

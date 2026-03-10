@@ -1,9 +1,9 @@
 package com.ovasta.logisticsapp.data.setting.api
 
-import retrofit2.http.POST
+import retrofit2.http.GET
 
 
 interface SettingsApi {
-    @POST("logout")
+    @GET("logout")
     suspend fun logout()
 }

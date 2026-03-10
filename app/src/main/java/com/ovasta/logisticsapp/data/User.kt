@@ -6,10 +6,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class User(
-    @SerializedName("user_id") val userId: Int,
-    @SerializedName("userType") var userType: UserType?,
-    @SerializedName("token") val token: String,
-    @SerializedName("branch_id") val branchId: Int?,
-    @SerializedName("firebase_token") val firebaseToken: String?,
+    @SerializedName("id") val id: Int,
+    @SerializedName("delivery_id") val deliveryId: Int,
+    @SerializedName("district_id") val districId: Int,
+    @SerializedName("name") val name: String?,
+    @SerializedName("mobile") val mobile: String?,
+    @SerializedName("email") var email: String?,
+    @SerializedName("type_id") var userTypeId: Int?,
+    @SerializedName("available") var available: Boolean?,
+   var token: String?,
 )
 

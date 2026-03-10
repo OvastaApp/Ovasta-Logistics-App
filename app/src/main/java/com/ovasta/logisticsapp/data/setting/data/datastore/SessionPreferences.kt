@@ -24,7 +24,7 @@ data class SessionPreferences(
     val deviceRam: String = "",
     val accessToken: String = "",
     val deviceId: String = "",
-    val isShiftStarted: Boolean = false,
+    val isTracking: Boolean = false,
 )
 
 object SessionPreferencesSerializer : Serializer<SessionPreferences> {

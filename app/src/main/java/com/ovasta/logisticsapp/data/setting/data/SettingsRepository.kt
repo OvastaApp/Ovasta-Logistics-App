@@ -15,12 +15,13 @@ class SettingsRepository(
         return settingsLocalDataSource.getUseData()
     }
 
-    override suspend fun updateShiftStatus(isSignedIn: Boolean) {
-        settingsLocalDataSource.updateShiftStatus(isSignedIn = isSignedIn)
+    override suspend fun updateTrackingStatus(isTracking: Boolean) {
+        settingsLocalDataSource.updateTrackingStatus(isTracking = isTracking)
     }
 
     override fun observeShiftStatus(): Flow<Boolean> =
         settingsLocalDataSource.observeShiftStatus()
+
     override suspend fun logout() = settingsRemoteDataSource.logout()
 
     override suspend fun clearUserData() {

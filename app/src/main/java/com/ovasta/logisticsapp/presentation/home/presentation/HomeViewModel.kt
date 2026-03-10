@@ -16,6 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
+import com.ovasta.logisticsapp.base.exception.APIException
+import com.ovasta.logisticsapp.base.exception.toComposeUIException
+import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 
@@ -96,6 +99,10 @@ class HomeViewModel(
             is HomeScreenActions.ChangeLogoutDialogStatus -> {
                 _viewState.update { it.copy(isLogoutDialogVisible = tasksScreenAction.isVisible) }
             }
+
+            HomeScreenActions.OnLogoutClicked -> {
+                logout()
+            }
         }
     }
 
@@ -137,7 +144,6 @@ class HomeViewModel(
     private fun toggleTracking() {
         viewModelScope.launch {
             val isTracking = homeRepository.observeShiftStatus().first()
-
             if (isTracking) {
                 stopTracking()
             } else {
@@ -179,7 +185,9 @@ class HomeViewModel(
     private fun observeTracking() {
         viewModelScope.launch {
             settingsRepository.observeShiftStatus().collect { isTracking ->
-                _viewState.update { it.copy(isTracking = isTracking) }
+                _viewState.update {
+                    it.copy(isTracking = isTracking)
+                }
             }
         }
     }
@@ -218,6 +226,27 @@ class HomeViewModel(
                 _viewState.update { it.copy(filteredTasks = filteredTasks) }
             }
         }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                settingsRepository.logout()
+            }.onSuccess {
+                setComposeUILoading(false)
+                stopTracking()
+                settingsRepository.clearUserData()
+                emitScreenDirectionEvent(LoginScreen)
+            }.onFailure {
+                updateViewStateWithFail(it)
+            }
+        }
+    }
+
+    fun updateViewStateWithFail(throwable: Throwable) {
+        setComposeUILoading(false)
+        emitComposeUIExceptionEvent(throwable.toComposeUIException())
     }
 
     private fun clearToastMessage() {

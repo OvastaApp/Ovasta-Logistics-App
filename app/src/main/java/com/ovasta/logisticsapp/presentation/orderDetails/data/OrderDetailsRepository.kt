@@ -7,8 +7,8 @@ class OrderDetailsRepository(
     private val homeRemoteDataSource: IOrderDetailsRemoteDataSource,
 ) : IOrderDetailsRepository {
     override suspend fun getTaskDetails(
-        branchId: Int,
+        districId: Int,
         taskId: Int
     ): Flow<HomeTask> =
-        homeRemoteDataSource.getTaskDetails(branchId, taskId)
+        homeRemoteDataSource.getTaskDetails(districId, taskId)
 }

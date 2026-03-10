@@ -12,7 +12,7 @@ import kotlinx.coroutines.tasks.await
 class OrderDetailsRemoteDataSource : IOrderDetailsRemoteDataSource {
 
     override suspend fun getTaskDetails(
-        branchId: Int,
+        districId: Int,
         taskId: Int
     ): Flow<HomeTask> = flow {
 

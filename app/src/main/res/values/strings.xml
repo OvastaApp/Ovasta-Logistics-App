@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Logistics</string>
+    <string name="app_name">OvaStar</string>
     <string name="login">Login</string>
     <string name="enter_your_phone_number">Enter your phone number</string>
     <string name="confirm">Confirm</string>
@@ -151,7 +151,7 @@
     <string name="save">products you can add</string>
     <string name="receive_amount">Receive Amount</string>
     <string name="change">Change</string>
-
+    <string name="start_work">Start work</string>
+    <string name="work_started">Work started successfully</string>
     <string name="logout_message">Are you sure you want to log out of your account?</string>
-
 </resources>

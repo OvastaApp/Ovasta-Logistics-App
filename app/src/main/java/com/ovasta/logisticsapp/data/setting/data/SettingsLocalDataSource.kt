@@ -31,13 +31,13 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
         }
     }
 
-    override suspend fun updateShiftStatus(isSignedIn: Boolean) {
+    override suspend fun updateTrackingStatus(isTracking: Boolean) {
         dataStore.updateData {
-            it.copy(isShiftStarted = isSignedIn)
+            it.copy(isTracking = isTracking)
         }
     }
 
     override fun observeShiftStatus(): Flow<Boolean> {
-        return dataStore.data.map { it.isShiftStarted }
+        return dataStore.data.map { it.isTracking }
     }
 }

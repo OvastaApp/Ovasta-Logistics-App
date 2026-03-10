@@ -27,6 +27,7 @@ sealed interface HomeScreenActions {
     object ToggleTracking : HomeScreenActions
 
     data class ChangeLogoutDialogStatus(val isVisible: Boolean) : HomeScreenActions
+    object OnLogoutClicked : HomeScreenActions
 
 
 }

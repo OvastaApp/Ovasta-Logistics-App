@@ -5,6 +5,7 @@ import com.ovasta.logisticsapp.base.constants.LocalConstants.LANGUAGE_AR_ISO
 import com.ovasta.logisticsapp.data.RemoteConstants.HeadersConst.ACCEPT
 import com.ovasta.logisticsapp.data.RemoteConstants.HeadersConst.AUTHORIZATION
 import com.ovasta.logisticsapp.data.RemoteConstants.HeadersConst.IDENTIFIER
+import com.ovasta.logisticsapp.data.RemoteConstants.HeadersConst.LANG
 import com.ovasta.logisticsapp.data.setting.data.datastore.SessionPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +54,7 @@ class HeadersInterceptor(private val dataStore: DataStore<SessionPreferences>) :
     }
 
     private fun setupRequestHeaders(request: Request): Request {
-        val hash = "\$2y\$10\$Lku1/D.Uk5XmKPxiMFYxmOi6KqxmqJusRa3aNosKJCDVD9dDQz/b2"
+        val hash = "\$2a\$12\$BeuZVyrk1vlnlws5ljkRnuHA5UypUwVW3gyGoFaGvpdF5sgeSzXr2"
 
 
         val builder = request.newBuilder()
@@ -63,7 +64,7 @@ class HeadersInterceptor(private val dataStore: DataStore<SessionPreferences>) :
         builder.addHeader(ACCEPT, "application/json")
         builder.addHeader(IDENTIFIER, hash)
 
-//        builder.addHeader(LANG, SessionHeaderCache.lang)
+        builder.addHeader(LANG, "ar")
 //        builder.addHeader(DEVICE_ID, SessionHeaderCache.deviceId)
         val token = SessionHeaderCache.token
         builder.addHeader(

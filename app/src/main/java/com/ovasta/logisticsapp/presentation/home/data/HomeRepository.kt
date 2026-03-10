@@ -14,11 +14,8 @@ class HomeRepository(
     val settingsRepository: ISettingsRepository
 ) : IHomeRepository {
     override suspend fun getAssignedTasks(
-        userId: Int, branchId: Int, userType: String
-    ) = homeRemoteDataSource.getAssignedTasks(userId, branchId, userType)
-
-    private var isTracking = false
-    private var userId: Int? = null
+        userId: Int, districId: Int, userType: String
+    ) = homeRemoteDataSource.getAssignedTasks(userId, districId, userType)
 
     override suspend fun startLocationTracking(context: Context) {
         withContext(Dispatchers.Main) {
@@ -27,7 +24,7 @@ class HomeRepository(
                     action = LocationTrackerService.Action.START.name
                 }
                 context.startService(intent)
-                settingsRepository.updateShiftStatus(true)
+                settingsRepository.updateTrackingStatus(true)
                 Log.d("LocationTrackingRepository", "Location tracking started")
             } catch (ex: Exception) {
                 Log.e("LocationTrackingRepository", "Error starting location tracking", ex)
@@ -43,7 +40,7 @@ class HomeRepository(
                     action = LocationTrackerService.Action.STOP.name
                 }
                 context.stopService(intent)
-                settingsRepository.updateShiftStatus(false)
+                settingsRepository.updateTrackingStatus(false)
                 Log.d("LocationTrackingRepository", "Location tracking stopped")
             } catch (ex: Exception) {
                 Log.e("LocationTrackingRepository", "Error stopping location tracking", ex)
@@ -53,15 +50,14 @@ class HomeRepository(
     }
 
     override suspend fun sendLocation(lat: Double, long: Double) {
-        Log.d("LocationTracker", "Lat=$lat, Lng=$long")
-        userId = if (userId == null) {
-            settingsRepository.getUseData()?.userId
-        } else {
-            userId
+        with(settingsRepository.getUseData()) {
+            homeRemoteDataSource.logLocation(
+                userId = this?.id ?: 0,
+                districtId = this?.districId ?: 0,
+                lat,
+                long
+            )
         }
-//        userId?.let {
-            homeRemoteDataSource.logLocation(3, lat, long)
-//        }
     }
 
     override fun observeShiftStatus(): Flow<Boolean> {

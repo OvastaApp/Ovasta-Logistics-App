@@ -21,6 +21,8 @@ data class ApiResponse<T>(
     val perPage: Int,
     @SerializedName("total")
     val total: Int,
+    @SerializedName("token")
+    val token: String,
 ) {
     override fun toString(): String {
         return "ApiResponse(success=$status, message=$message, data=$data)"

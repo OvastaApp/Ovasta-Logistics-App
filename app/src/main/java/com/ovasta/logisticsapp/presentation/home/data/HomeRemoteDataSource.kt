@@ -8,6 +8,8 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.memoryCacheSettings
 import com.ovasta.logisticsapp.data.FirebaseConstants
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_WORKERS_NAME
@@ -24,10 +26,10 @@ class HomeRemoteDataSource(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getAssignedTasks(
-        userId: Int, branchId: Int, userType: String
+        userId: Int, districId: Int, userType: String
     ): Flow<List<HomeTask>> = callbackFlow {
         val listenerRegistration =
-            db.collection(FIRESTORE_ROOT_WORKERS_NAME).document(branchId.toString())
+            db.collection(FIRESTORE_ROOT_WORKERS_NAME).document(districId.toString())
                 .collection(userType).document(userId.toString())
                 .collection(FirebaseConstants.FIRESTORE_WORKER_ORDERS_NAME)
                 .addSnapshotListener { value, error ->
@@ -82,16 +84,23 @@ class HomeRemoteDataSource(
         }
     }
 
-
-    override suspend fun logLocation(userId: Int, latitude: Double, longitude: Double) {
+    override suspend fun logLocation(
+        userId: Int,
+        districtId: Int,
+        latitude: Double,
+        longitude: Double
+    ) {
         val locationData = hashMapOf(
             "userId" to userId,
             "latitude" to latitude,
             "longitude" to longitude,
             "timestamp" to FieldValue.serverTimestamp()
-
         )
-        db.collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
+        db.collection(FIRESTORE_ROOT_WORKERS_NAME)
+            .document(FIRESTORE_ROOT_DISTRICT_NAME)
+            .collection(districtId.toString())
+            .document(FIRESTORE_ROOT_DRIVERS_NAME)
+            .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
             .document(userId.toString())
             .set(locationData, SetOptions.merge())
             .addOnFailureListener {

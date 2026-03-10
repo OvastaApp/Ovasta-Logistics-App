@@ -7,6 +7,6 @@ interface ISettingsLocalDataSource {
     suspend fun getUseData(): User?
     suspend fun clearUserData()
     suspend fun saveUserData(user: User)
-    suspend fun updateShiftStatus(isSignedIn: Boolean)
+    suspend fun updateTrackingStatus(isTracking: Boolean)
     fun observeShiftStatus(): Flow<Boolean>
 }

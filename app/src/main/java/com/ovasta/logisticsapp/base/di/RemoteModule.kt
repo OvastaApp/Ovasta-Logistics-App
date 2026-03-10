@@ -17,7 +17,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-val remoteModule = module{
+val remoteModule = module {
     single { HeadersInterceptor(get()) }
     single<FirebaseFirestore> { Firebase.firestore }
     single { HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY) }
@@ -45,12 +45,12 @@ val remoteModule = module{
 
     single { GsonBuilder().create() }
 
-    single<Retrofit>{
-            Retrofit.Builder()
-                .baseUrl("http://167.172.209.252/api/consumer-app/ovasta-ghanem-xyznpkq/")
-                .addConverterFactory(GsonConverterFactory.create(get()))
-                .client(get())
-                .build()
+    single<Retrofit> {
+        Retrofit.Builder()
+            .baseUrl("http://167.172.209.252/api/delivery-agents/")
+            .addConverterFactory(GsonConverterFactory.create(get()))
+            .client(get())
+            .build()
     }
 
 }
