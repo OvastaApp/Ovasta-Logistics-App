@@ -1,7 +1,6 @@
-package com.ovasta.logisticsapp.data.setting.api
+package com.ovasta.logisticsapp.data.setting.data
 
 import retrofit2.http.GET
-
 
 interface SettingsApi {
     @GET("logout")

@@ -145,6 +145,7 @@ fun HomeScreen(
             viewState.isLogoutDialogVisible,
             onConfirm = {
                 viewModel.onTasksScreenAction(HomeScreenActions.OnLogoutClicked)
+                viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             }, onDismiss = {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })

@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.ovasta.logisticsapp.base.services.LocationTrackerService
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ class HomeRepository(
                 val intent = Intent(context, LocationTrackerService::class.java).apply {
                     action = LocationTrackerService.Action.START.name
                 }
-                context.startService(intent)
+                ContextCompat.startForegroundService(context, intent)
                 settingsRepository.updateTrackingStatus(true)
                 Log.d("LocationTrackingRepository", "Location tracking started")
             } catch (ex: Exception) {
@@ -39,7 +40,7 @@ class HomeRepository(
                 val intent = Intent(context, LocationTrackerService::class.java).apply {
                     action = LocationTrackerService.Action.STOP.name
                 }
-                context.stopService(intent)
+                context.startService(intent)
                 settingsRepository.updateTrackingStatus(false)
                 Log.d("LocationTrackingRepository", "Location tracking stopped")
             } catch (ex: Exception) {
@@ -63,4 +64,9 @@ class HomeRepository(
     override fun observeShiftStatus(): Flow<Boolean> {
         return settingsRepository.observeShiftStatus()
     }
+
+    override suspend fun changePartnerStatus(isOnline: Boolean?) =
+        homeRemoteDataSource.changePartnerStatus(isOnline = isOnline)
+
+    override suspend fun getPartnerStatus() = homeRemoteDataSource.getPartnerStatus()
 }

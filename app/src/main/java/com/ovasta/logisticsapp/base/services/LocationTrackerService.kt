@@ -24,6 +24,7 @@ class LocationTrackerService() : Service(), KoinComponent {
     private val scope = CoroutineScope(
         SupervisorJob() + Dispatchers.IO
     )
+    private var trackingJob: kotlinx.coroutines.Job? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -37,12 +38,19 @@ class LocationTrackerService() : Service(), KoinComponent {
         when (intent?.action) {
             Action.START.name -> start()
             Action.STOP.name -> stop()
+            else -> {
+                // Service restarted by system after being killed — resume tracking
+                start()
+            }
         }
 
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     private fun start() {
+        // Cancel any existing tracking job to prevent duplicate collections
+        trackingJob?.cancel()
+
         val locationManager: LocationManager by inject()
 
         val notificationManager =
@@ -56,7 +64,7 @@ class LocationTrackerService() : Service(), KoinComponent {
 
         startForeground(1, notification.build())
 
-        scope.launch {
+        trackingJob = scope.launch {
             locationManager.trackLocation().collect { location ->
                 val latitude = location.latitude
                 val longitude = location.longitude

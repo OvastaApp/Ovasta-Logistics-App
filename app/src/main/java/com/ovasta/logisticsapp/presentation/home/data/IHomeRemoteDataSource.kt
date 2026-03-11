@@ -1,6 +1,8 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
+import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import kotlinx.coroutines.flow.Flow
 
 interface IHomeRemoteDataSource {
@@ -14,4 +16,7 @@ interface IHomeRemoteDataSource {
         userId: Int, districtId: Int, latitude: Double, longitude: Double
     )
 
+    suspend fun changePartnerStatus(isOnline: Boolean? = false)
+
+    suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
+import androidx.compose.runtime.toMutableStateList
 import com.ovasta.logisticsapp.base.exception.APIException
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
@@ -77,6 +78,7 @@ class HomeViewModel(
     init {
         observeSearchKey()
         observeTracking()
+        fetchPartnerStatusOnStart()
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -93,7 +95,7 @@ class HomeViewModel(
             }
 
             HomeScreenActions.ToggleTracking -> {
-                toggleTracking()
+                changePartnerStatus(!viewState.value.isTracking)
             }
 
             is HomeScreenActions.ChangeLogoutDialogStatus -> {
@@ -141,13 +143,12 @@ class HomeViewModel(
         }
     }
 
-    private fun toggleTracking() {
+    private fun toggleTracking(shouldBeTracking: Boolean) {
         viewModelScope.launch {
-            val isTracking = homeRepository.observeShiftStatus().first()
-            if (isTracking) {
-                stopTracking()
-            } else {
+            if (shouldBeTracking) {
                 startTracking()
+            } else {
+                stopTracking()
             }
         }
     }
@@ -243,6 +244,57 @@ class HomeViewModel(
             }
         }
     }
+
+    private fun getPartnerStatus() {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.getPartnerStatus()
+            }.onSuccess { profileConfig ->
+                setComposeUILoading(false)
+                val isOnline = profileConfig.data?.isOnline ?: false
+                _viewState.update { it.copy(isTracking = isOnline) }
+                // Sync the local tracking service with server status
+                toggleTracking(shouldBeTracking = isOnline)
+            }.onFailure {
+                setComposeUILoading(false)
+                emitComposeUIExceptionEvent(it.toComposeUIException())
+            }
+        }
+    }
+
+    private fun fetchPartnerStatusOnStart() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                homeRepository.getPartnerStatus()
+            }.onSuccess { response ->
+                val isOnline = response.data?.isOnline ?: false
+                _viewState.update { it.copy(isTracking = isOnline) }
+                // If the server says we should be online, restart tracking service
+                if (isOnline) {
+                    startTracking()
+                }
+            }.onFailure {
+                Log.e("HomeViewModel", "Failed to fetch partner status on start", it)
+            }
+        }
+    }
+
+    private fun changePartnerStatus(isOnline: Boolean) {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.changePartnerStatus(isOnline = isOnline)
+            }.onSuccess {
+                setComposeUILoading(false)
+                toggleTracking(shouldBeTracking = isOnline)
+            }.onFailure {
+                setComposeUILoading(false)
+                emitComposeUIExceptionEvent(it.toComposeUIException())
+            }
+        }
+    }
+
 
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)

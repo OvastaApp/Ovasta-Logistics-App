@@ -1,6 +1,6 @@
 package com.ovasta.logisticsapp.data.setting.data
 
-import com.ovasta.logisticsapp.data.setting.api.SettingsApi
+import com.ovasta.logisticsapp.data.setting.data.SettingsApi
 
 class SettingsRemoteDataSource(private val settingsApi: SettingsApi) : ISettingsRemoteDataSource {
 

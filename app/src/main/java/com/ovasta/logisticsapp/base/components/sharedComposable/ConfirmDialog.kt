@@ -30,6 +30,7 @@ import com.ovasta.logisticsapp.base.Gray300
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray700
 import com.ovasta.logisticsapp.base.Gray900
+import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.Primary500
 import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.mdMedium
@@ -77,7 +78,7 @@ fun ConfirmDialog(
                 onClick = rememberSafeClick { onPrimaryClick() },
                 shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Primary500
+                    backgroundColor = Primary
                 ),
                 contentPadding = PaddingValues(
                     vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),

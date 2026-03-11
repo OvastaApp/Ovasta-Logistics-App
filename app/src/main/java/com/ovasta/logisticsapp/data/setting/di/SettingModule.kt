@@ -5,7 +5,7 @@ import android.location.Geocoder
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.ovasta.logisticsapp.data.setting.api.SettingsApi
+import com.ovasta.logisticsapp.data.setting.data.SettingsApi
 import com.ovasta.logisticsapp.data.setting.data.ISettingsLocalDataSource
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRemoteDataSource
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository

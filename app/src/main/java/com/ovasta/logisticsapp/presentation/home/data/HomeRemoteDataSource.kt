@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.memoryCacheSettings
+import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.data.FirebaseConstants
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DRIVERS_NAME
@@ -14,6 +15,7 @@ import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIV
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_WORKERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +23,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
 
 class HomeRemoteDataSource(
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore,
+    private val homeApi: HomeApi
 ) : IHomeRemoteDataSource {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -107,4 +110,9 @@ class HomeRemoteDataSource(
                 Log.e("logLocation", "Failed to update location", it)
             }
     }
+
+    override suspend fun changePartnerStatus(isOnline: Boolean?) =
+        homeApi.changePartnerStatus(isOnline)
+
+    override suspend fun getPartnerStatus() = homeApi.getPartnerStatus()
 }

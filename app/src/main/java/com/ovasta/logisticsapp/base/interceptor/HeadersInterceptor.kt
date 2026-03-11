@@ -69,7 +69,7 @@ class HeadersInterceptor(private val dataStore: DataStore<SessionPreferences>) :
         val token = SessionHeaderCache.token
         builder.addHeader(
             AUTHORIZATION,
-            token
+            "Bearer $token"
         )
         return builder.build()
     }

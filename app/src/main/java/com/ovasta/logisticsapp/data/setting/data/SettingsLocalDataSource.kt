@@ -26,7 +26,8 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
     override suspend fun saveUserData(user: User) {
         dataStore.updateData {
             it.copy(
-                user = user
+                user = user,
+                accessToken = user.token ?: "",
             )
         }
     }
