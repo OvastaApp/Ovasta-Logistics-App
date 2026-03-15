@@ -3,19 +3,16 @@ package com.ovasta.logisticsapp.presentation.home.data
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.memoryCacheSettings
-import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.data.FirebaseConstants
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_WORKERS_NAME
+import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
-import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -111,8 +108,10 @@ class HomeRemoteDataSource(
             }
     }
 
-    override suspend fun changePartnerStatus(isOnline: Boolean?) =
-        homeApi.changePartnerStatus(isOnline)
+    override suspend fun changePartnerStatus(isOnline: Boolean) {
+        val changeStatusRequest = ChangeStatusRequest(isOnline = isOnline)
+        homeApi.changePartnerStatus(changeStatusRequest)
+    }
 
     override suspend fun getPartnerStatus() = homeApi.getPartnerStatus()
 }

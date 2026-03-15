@@ -31,14 +31,4 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
             )
         }
     }
-
-    override suspend fun updateTrackingStatus(isTracking: Boolean) {
-        dataStore.updateData {
-            it.copy(isTracking = isTracking)
-        }
-    }
-
-    override fun observeShiftStatus(): Flow<Boolean> {
-        return dataStore.data.map { it.isTracking }
-    }
 }

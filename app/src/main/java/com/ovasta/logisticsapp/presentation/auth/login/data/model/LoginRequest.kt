@@ -5,4 +5,5 @@ import com.google.gson.annotations.SerializedName
 data class LoginRequest(
     @SerializedName("mobile") val mobile: String,
     @SerializedName("password") val password: String,
-    @SerializedName("user_type") val userType: Int, )
+    @SerializedName("type_id") val userTypeId: Int
+)

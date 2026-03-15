@@ -47,7 +47,7 @@ val remoteModule = module {
 
     single<Retrofit> {
         Retrofit.Builder()
-            .baseUrl("http://167.172.209.252/api/delivery-agents/")
+            .baseUrl("http://167.172.209.252/api/logistics/")
             .addConverterFactory(GsonConverterFactory.create(get()))
             .client(get())
             .build()

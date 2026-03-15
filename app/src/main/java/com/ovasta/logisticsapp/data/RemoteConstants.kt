@@ -10,7 +10,6 @@ object RemoteConstants : KoinComponent {
     const val LOST_CONNECTION_STATUS_CODE = -2
     const val SERVER_ERROR = 500
     const val UNAUTHORIZED_CODE = 401
-    const val ECOMMERCE_END_POINT = "commerce/api/open/v1"
     const val CACHE_NAME = "maxman_http_cache"
     const val CACHE_SIZE = 50 * 1024 * 1024L
 

@@ -77,8 +77,7 @@ class HomeViewModel(
 
     init {
         observeSearchKey()
-        observeTracking()
-        fetchPartnerStatusOnStart()
+        getPartnerStatus()
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -156,12 +155,10 @@ class HomeViewModel(
     private fun startTracking() {
         viewModelScope.launch {
             try {
-                _viewState.update { it.copy(isLoading = true) }
                 homeRepository.startLocationTracking(context)
-                delay(1000)
-                _viewState.update { it.copy(isTracking = true, isLoading = false) }
+                _viewState.update { it.copy(isTracking = true) }
             } catch (ex: Exception) {
-                _viewState.update { it.copy(isTracking = false, isLoading = false) }
+                _viewState.update { it.copy(isTracking = false) }
                 error.value = ex
                 Log.e("HomeViewModel", "Failed to start tracking", ex)
             }
@@ -171,24 +168,12 @@ class HomeViewModel(
     private fun stopTracking() {
         viewModelScope.launch {
             try {
-                _viewState.update { it.copy(isLoading = true) }
                 homeRepository.stopLocationTracking(context)
-                delay(1000)
-                _viewState.update { it.copy(isTracking = false, isLoading = false) }
+                _viewState.update { it.copy(isTracking = false) }
             } catch (ex: Exception) {
-                _viewState.update { it.copy(isTracking = true, isLoading = false) }
+                _viewState.update { it.copy(isTracking = true) }
                 error.value = ex
                 Log.e("HomeViewModel", "Failed to stop tracking", ex)
-            }
-        }
-    }
-
-    private fun observeTracking() {
-        viewModelScope.launch {
-            settingsRepository.observeShiftStatus().collect { isTracking ->
-                _viewState.update {
-                    it.copy(isTracking = isTracking)
-                }
             }
         }
     }
@@ -252,30 +237,12 @@ class HomeViewModel(
                 homeRepository.getPartnerStatus()
             }.onSuccess { profileConfig ->
                 setComposeUILoading(false)
-                val isOnline = profileConfig.data?.isOnline ?: false
+                val isOnline = profileConfig.data.isOnline ?: false
                 _viewState.update { it.copy(isTracking = isOnline) }
-                // Sync the local tracking service with server status
                 toggleTracking(shouldBeTracking = isOnline)
             }.onFailure {
                 setComposeUILoading(false)
                 emitComposeUIExceptionEvent(it.toComposeUIException())
-            }
-        }
-    }
-
-    private fun fetchPartnerStatusOnStart() {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                homeRepository.getPartnerStatus()
-            }.onSuccess { response ->
-                val isOnline = response.data?.isOnline ?: false
-                _viewState.update { it.copy(isTracking = isOnline) }
-                // If the server says we should be online, restart tracking service
-                if (isOnline) {
-                    startTracking()
-                }
-            }.onFailure {
-                Log.e("HomeViewModel", "Failed to fetch partner status on start", it)
             }
         }
     }

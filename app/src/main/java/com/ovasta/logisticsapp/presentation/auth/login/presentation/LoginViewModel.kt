@@ -11,7 +11,6 @@ import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.auth.login.data.ILoginRepository
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -108,7 +107,6 @@ class LoginViewModel(
 
         viewModelScope.launch(dispatcher + coroutineExceptionHandler) {
             setComposeUILoading(true)
-            delay(10000)
             runCatching {
                 loginRepository.login(phone, password, userType.typeId)
             }.onSuccess { response ->

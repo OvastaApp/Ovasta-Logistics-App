@@ -16,7 +16,7 @@ interface IHomeRemoteDataSource {
         userId: Int, districtId: Int, latitude: Double, longitude: Double
     )
 
-    suspend fun changePartnerStatus(isOnline: Boolean? = false)
+    suspend fun changePartnerStatus(isOnline: Boolean)
 
     suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
 }

@@ -7,8 +7,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 object HomeScreen : ScreenDirection {
     override fun execute(navController: NavController) {
-        navController.navigate(HomeScreen)
+        navController.navigate(HomeScreen) {
+            popUpTo(0) { inclusive = true }
+            launchSingleTop = true
+        }
     }
 }
-
 

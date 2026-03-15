@@ -85,7 +85,6 @@ fun ConfirmDialog(
                     horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
                 )
             ) {
-
                 Text(
                     text = stringResource(R.string.confirm),
                     style = mdMedium.copy(color = Base_white)
