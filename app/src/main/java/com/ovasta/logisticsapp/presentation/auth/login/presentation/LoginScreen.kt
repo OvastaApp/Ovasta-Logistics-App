@@ -350,8 +350,7 @@ private fun LoginContent(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Primary
                     ),
-                    enabled = true
-                    //viewState.isLoginButtonEnabled
+                    enabled = viewState.isLoginButtonEnabled
                 ) {
                     Text(
                         text = stringResource(R.string.login),
