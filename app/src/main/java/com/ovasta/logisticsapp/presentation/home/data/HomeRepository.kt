@@ -49,7 +49,7 @@ class HomeRepository(
     override suspend fun sendLocation(lat: Double, long: Double) {
         with(settingsRepository.getUseData()) {
             homeRemoteDataSource.logLocation(
-                userId = this?.id ?: 0,
+                userId = this?.deliveryId ?: 0,
                 districtId = this?.districId ?: 0,
                 lat,
                 long
