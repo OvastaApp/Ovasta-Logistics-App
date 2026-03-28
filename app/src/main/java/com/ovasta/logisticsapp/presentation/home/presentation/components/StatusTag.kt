@@ -2,16 +2,10 @@ package com.ovasta.logisticsapp.presentation.home.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
@@ -30,27 +24,20 @@ fun StatusTag(
         TaskStatus.Completed.id -> Pair(Color(0xFFE8F5E9), Color(0xFF4CAF50))
         TaskStatus.InProgress.id -> Pair(Color(0xFFE3F2FD), Color(0xFF2196F3))
         TaskStatus.Pending.id -> Pair(Color(0xFFFFEBEE), Color(0xFFF44336))
-        else -> Pair(Color(0xFFF5F5F5), Color(0xFF9E9E9E))
+        else -> Pair(Color(0xFFFFEBEE), Color(0xFFF44336))
     }
 
-    Row(
+    Box(
         modifier = modifier
             .background(
                 color = backgroundColor,
                 shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
             )
             .padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
+                horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
                 vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp)
-            ),
-        verticalAlignment = Alignment.CenterVertically
+            )
     ) {
-        Box(
-            modifier = Modifier
-                .size(dimensionResource(com.intuit.sdp.R.dimen._6sdp))
-                .background(textColor, CircleShape)
-        )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
         Text(
             text = statusName,
             style = xsMedium.copy(color = textColor)

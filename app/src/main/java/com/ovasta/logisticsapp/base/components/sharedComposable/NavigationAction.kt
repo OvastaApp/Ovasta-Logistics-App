@@ -85,7 +85,7 @@ fun ActionButton(
         Row(
             modifier = Modifier.padding(
                 horizontal = dimensionResource(com.intuit.sdp.R.dimen._6sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp)
             ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center

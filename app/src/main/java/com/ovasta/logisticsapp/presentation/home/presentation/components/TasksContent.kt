@@ -3,15 +3,12 @@ package com.ovasta.logisticsapp.presentation.home.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -43,13 +40,8 @@ import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray500
-import com.ovasta.logisticsapp.base.Gray800
-import com.ovasta.logisticsapp.base.Primary500
 import com.ovasta.logisticsapp.base.components.sharedComposable.ToastMsg
 import com.ovasta.logisticsapp.base.mdRegular
-import com.ovasta.logisticsapp.base.smMedium
-import com.ovasta.logisticsapp.base.smNormal
-import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
@@ -184,54 +176,20 @@ fun TasksContent(
                     // Tasks list
                     if (tasks.isEmpty()) {
                         item(key = "empty") {
-                            Column(
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._60sdp))
+                                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp))
                                     .testTag("emptyState"),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                contentAlignment = Alignment.TopCenter
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_empty_tasks),
-                                    contentDescription = null,
-                                    tint = Gray500.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._60sdp))
-                                )
-                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
                                 Text(
                                     text = stringResource(R.string.no_tasks_available),
-                                    style = smMedium.copy(color = Gray800)
-                                )
-                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
-                                Text(
-                                    text = stringResource(R.string.check_back_later),
-                                    style = smNormal.copy(color = Gray500)
+                                    style = mdRegular.copy(color = Gray500)
                                 )
                             }
                         }
                     } else {
-                        // Tasks count header
-                        item(key = "tasks_header") {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        top = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                                        bottom = dimensionResource(com.intuit.sdp.R.dimen._2sdp)
-                                    ),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.tasks),
-                                    style = smMedium.copy(color = Gray800)
-                                )
-                                Spacer(modifier = Modifier.weight(1f))
-                                Text(
-                                    text = "${tasks.size}",
-                                    style = xsMedium.copy(color = Primary500)
-                                )
-                            }
-                        }
 
                         itemsIndexed(tasks, key = { _, task -> task.taskId }) { _, task ->
                             TaskCard(

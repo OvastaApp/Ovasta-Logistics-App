@@ -108,7 +108,7 @@ private fun StatCard(
     borderColor: Color
 ) {
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._10sdp)),
+        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         border = BorderStroke(
             width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
@@ -120,7 +120,7 @@ private fun StatCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
+                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
                     vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
                 ),
             verticalAlignment = Alignment.CenterVertically
@@ -129,9 +129,9 @@ private fun StatCard(
                 painter = painterResource(icon),
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
             )
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = label,
@@ -142,7 +142,7 @@ private fun StatCard(
                 Text(
                     text = value,
                     style = smNormal.copy(color = Gray800),
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -177,7 +177,7 @@ private fun OrdersProgressCard(
     }
 
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._10sdp)),
+        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
         colors = CardDefaults.cardColors(containerColor = Base_white),
         border = BorderStroke(
             width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
@@ -188,7 +188,7 @@ private fun OrdersProgressCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+                .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -203,49 +203,49 @@ private fun OrdersProgressCard(
                         painter = painterResource(R.drawable.ic_delivery_truck),
                         contentDescription = null,
                         tint = Primary,
-                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
                     )
-                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                     Text(
                         text = stringResource(R.string.orders_progress),
-                        style = smNormal.copy(color = Gray800),
+                        style = mdMedium.copy(color = Gray800),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                 Text(
                     text = stringResource(
                         R.string.orders_progress_count,
                         ordersCount,
                         targetOrdersCount
                     ),
-                    style = xsMedium.copy(color = progressColor),
+                    style = smNormal.copy(color = progressColor),
                     maxLines = 1
                 )
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
 
             // Progress bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(dimensionResource(com.intuit.sdp.R.dimen._6sdp))
-                    .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._3sdp)))
-                    .background(progressColor.copy(alpha = 0.12f))
+                    .height(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                    .background(progressColor.copy(alpha = 0.15f))
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(fraction = animatedProgress)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._3sdp)))
+                        .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
                         .background(progressColor)
                 )
             }
 
             if (!targetEndDate.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                 Text(
                     text = stringResource(R.string.target_end_date, targetEndDate),
                     style = xsMedium.copy(color = Gray500),

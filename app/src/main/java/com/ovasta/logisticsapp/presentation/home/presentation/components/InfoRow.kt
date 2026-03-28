@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.smNormal
@@ -23,25 +23,28 @@ fun InfoRow(
     label: String,
     modifier: Modifier = Modifier,
     textStyle: androidx.compose.ui.text.TextStyle = smNormal.copy(color = Gray500),
-    iconSize: Int = com.intuit.sdp.R.dimen._18sdp,
-    maxLines: Int = 2
+    iconSize: Int = com.intuit.sdp.R.dimen._20sdp // uniform size for all icons
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.fillMaxWidth()
     ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            tint = textStyle.color,
-            modifier = Modifier.size(dimensionResource(iconSize))
-        )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(iconSize)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = Gray500,
+                modifier = Modifier.size(dimensionResource(iconSize))
+            )
+        }
+        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
         Text(
             text = label,
-            style = textStyle,
-            maxLines = maxLines,
-            overflow = TextOverflow.Ellipsis
+            style = textStyle
         )
     }
 }
