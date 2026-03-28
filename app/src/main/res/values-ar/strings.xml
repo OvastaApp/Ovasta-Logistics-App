@@ -153,4 +153,12 @@
     <string name="logout_message">هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟</string>
     <string name="start_work">ابدء العمل</string>
     <string name="work_started">تم بدء العمل بنجاح</string>
+    <string name="stop_work">إيقاف العمل</string>
+    <string name="tracking_active">التتبع مفعّل</string>
+    <string name="tracking_inactive">التتبع متوقف</string>
+    <string name="total_withdrawals">إجمالي السحوبات</string>
+    <string name="delivery_profit">أرباح التوصيل</string>
+    <string name="orders_progress">تقدّم الطلبات</string>
+    <string name="orders_progress_count">%1$d / %2$d طلب</string>
+    <string name="target_end_date">ينتهي الهدف: %s</string>
 </resources>

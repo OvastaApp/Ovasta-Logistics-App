@@ -11,8 +11,8 @@ import kotlinx.parcelize.Parcelize
 @IgnoreExtraProperties
 @Keep
 data class HomeTask(
-    @get:PropertyName("task_id")
-    @PropertyName("task_id")
+    @get:PropertyName("order_id")
+    @PropertyName("order_id")
     val taskId: Int = 0,
 
     @get:PropertyName("customer_long")

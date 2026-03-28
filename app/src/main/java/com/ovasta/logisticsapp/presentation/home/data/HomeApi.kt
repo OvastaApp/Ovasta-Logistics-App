@@ -2,6 +2,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -13,4 +14,7 @@ interface HomeApi {
 
     @GET("get-partner-status")
     suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
+
+    @GET("partner/statistics")
+    suspend fun getPartnerStatistics(): ApiResponse<PartnerStatistics>
 }

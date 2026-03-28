@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 import android.content.Context
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import kotlinx.coroutines.flow.Flow
 
@@ -30,10 +31,11 @@ interface IHomeRepository {
      * @return Boolean indicating if tracking is active
      */
 
-    suspend fun sendLocation( lat: Double, long: Double)
+    suspend fun sendLocation(lat: Double, long: Double)
 
     suspend fun changePartnerStatus(isOnline: Boolean)
 
     suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
 
+    suspend fun getPartnerStatistics(): ApiResponse<PartnerStatistics>
 }

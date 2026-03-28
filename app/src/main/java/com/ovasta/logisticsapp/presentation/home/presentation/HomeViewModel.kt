@@ -16,12 +16,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
-import androidx.compose.runtime.toMutableStateList
-import com.ovasta.logisticsapp.base.exception.APIException
+import androidx.compose.animation.core.updateTransition
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Job
 
 class HomeViewModel(
     private val context: Context,
@@ -31,13 +29,22 @@ class HomeViewModel(
     private val _viewState = MutableStateFlow(HomeViewState())
     val viewState = _viewState.asStateFlow()
 
+    private var assignedTasksJob: Job? = null
+
     fun getAssignedTasks() {
-        viewModelScope.launch {
-            _viewState.update { it.copy(isLoading = true) }
+        // Cancel any previous collection to avoid duplicate listeners
+        assignedTasksJob?.cancel()
+        assignedTasksJob = viewModelScope.launch {
+            setComposeUILoading(true)
             try {
-                homeRepository.getAssignedTasks(1, 1, "pickers").collect { tasks ->
-                    _viewState.update { it.copy(isLoading = false) }
+                homeRepository.getAssignedTasks(
+                    userId = 1, districtId = 1,
+                    "drivers"
+                ).collect { tasks ->
                     Log.d("assignedTasksVM", "$tasks")
+
+                    // Dismiss loading on the first (and every subsequent) emission
+                    setComposeUILoading(false)
 
                     val previousTasks = _viewState.value.tasks
 
@@ -49,11 +56,14 @@ class HomeViewModel(
                     // }
                 }
             } catch (ex: Exception) {
-                _viewState.update { it.copy(isLoading = false) }
-                error.value = ex
+                // CancellationException is expected when the job is cancelled (e.g. refresh/rotation)
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
+                setComposeUILoading(false)
+                updateViewStateWithFail(ex)
             }
         }
     }
+
 
     suspend fun getUserData(): User? {
         return settingsRepository.getUseData()
@@ -98,7 +108,7 @@ class HomeViewModel(
             }
 
             is HomeScreenActions.ChangeLogoutDialogStatus -> {
-                _viewState.update { it.copy(isLogoutDialogVisible = tasksScreenAction.isVisible) }
+                updateUiState(viewState.value.copy(isLogoutDialogVisible = tasksScreenAction.isVisible))
             }
 
             HomeScreenActions.OnLogoutClicked -> {
@@ -112,7 +122,7 @@ class HomeViewModel(
         when (taskItemAction) {
             is HomeItemActions.OpenContactBottomSheet -> {
                 if (taskItemAction.homeTask.clientPhone.isNullOrBlank()) {
-                    _viewState.update { it.copy(showToastMessage = R.string.phone_number_not_available) }
+                    updateUiState(viewState.value.copy(showToastMessage = R.string.phone_number_not_available))
                 } else {
                     _showContactSheet.value = taskItemAction.homeTask
                 }
@@ -120,7 +130,7 @@ class HomeViewModel(
 
             is HomeItemActions.OpenDirection -> {
                 if (taskItemAction.lat == 0.0f || taskItemAction.lng == 0.0f) {
-                    _viewState.update { it.copy(showToastMessage = R.string.location_not_available) }
+                    updateUiState(_viewState.value.copy(showToastMessage = R.string.location_not_available))
                 } else {
                     viewModelScope.launch {
                         _taskItemActions.emit(taskItemAction)
@@ -156,9 +166,9 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 homeRepository.startLocationTracking(context)
-                _viewState.update { it.copy(isTracking = true) }
+                updateUiState(_viewState.value.copy(isTracking = true))
             } catch (ex: Exception) {
-                _viewState.update { it.copy(isTracking = false) }
+                updateUiState(_viewState.value.copy(isTracking = false))
                 error.value = ex
                 Log.e("HomeViewModel", "Failed to start tracking", ex)
             }
@@ -169,9 +179,9 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 homeRepository.stopLocationTracking(context)
-                _viewState.update { it.copy(isTracking = false) }
+                updateUiState(_viewState.value.copy(isTracking = false))
             } catch (ex: Exception) {
-                _viewState.update { it.copy(isTracking = true) }
+                updateUiState(_viewState.value.copy(isTracking = true))
                 error.value = ex
                 Log.e("HomeViewModel", "Failed to stop tracking", ex)
             }
@@ -198,7 +208,7 @@ class HomeViewModel(
     fun searchTasks() {
         val query = _searchKey.value
         if (query.isNullOrBlank()) {
-            _viewState.update { it.copy(filteredTasks = it.tasks) }
+            updateUiState(_viewState.value.copy(filteredTasks = _viewState.value.tasks))
             return
         } else {
             viewState.value.tasks.filter {
@@ -209,7 +219,7 @@ class HomeViewModel(
                     query, ignoreCase = true
                 ) == true
             }.let { filteredTasks ->
-                _viewState.update { it.copy(filteredTasks = filteredTasks) }
+                updateUiState(_viewState.value.copy(filteredTasks = filteredTasks))
             }
         }
     }
@@ -238,7 +248,7 @@ class HomeViewModel(
             }.onSuccess { profileConfig ->
                 setComposeUILoading(false)
                 val isOnline = profileConfig.data.isOnline ?: false
-                _viewState.update { it.copy(isTracking = isOnline) }
+                updateUiState(_viewState.value.copy(isTracking = isOnline))
                 toggleTracking(shouldBeTracking = isOnline)
             }.onFailure {
                 setComposeUILoading(false)
@@ -262,10 +272,29 @@ class HomeViewModel(
         }
     }
 
+    private fun getPartnerStatistics() {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.getPartnerStatistics()
+            }.onSuccess { response ->
+                setComposeUILoading(false)
+                updateUiState(viewState.value.copy(partnerStatistics = response.data))
+            }.onFailure {
+                setComposeUILoading(false)
+                emitComposeUIExceptionEvent(it.toComposeUIException())
+            }
+        }
+    }
+
 
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)
         emitComposeUIExceptionEvent(throwable.toComposeUIException())
+    }
+
+    fun updateUiState(homeViewState: HomeViewState) {
+        _viewState.value = homeViewState
     }
 
     private fun clearToastMessage() {

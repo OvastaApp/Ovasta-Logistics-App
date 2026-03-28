@@ -5,14 +5,13 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
-import com.ovasta.logisticsapp.data.FirebaseConstants
+import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
-import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
-import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_WORKERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -20,8 +19,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
 
 class HomeRemoteDataSource(
-    private val db: FirebaseFirestore,
-    private val homeApi: HomeApi
+    private val db: FirebaseFirestore, private val homeApi: HomeApi
 ) : IHomeRemoteDataSource {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -29,10 +27,10 @@ class HomeRemoteDataSource(
         userId: Int, districId: Int, userType: String
     ): Flow<List<HomeTask>> = callbackFlow {
         val listenerRegistration =
-            db.collection(FIRESTORE_ROOT_WORKERS_NAME).document(districId.toString())
-                .collection(userType).document(userId.toString())
-                .collection(FirebaseConstants.FIRESTORE_WORKER_ORDERS_NAME)
-                .addSnapshotListener { value, error ->
+            db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districId.toString())
+                .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
+                .document(userId.toString())
+                .collection(FIRESTORE_ROOT_ORDERS_NAME).addSnapshotListener { value, error ->
                     if (error != null) {
                         Log.e("assignedOrders", "Error fetching orders", error)
                         close(error)
@@ -46,12 +44,13 @@ class HomeRemoteDataSource(
 
         awaitClose { listenerRegistration.remove() }
     }.flatMapLatest { orderIds ->
-        listenToOrdersChanges(orderIds)
+        listenToOrdersChanges(orderIds, districId)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenToOrdersChanges(
-        orderIds: List<String>
+        orderIds: List<String>,
+        districId: Int
     ): Flow<List<HomeTask>> = callbackFlow {
 
         if (orderIds.isEmpty()) {
@@ -60,7 +59,10 @@ class HomeRemoteDataSource(
             return@callbackFlow
         }
 
-        val ordersCollection = db.collection(FIRESTORE_ROOT_ORDERS_NAME)
+        val ordersCollection =
+            db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districId.toString())
+                .collection(FIRESTORE_ROOT_ORDERS_NAME)
+
 
         val tasksMap = mutableMapOf<String, HomeTask>()
         val listeners = mutableListOf<ListenerRegistration>()
@@ -85,10 +87,7 @@ class HomeRemoteDataSource(
     }
 
     override suspend fun logLocation(
-        userId: Int,
-        districtId: Int,
-        latitude: Double,
-        longitude: Double
+        userId: Int, districtId: Int, latitude: Double, longitude: Double
     ) {
         val locationData = hashMapOf(
             "userId" to userId,
@@ -96,14 +95,9 @@ class HomeRemoteDataSource(
             "longitude" to longitude,
             "timestamp" to FieldValue.serverTimestamp()
         )
-        db.collection(FIRESTORE_ROOT_WORKERS_NAME)
-            .document(FIRESTORE_ROOT_DISTRICT_NAME)
-            .collection(districtId.toString())
-            .document(FIRESTORE_ROOT_DRIVERS_NAME)
-            .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
-            .document(userId.toString())
-            .set(locationData, SetOptions.merge())
-            .addOnFailureListener {
+        db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
+            .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME).document(userId.toString())
+            .set(locationData, SetOptions.merge()).addOnFailureListener {
                 Log.e("logLocation", "Failed to update location", it)
             }
     }
@@ -114,4 +108,6 @@ class HomeRemoteDataSource(
     }
 
     override suspend fun getPartnerStatus() = homeApi.getPartnerStatus()
+
+    override suspend fun getPartnerStatistics() = homeApi.getPartnerStatistics()
 }

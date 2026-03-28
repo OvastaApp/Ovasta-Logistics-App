@@ -61,4 +61,6 @@ class HomeRepository(
         homeRemoteDataSource.changePartnerStatus(isOnline = isOnline)
 
     override suspend fun getPartnerStatus() = homeRemoteDataSource.getPartnerStatus()
+
+    override suspend fun getPartnerStatistics() = homeRemoteDataSource.getPartnerStatistics()
 }

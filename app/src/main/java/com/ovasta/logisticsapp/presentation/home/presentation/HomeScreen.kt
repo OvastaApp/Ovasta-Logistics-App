@@ -80,6 +80,7 @@ import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.TaskStatus
+import com.ovasta.logisticsapp.presentation.home.presentation.components.TrackingToggleCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -102,7 +103,7 @@ fun HomeScreen(
         navController = navController
     ) {
         LaunchedEffect(Unit) {
-//        viewModel.getAssignedTasks()
+            viewModel.getAssignedTasks()
 
             viewModel.taskItemActions
                 .filterNotNull()
@@ -222,42 +223,39 @@ fun TasksContent(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                TrackingToggleButton(
-                    isSignedIn = viewState.isTracking,
-                    onToggle = { onTasksScreenAction(HomeScreenActions.ToggleTracking) }
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Gray100)
+                        .padding(
+                            top = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
+                            start = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
+                            end = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
+                        )
+                ) {
+                    TrackingToggleCard(
+                        isTracking = viewState.isTracking,
+                        onToggle = { onTasksScreenAction(HomeScreenActions.ToggleTracking) }
+                    )
 
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .background(Gray100)
-//                        .padding(
-//                            top = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-//                            start = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-//                            end = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-//                        )
-//                ) {
-//                    SearchWithFilterBar(
-//                        searchKey = searchKey,
-//                        onSearchKeyChange = {
-//                            onTasksScreenAction(
-//                                HomeScreenActions.OnSearchKeyChange(it)
-//                            )
-//                        },
-//                        onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-//
-//                    Tasks(viewState, currency, startedTaskId, onTasksScreenAction, onTaskItemAction)
-//                }
+                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+
+                    SearchWithFilterBar(
+                        searchKey = searchKey,
+                        onSearchKeyChange = {
+                            onTasksScreenAction(
+                                HomeScreenActions.OnSearchKeyChange(it)
+                            )
+                        },
+                        onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
+                    )
+
+                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+
+                    Tasks(viewState, currency, startedTaskId, onTasksScreenAction, onTaskItemAction)
+                }
             }
         }
-
-        if (viewState.isLoading && !isRefreshing) {
-            ShowLoadingIndicator(Modifier)
-        }
-
         if (showToast.value) {
             Box(
                 modifier = Modifier
@@ -298,44 +296,6 @@ fun LogoutDialog(
     }
 }
 
-@Composable
-fun TrackingToggleButton(
-    isSignedIn: Boolean,
-    onToggle: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        androidx.compose.material3.FloatingActionButton(
-            onClick = onToggle,
-            containerColor = if (isSignedIn) Color(0xFF2E7D32) else Color(0xFFB0BEC5),
-            contentColor = Color.White,
-            modifier = Modifier.size(120.dp)
-        ) {
-            Icon(
-                painter = painterResource(
-                    id = if (isSignedIn) R.drawable.ic_start_tracking else R.drawable.ic_stop_tracking
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(48.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = if (isSignedIn) stringResource(R.string.work_started) else  stringResource(R.string.start_work),
-            style = mdMedium.copy(color = Gray800)
-        )
-
-
-    }
-}
 
 @Composable
 fun SearchWithFilterBar(
@@ -482,14 +442,6 @@ fun TaskCard(
             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
 
             InfoRow(
-                icon = R.drawable.ic_profile,
-                label = homeTask.clientPhone ?: stringResource(R.string.no_address),
-                modifier = Modifier.testTag("clientName")
-            )
-
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
-            InfoRow(
                 icon = R.drawable.ic_address,
                 label = homeTask.customerAddress?.ifEmpty { stringResource(R.string.no_address) }
                     ?: stringResource(R.string.no_address),
@@ -606,7 +558,6 @@ fun StatusTag(
 
 private fun fakeHomeViewState(): HomeViewState {
     return HomeViewState(
-        isLoading = false,
         filteredTasks = listOf(
             HomeTask(
                 taskId = 1,
