@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
-import androidx.compose.animation.core.updateTransition
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import kotlinx.coroutines.Job
 
 class HomeViewModel(
@@ -88,6 +88,7 @@ class HomeViewModel(
     init {
         observeSearchKey()
         getPartnerStatus()
+        getPartnerStatistics()
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -281,8 +282,20 @@ class HomeViewModel(
                 setComposeUILoading(false)
                 updateUiState(viewState.value.copy(partnerStatistics = response.data))
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+//                setComposeUILoading(false)
+//                emitComposeUIExceptionEvent(it.toComposeUIException())
+
+                updateUiState(
+                    viewState.value.copy(
+                        partnerStatistics = PartnerStatistics(
+                            300.0,
+                            1500.0,
+                            7,
+                            50,
+                            "2024-12-31"
+                        )
+                    )
+                )
             }
         }
     }

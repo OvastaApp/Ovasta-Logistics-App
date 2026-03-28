@@ -21,7 +21,7 @@
     <string name="cart">السلة</string>
     <string name="order_summary">ملخص الطلب</string>
     <string name="total_price">السعر الإجمالي</string>
-    <string name="price_currency">%s جنيه مصري</string>
+    <string name="price_currency">%s ج.م</string>
     <string name="empty_cart">السلة فارغة</string>
     <string name="add_products_to_start">أضف منتجات للبدء</string>
     <string name="checkout">إتمام الدفع</string>
@@ -130,6 +130,7 @@
     <string name="not_available">غير متاح</string>
     <string name="find_order">البحث عن الطلب</string>
     <string name="contact">اتصال</string>
+    <string name="whatsapp">واتساب</string>
     <string name="directions">الاتجاهات</string>
     <string name="continue_the_task">متابعة المهمة</string>
     <string name="edit_task">تعديل المهمة</string>
