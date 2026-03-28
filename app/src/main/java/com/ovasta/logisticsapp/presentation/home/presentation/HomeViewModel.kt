@@ -130,8 +130,28 @@ class HomeViewModel(
             }
 
             is HomeItemActions.OpenDirection -> {
-                if (taskItemAction.lat == 0.0f || taskItemAction.lng == 0.0f) {
+                if (taskItemAction.lat == 0.0 || taskItemAction.lng == 0.0) {
                     updateUiState(_viewState.value.copy(showToastMessage = R.string.location_not_available))
+                } else {
+                    viewModelScope.launch {
+                        _taskItemActions.emit(taskItemAction)
+                    }
+                }
+            }
+
+            is HomeItemActions.CallRetailer -> {
+                if (taskItemAction.clientPhone.isBlank()) {
+                    updateUiState(viewState.value.copy(showToastMessage = R.string.phone_number_not_available))
+                } else {
+                    viewModelScope.launch {
+                        _taskItemActions.emit(taskItemAction)
+                    }
+                }
+            }
+
+            is HomeItemActions.WhatsAppRetailer -> {
+                if (taskItemAction.clientWhatsapp.isBlank()) {
+                    updateUiState(viewState.value.copy(showToastMessage = R.string.phone_number_not_available))
                 } else {
                     viewModelScope.launch {
                         _taskItemActions.emit(taskItemAction)

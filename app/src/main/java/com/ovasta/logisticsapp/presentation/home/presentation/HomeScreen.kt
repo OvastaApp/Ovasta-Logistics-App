@@ -8,8 +8,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
-import com.ovasta.logisticsapp.base.components.sharedComposable.ContactSheet
-import com.ovasta.logisticsapp.base.ext.copyPhoneNumber
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.openWhatsApp
@@ -29,7 +27,6 @@ fun HomeScreen(
     val viewState by viewModel.viewState.collectAsState()
     val searchKey by viewModel.searchKey.collectAsState()
     val currency by viewModel.currency.collectAsState()
-    val showContactSheet by viewModel.showContactSheet.collectAsState()
     BaseScreen(
         viewModel = viewModel,
         navController = navController
@@ -48,16 +45,12 @@ fun HomeScreen(
                             context.navigateToLocationClick(event.lat, event.lng)
                         }
 
-                        is HomeItemActions.CopyPhone -> {
-                            context.copyPhoneNumber(event.retailerPhone)
-                        }
-
                         is HomeItemActions.CallRetailer -> {
-                            context.makePhoneCall(event.retailerPhone)
+                            context.makePhoneCall(event.clientPhone)
                         }
 
                         is HomeItemActions.WhatsAppRetailer -> {
-                            context.openWhatsApp(event.retailerPhone)
+                            context.openWhatsApp(event.clientWhatsapp)
                         }
 
                         else -> Unit
@@ -66,13 +59,7 @@ fun HomeScreen(
                 }
         }
 
-        if (showContactSheet != null) {
-            ContactSheet(
-                taskId = showContactSheet?.taskId ?: 0,
-                homeTaskInfo = showContactSheet!!,
-                onAction = { viewModel.onTaskItemAction(it) }
-            )
-        }
+
 
         LogoutDialog(
             viewState.isLogoutDialogVisible,
@@ -104,8 +91,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 totalPrice = 250f,
                 clientPhone = "01012345678",
                 customerAddress = "Nasr City, Cairo",
-                clientLang = 30.0444f,
-                clientLat = 31.2357f
+                clientLang = 30.0444,
+                clientLat = 31.2357
             ),
             HomeTask(
                 taskId = 3,
@@ -114,8 +101,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 totalPrice = 250f,
                 clientPhone = "01012345678",
                 customerAddress = "Nasr City, Cairo",
-                clientLang = 30.0444f,
-                clientLat = 31.2357f
+                clientLang = 30.0444,
+                clientLat = 31.2357
             ),
             HomeTask(
                 taskId = 2,
@@ -124,8 +111,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 totalPrice = 480f,
                 clientPhone = "01198765432",
                 customerAddress = "Maadi, Cairo",
-                clientLang = 29.9602f,
-                clientLat = 31.2569f
+                clientLang = 29.9602,
+                clientLat = 31.2569
             )
         ),
         showToastMessage = null

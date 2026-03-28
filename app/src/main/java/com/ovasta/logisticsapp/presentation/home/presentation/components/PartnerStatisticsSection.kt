@@ -1,9 +1,15 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,9 +29,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -40,6 +50,7 @@ import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
+import androidx.compose.ui.text.font.FontWeight
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import java.util.Locale
@@ -48,51 +59,137 @@ import java.util.Locale
 fun PartnerStatisticsSection(
     statistics: PartnerStatistics
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+    var isExpanded by remember { mutableStateOf(true) }
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        animationSpec = tween(300),
+        label = "expandIconRotation"
+    )
+
+    Card(
+        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        colors = CardDefaults.cardColors(containerColor = Base_white),
+        border = BorderStroke(
+            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            color = Gray200
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isExpanded = !isExpanded }
     ) {
-        // Row with Withdrawals and Delivery Profit side by side
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
         ) {
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_price,
-                iconTint = Color(0xFFE57373),
-                label = stringResource(R.string.total_withdrawals),
-                value = String.format(
-                    stringResource(R.string.price_currency),
-                    formatAmount(statistics.withdrawTransactionsSum)
-                ),
-                containerColor = Color(0xFFFFF8F0),
-                borderColor = Color(0xFFFFE0B2)
-            )
+            // Header - Always visible
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_price),
+                        contentDescription = null,
+                        tint = Primary,
+                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                    )
+                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                    Column {
+                        Text(
+                            text = stringResource(R.string.statistics),
+                            style = smNormal.copy(color = Gray800, fontWeight = FontWeight.SemiBold)
+                        )
+                        // Collapsed summary - show net profit (profit - withdrawals)
+                        if (!isExpanded) {
+                            val netProfit = (statistics.deliveryProfitSum ?: 0.0) - (statistics.withdrawTransactionsSum ?: 0.0)
+                            val netColor = if (netProfit >= 0) Color(0xFF4CAF50) else Color(0xFFE57373)
+                            Text(
+                                text = String.format(
+                                    stringResource(R.string.price_currency),
+                                    formatAmount(netProfit)
+                                ),
+                                style = xsMedium.copy(color = netColor)
+                            )
+                        }
+                    }
+                }
 
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_delivery_fees,
-                iconTint = Color(0xFF4CAF50),
-                label = stringResource(R.string.delivery_profit),
-                value = String.format(
-                    stringResource(R.string.price_currency),
-                    formatAmount(statistics.deliveryProfitSum)
-                ),
-                containerColor = Color(0xFFF0F9F0),
-                borderColor = Color(0xFFC8E6C9)
-            )
-        }
+                Icon(
+                    painter = painterResource(R.drawable.ic_black_arrow_down),
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = Gray500,
+                    modifier = Modifier
+                        .size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
+                        .rotate(rotationAngle)
+                )
+            }
 
-        // Orders progress card - only show when target is set
-        val targetCount = statistics.targetOrdersCount ?: 0
-        if (targetCount > 0) {
-            OrdersProgressCard(
-                ordersCount = statistics.ordersCount ?: 0,
-                targetOrdersCount = targetCount,
-                targetEndDate = statistics.targetEndDate
-            )
+            // Expandable content
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(
+                    animationSpec = tween(300),
+                    expandFrom = Alignment.Top
+                ) + fadeIn(animationSpec = tween(300)),
+                exit = shrinkVertically(
+                    animationSpec = tween(300),
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut(animationSpec = tween(300))
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+                ) {
+                    // Row with Delivery Profit and Withdrawals side by side
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    ) {
+                        StatCard(
+                            modifier = Modifier.weight(1f),
+                            icon = R.drawable.ic_delivery_fees,
+                            iconTint = Color(0xFF4CAF50),
+                            label = stringResource(R.string.delivery_profit),
+                            value = String.format(
+                                stringResource(R.string.price_currency),
+                                formatAmount(statistics.deliveryProfitSum)
+                            ),
+                            containerColor = Color(0xFFF0F9F0),
+                            borderColor = Color(0xFFC8E6C9)
+                        )
+
+                        StatCard(
+                            modifier = Modifier.weight(1f),
+                            icon = R.drawable.ic_price,
+                            iconTint = Color(0xFFE57373),
+                            label = stringResource(R.string.total_withdrawals),
+                            value = String.format(
+                                stringResource(R.string.price_currency),
+                                formatAmount(statistics.withdrawTransactionsSum)
+                            ),
+                            containerColor = Color(0xFFFFF8F0),
+                            borderColor = Color(0xFFFFE0B2)
+                        )
+                    }
+
+                    // Orders progress card - only show when target is set
+                    val targetCount = statistics.targetOrdersCount ?: 0
+                    if (targetCount > 0) {
+                        OrdersProgressCard(
+                            ordersCount = statistics.ordersCount ?: 0,
+                            targetOrdersCount = targetCount,
+                            targetEndDate = statistics.targetEndDate
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -215,8 +312,9 @@ private fun OrdersProgressCard(
                 }
                 Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                 Text(
-                    text = stringResource(
-                        R.string.orders_progress_count,
+                    text = String.format(
+                        Locale.ENGLISH,
+                        stringResource(R.string.orders_progress_count),
                         ordersCount,
                         targetOrdersCount
                     ),

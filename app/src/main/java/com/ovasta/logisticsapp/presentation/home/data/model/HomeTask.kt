@@ -15,13 +15,13 @@ data class HomeTask(
     @PropertyName("order_id")
     val taskId: Int = 0,
 
-    @get:PropertyName("customer_long")
-    @PropertyName("customer_long")
-    val clientLang: Float = 0f,
-
     @get:PropertyName("customer_lat")
     @PropertyName("customer_lat")
-    val clientLat: Float = 0f,
+    val clientLat: Double = 0.0,
+
+    @get:PropertyName("customer_long")
+    @PropertyName("customer_long")
+    val clientLang: Double = 0.0,
 
     @get:PropertyName("customer_name")
     @PropertyName("customer_name")
@@ -34,6 +34,10 @@ data class HomeTask(
     @get:PropertyName("customer_mobile")
     @PropertyName("customer_mobile")
     val clientPhone: String? = null,
+
+    @get:PropertyName("customer_whatsapp")
+    @PropertyName("customer_whatsapp")
+    val clientWhatsapp: String? = null,
 
     @get:PropertyName("delivery_fees")
     @PropertyName("delivery_fees")

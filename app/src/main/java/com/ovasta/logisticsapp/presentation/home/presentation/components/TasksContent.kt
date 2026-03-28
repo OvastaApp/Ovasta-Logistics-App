@@ -192,34 +192,34 @@ fun TasksContent(
                     } else {
 
                         itemsIndexed(tasks, key = { _, task -> task.taskId }) { _, task ->
-                            TaskCard(
-                                homeTask = task,
-                                currency = currency,
-                                startedTaskId = startedTaskId,
-                                onTaskDetailsClick = { taskId, retailerId ->
-                                    onTaskItemAction(
-                                        HomeItemActions.ShowTaskDetails(taskId, retailerId)
-                                    )
-                                },
-                                onDirectionClick = { lat, long ->
-                                    onTaskItemAction(
-                                        HomeItemActions.OpenDirection(lat, long)
-                                    )
-                                },
-                                onContactClick = {
-                                    onTaskItemAction(
-                                        HomeItemActions.OpenContactBottomSheet(task)
-                                    )
-                                },
-                                onWhatsAppClick = {
-                                    onTaskItemAction(
-                                        HomeItemActions.WhatsAppRetailer(task.clientPhone ?: "")
-                                    )
-                                },
-                                onClick = {
-                                    onTaskItemAction(HomeItemActions.TaskClicked(task))
-                                }
-                            )
+                        TaskCard(
+                            homeTask = task,
+                            currency = currency,
+                            startedTaskId = startedTaskId,
+                            onTaskDetailsClick = { taskId, retailerId ->
+                                onTaskItemAction(
+                                    HomeItemActions.ShowTaskDetails(taskId, retailerId)
+                                )
+                            },
+                            onDirectionClick = { lat, long ->
+                                onTaskItemAction(
+                                    HomeItemActions.OpenDirection(lat, long)
+                                )
+                            },
+                            onContactClick = { phone ->
+                                onTaskItemAction(
+                                    HomeItemActions.CallRetailer(phone)
+                                )
+                            },
+                            onWhatsAppClick = { phone ->
+                                onTaskItemAction(
+                                    HomeItemActions.WhatsAppRetailer(phone)
+                                )
+                            },
+                            onClick = {
+                                onTaskItemAction(HomeItemActions.TaskClicked(task))
+                            }
+                        )
                         }
                     }
 

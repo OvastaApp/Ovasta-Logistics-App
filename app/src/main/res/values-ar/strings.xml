@@ -155,10 +155,11 @@
     <string name="start_work">ابدء العمل</string>
     <string name="work_started">تم بدء العمل بنجاح</string>
     <string name="stop_work">إيقاف العمل</string>
-    <string name="tracking_active">التتبع مفعّل</string>
-    <string name="tracking_inactive">التتبع متوقف</string>
-    <string name="total_withdrawals">إجمالي السحوبات</string>
-    <string name="delivery_profit">أرباح التوصيل</string>
+    <string name="tracking_active">متاح</string>
+    <string name="tracking_inactive">غير متاح</string>
+    <string name="total_withdrawals">سحوبات</string>
+    <string name="delivery_profit">ارباحك</string>
+    <string name="statistics">الإحصائيات</string>
     <string name="orders_progress">تقدّم الطلبات</string>
     <string name="orders_progress_count">%1$d / %2$d طلب</string>
     <string name="target_end_date">ينتهي الهدف: %s</string>

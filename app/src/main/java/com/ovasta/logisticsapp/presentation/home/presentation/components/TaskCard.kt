@@ -34,7 +34,7 @@ fun TaskCard(
     currency: String,
     startedTaskId: Int,
     onTaskDetailsClick: (taskId: Int, retailerId: Int) -> Unit,
-    onDirectionClick: (Float, Float) -> Unit,
+    onDirectionClick: (Double, Double) -> Unit,
     onContactClick: (String) -> Unit,
     onWhatsAppClick: (String) -> Unit,
     onClick: () -> Unit,
@@ -123,7 +123,7 @@ fun TaskCard(
                     )
                 },
                 onContactClick = { onContactClick(homeTask.clientPhone ?: "") },
-                onWhatsAppClick = { onWhatsAppClick(homeTask.clientPhone ?: "") }
+                onWhatsAppClick = { onWhatsAppClick(homeTask.clientWhatsapp ?: "") }
             )
         }
     }
@@ -140,8 +140,8 @@ fun PreviewTaskCard() {
             customerAddress = "123 Main St, City",
             itemsCount = 5,
             totalPrice = 150.0f,
-            clientLat = 37.7749f,
-            clientLang = -122.4194f,
+            clientLat = 37.7749,
+            clientLang = -122.4194,
             clientPhone = "1234567890"
         ),
         currency = "$",

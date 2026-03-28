@@ -160,6 +160,7 @@
     <string name="logout_message">Are you sure you want to log out of your account?</string>
     <string name="total_withdrawals">Total Withdrawals</string>
     <string name="delivery_profit">Delivery Profit</string>
+    <string name="statistics">Statistics</string>
     <string name="orders_progress">Orders Progress</string>
     <string name="orders_progress_count">%1$d / %2$d orders</string>
     <string name="target_end_date">Target ends: %s</string>
