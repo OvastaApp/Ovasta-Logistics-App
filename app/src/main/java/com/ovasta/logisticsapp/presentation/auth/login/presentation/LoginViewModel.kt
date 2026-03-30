@@ -2,6 +2,7 @@ package com.ovasta.logisticsapp.presentation.auth.login.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.BaseViewModel
+import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.UserType
 import com.ovasta.logisticsapp.base.exception.APIException
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
@@ -10,6 +11,7 @@ import com.ovasta.logisticsapp.data.RemoteConstants
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.auth.login.data.ILoginRepository
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
+import com.ovasta.logisticsapp.presentation.nav.Home
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,7 +118,7 @@ class LoginViewModel(
                 setComposeUILoading(false)
 //                loginRepository.authenticateWithFirebase(user.firebaseToken, onSuccess = {
 //                    setComposeUILoading(false)
-                emitScreenDirectionEvent(HomeScreen)
+                emitScreenDirectionEvent(ScreenDirection.Replace(Home))
 //                }, onFailure = {
 //                    setComposeUILoading(false)
 //                })

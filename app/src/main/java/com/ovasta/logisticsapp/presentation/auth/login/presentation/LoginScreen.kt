@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +46,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
@@ -53,7 +53,6 @@ import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Primary
-import com.ovasta.logisticsapp.base.ScreenDirectionEventHandler
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.components.sharedComposable.ContextEventHandler
 import com.ovasta.logisticsapp.base.mdMedium
@@ -78,24 +77,15 @@ object LoginContentTestTag {
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel,
-    navController: NavController
+    viewModel: LoginViewModel
 ) {
     val viewState by viewModel.viewState.collectAsState()
-    BaseScreen(
-        viewModel = viewModel,
-        navController = navController
-    ) {
+    BaseScreen(viewModel = viewModel) {
         LoginContent(
             viewState = viewState,
             onAction = viewModel::onAction
         )
     }
-    ScreenDirectionEventHandler(
-        viewModel = viewModel,
-        navController = navController
-    )
-
     ContextEventHandler(viewModel)
 }
 

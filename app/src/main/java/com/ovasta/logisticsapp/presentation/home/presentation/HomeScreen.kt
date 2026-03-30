@@ -6,7 +6,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
@@ -21,19 +20,16 @@ import kotlinx.coroutines.flow.filterNotNull
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    navController: NavController
 ) {
     val context = LocalContext.current
     val viewState by viewModel.viewState.collectAsState()
     val searchKey by viewModel.searchKey.collectAsState()
     val currency by viewModel.currency.collectAsState()
     BaseScreen(
-        viewModel = viewModel,
-        navController = navController
+        viewModel = viewModel
     ) {
         LaunchedEffect(Unit) {
             viewModel.getAssignedTasks()
-
             viewModel.taskItemActions
                 .filterNotNull()
                 .collectLatest { event ->

@@ -8,31 +8,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavController
 import com.maxab.basemodule.listener.LogoutListener
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.ScreenDirectionEventHandler
 import com.ovasta.logisticsapp.data.RemoteConstants
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 fun BaseScreen(
     viewModel: BaseViewModel,
-    navController: NavController,
     content: @Composable () -> Unit
 ) {
     ScreenDirectionEventHandler(
-        viewModel = viewModel,
-        navController = navController
+        viewModel = viewModel
     )
 
     val logoutListener = LocalActivity.current as? LogoutListener

@@ -16,9 +16,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
+import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
+import com.ovasta.logisticsapp.presentation.nav.Home
+import com.ovasta.logisticsapp.presentation.nav.Login
 import kotlinx.coroutines.Job
 
 class HomeViewModel(
@@ -254,7 +257,7 @@ class HomeViewModel(
                 setComposeUILoading(false)
                 stopTracking()
                 settingsRepository.clearUserData()
-                emitScreenDirectionEvent(LoginScreen)
+                emitScreenDirectionEvent(ScreenDirection.Replace(Login))
             }.onFailure {
                 updateViewStateWithFail(it)
             }

@@ -65,11 +65,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
-    // Jetpack Compose Integration
-    implementation(libs.androidx.navigation.compose)
-    // Views/Fragments Integration
-    implementation(libs.androidx.navigation.fragment)
-    implementation(libs.androidx.navigation.ui)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.kotlinx.serialization.core)
 
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.androidx.ui.test.manifest)

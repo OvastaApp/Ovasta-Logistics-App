@@ -11,23 +11,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.ScreenDirectionEventHandler
 import com.ovasta.logisticsapp.base.White
 
 @Composable
 fun SplashScreen(
-    viewModel: SplashViewModel, navController: NavController
+    viewModel: SplashViewModel
 ) {
 
-    ScreenDirectionEventHandler(viewModel = viewModel, navController = navController)
+    ScreenDirectionEventHandler(
+        viewModel = viewModel
+    )
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         SplashContent()
     }
-    viewModel.navNextScreen()
-
 }
 
 @Composable

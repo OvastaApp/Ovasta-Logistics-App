@@ -1,11 +1,9 @@
 package com.ovasta.logisticsapp.base
 
 import android.content.Context
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.ovasta.logisticsapp.base.exception.ComposeUIException
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,9 +14,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-typealias NavControllerEvent = (NavController) -> Unit
 typealias ContextEvent = (Context) -> Unit
 
 open class BaseViewModel : ViewModel(), KoinComponent {
@@ -27,8 +23,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     protected val error = SingleLiveEvent<Throwable>()
     protected val loading = MutableLiveData<Boolean>()
 
-    private val _navControllerEvent = MutableSharedFlow<NavControllerEvent?>()
-    val navControllerEvent = _navControllerEvent.asSharedFlow()
 
     private val _contextEvent = MutableSharedFlow<ContextEvent?>()
     val contextEvent = _contextEvent.asSharedFlow()
@@ -42,9 +36,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private val _composeUILoadingEvent = MutableStateFlow<Boolean>(false)
     val composeUILoadingEvent = _composeUILoadingEvent.asStateFlow()
 
-    fun emitNavigationEvent(event: NavControllerEvent) {
-        viewModelScope.launch { _navControllerEvent.emit(event) }
-    }
 
     fun emitContextEvent(event: ContextEvent) {
         viewModelScope.launch { _contextEvent.emit(event) }
