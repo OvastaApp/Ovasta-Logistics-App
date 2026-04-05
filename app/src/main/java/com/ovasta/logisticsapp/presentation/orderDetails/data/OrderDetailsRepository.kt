@@ -4,11 +4,10 @@ import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import kotlinx.coroutines.flow.Flow
 
 class OrderDetailsRepository(
-    private val homeRemoteDataSource: IOrderDetailsRemoteDataSource,
+    private val taskDetailsRemoteDataSource: IOrderDetailsRemoteDataSource,
 ) : IOrderDetailsRepository {
-    override suspend fun getTaskDetails(
-        districId: Int,
+    override suspend fun listenToOrderChanges(
+        districtId: Int,
         taskId: Int
-    ): Flow<HomeTask> =
-        homeRemoteDataSource.getTaskDetails(districId, taskId)
+    ): Flow<HomeTask> = taskDetailsRemoteDataSource.listenToOrderChanges(districtId, taskId)
 }

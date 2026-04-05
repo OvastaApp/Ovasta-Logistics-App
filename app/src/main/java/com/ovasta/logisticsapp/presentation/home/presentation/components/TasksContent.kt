@@ -217,7 +217,7 @@ fun TasksContent(
                                 )
                             },
                             onClick = {
-                                onTaskItemAction(HomeItemActions.TaskClicked(task))
+                                onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
                             }
                         )
                         }

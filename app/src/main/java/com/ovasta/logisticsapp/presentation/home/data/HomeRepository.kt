@@ -13,8 +13,8 @@ class HomeRepository(
     val settingsRepository: ISettingsRepository
 ) : IHomeRepository {
     override suspend fun getAssignedTasks(
-        userId: Int, districtId: Int, userType: String
-    ) = homeRemoteDataSource.getAssignedTasks(userId, districtId, userType)
+        userId: Int, districtId: Int
+    ) = homeRemoteDataSource.getAssignedTasks(userId, districtId)
 
     override suspend fun startLocationTracking(context: Context) {
         withContext(Dispatchers.Main) {
@@ -50,7 +50,7 @@ class HomeRepository(
         with(settingsRepository.getUseData()) {
             homeRemoteDataSource.logLocation(
                 userId = this?.deliveryId ?: 0,
-                districtId = this?.districId ?: 0,
+                districtId = this?.districtId ?: 0,
                 lat,
                 long
             )

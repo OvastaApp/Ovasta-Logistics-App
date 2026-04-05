@@ -8,7 +8,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -20,11 +19,14 @@ import com.ovasta.logisticsapp.presentation.auth.splash.SplashScreen
 import com.ovasta.logisticsapp.presentation.auth.splash.SplashViewModel
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewModel
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.DropOfOrderDetailsScreen
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.TaskDetailsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 data object Splash
 data object Login
 data object Home
+data class TaskDetails(val taskId: Int)
 
 
 @Composable
@@ -54,6 +56,14 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                         is Home -> NavEntry(key) {
                             val viewModel: HomeViewModel = koinViewModel()
                             HomeScreen(viewModel)
+                        }
+
+                        is TaskDetails -> NavEntry(key) {
+                            val viewModel: TaskDetailsViewModel = koinViewModel()
+                            DropOfOrderDetailsScreen(
+                                viewModel = viewModel,
+                                taskId = key.taskId,
+                            )
                         }
 
                         else -> NavEntry(Unit) { Text("Unknown route") }

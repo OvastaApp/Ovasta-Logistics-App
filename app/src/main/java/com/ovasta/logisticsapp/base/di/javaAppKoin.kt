@@ -6,6 +6,7 @@ import com.ovasta.logisticsapp.data.setting.di.settingModule
 import com.ovasta.logisticsapp.presentation.auth.login.di.loginModule
 import com.ovasta.logisticsapp.presentation.auth.splash.di.splashModule
 import com.ovasta.logisticsapp.presentation.home.di.homeModule
+import com.ovasta.logisticsapp.presentation.orderDetails.di.taskDetailsModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
@@ -25,6 +26,7 @@ fun startKoin(application: Application) {
                 splashModule,
                 loginModule,
                 homeModule,
+                taskDetailsModule
 //                cartModule,
 //                invoiceModule,
 //                historyModule

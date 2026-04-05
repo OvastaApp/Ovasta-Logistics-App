@@ -4,5 +4,8 @@ import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import kotlinx.coroutines.flow.Flow
 
 interface IOrderDetailsRepository {
-    suspend fun getTaskDetails(districId: Int, taskId: Int): Flow<HomeTask>
+    suspend fun listenToOrderChanges(
+        districtId: Int,
+        taskId: Int
+    ): Flow<HomeTask>
 }

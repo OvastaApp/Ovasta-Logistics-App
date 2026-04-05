@@ -4,12 +4,12 @@ import com.ovasta.logisticsapp.presentation.orderDetails.data.IOrderDetailsRemot
 import com.ovasta.logisticsapp.presentation.orderDetails.data.IOrderDetailsRepository
 import com.ovasta.logisticsapp.presentation.orderDetails.data.OrderDetailsRemoteDataSource
 import com.ovasta.logisticsapp.presentation.orderDetails.data.OrderDetailsRepository
-import com.ovasta.logisticsapp.presentation.orderDetails.presentation.OrderDetailsViewModel
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.TaskDetailsViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-val homeModule = module {
-    single<IOrderDetailsRemoteDataSource> { OrderDetailsRemoteDataSource() }
+val taskDetailsModule = module {
+    single<IOrderDetailsRemoteDataSource> { OrderDetailsRemoteDataSource(get()) }
     single<IOrderDetailsRepository> { OrderDetailsRepository(get()) }
-    viewModel { OrderDetailsViewModel(get(), get()) }
+    viewModel { TaskDetailsViewModel(get(), get()) }
 }

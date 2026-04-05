@@ -23,34 +23,33 @@ class HomeRemoteDataSource(
 ) : IHomeRemoteDataSource {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getAssignedTasks(
-        userId: Int, districId: Int, userType: String
-    ): Flow<List<HomeTask>> = callbackFlow {
-        val listenerRegistration =
-            db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districId.toString())
-                .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
-                .document(userId.toString())
-                .collection(FIRESTORE_ROOT_ORDERS_NAME).addSnapshotListener { value, error ->
-                    if (error != null) {
-                        Log.e("assignedOrders", "Error fetching orders", error)
-                        close(error)
-                        return@addSnapshotListener
+    override suspend fun getAssignedTasks(userId: Int, districtId: Int): Flow<List<HomeTask>> =
+        callbackFlow {
+            val listenerRegistration =
+                db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
+                    .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
+                    .document(userId.toString())
+                    .collection(FIRESTORE_ROOT_ORDERS_NAME).addSnapshotListener { value, error ->
+                        if (error != null) {
+                            Log.e("assignedOrders", "Error fetching orders", error)
+                            close(error)
+                            return@addSnapshotListener
+                        }
+
+                        val orderIds = value?.documents?.map { it.id } ?: emptyList()
+                        Log.d("assignedOrderIds", "$orderIds")
+                        trySend(orderIds)
                     }
 
-                    val orderIds = value?.documents?.map { it.id } ?: emptyList()
-                    Log.d("assignedOrderIds", "$orderIds")
-                    trySend(orderIds)
-                }
-
-        awaitClose { listenerRegistration.remove() }
-    }.flatMapLatest { orderIds ->
-        listenToOrdersChanges(orderIds, districId)
-    }
+            awaitClose { listenerRegistration.remove() }
+        }.flatMapLatest { orderIds ->
+            listenToOrdersChanges(orderIds, districtId)
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenToOrdersChanges(
         orderIds: List<String>,
-        districId: Int
+        districtId: Int
     ): Flow<List<HomeTask>> = callbackFlow {
 
         if (orderIds.isEmpty()) {
@@ -60,7 +59,7 @@ class HomeRemoteDataSource(
         }
 
         val ordersCollection =
-            db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districId.toString())
+            db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
                 .collection(FIRESTORE_ROOT_ORDERS_NAME)
 
 

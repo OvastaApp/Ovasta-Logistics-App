@@ -6,7 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
+import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.openWhatsApp
@@ -18,10 +21,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
-fun HomeScreen(
-    viewModel: HomeViewModel,
-) {
+fun HomeScreen(viewModel: HomeViewModel) {
     val context = LocalContext.current
+    val navigator = LocalNavigator.current
     val viewState by viewModel.viewState.collectAsState()
     val searchKey by viewModel.searchKey.collectAsState()
     val currency by viewModel.currency.collectAsState()
@@ -35,6 +37,7 @@ fun HomeScreen(
                 .collectLatest { event ->
                     when (event) {
                         is HomeItemActions.ShowTaskDetails -> {
+                            viewModel.onTaskItemAction(HomeItemActions.TaskClicked(event.taskId))
                         }
 
                         is HomeItemActions.OpenDirection -> {

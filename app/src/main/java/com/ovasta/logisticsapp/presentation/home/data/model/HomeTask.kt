@@ -60,7 +60,7 @@ data class HomeTask(
 
     @get:PropertyName("products")
     @PropertyName("products")
-    var products: List<FirebaseProduct> = emptyList(), // Added default value
+    var products: List<FirebaseProduct> = emptyList(),
 
     @get:PropertyName("updated_at")
     @PropertyName("updated_at")

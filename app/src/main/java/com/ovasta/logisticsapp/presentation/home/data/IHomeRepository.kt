@@ -10,8 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface IHomeRepository {
     suspend fun getAssignedTasks(
         userId: Int,
-        districtId: Int,
-        userType: String
+        districtId: Int
     ): Flow<List<HomeTask>>
 
     /**

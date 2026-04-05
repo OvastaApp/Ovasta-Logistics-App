@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 class User(
     @SerializedName("id") val id: Int,
     @SerializedName("delivery_id") val deliveryId: Int,
-    @SerializedName("district_id") val districId: Int,
+    @SerializedName("district_id") val districtId: Int,
     @SerializedName("name") val name: String?,
     @SerializedName("mobile") val mobile: String?,
     @SerializedName("email") var email: String?,

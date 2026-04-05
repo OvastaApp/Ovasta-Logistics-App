@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
-import com.ovasta.logisticsapp.data.User
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
@@ -18,10 +17,10 @@ import kotlinx.coroutines.launch
 import android.content.Context
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
-import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.nav.Home
 import com.ovasta.logisticsapp.presentation.nav.Login
+import com.ovasta.logisticsapp.presentation.nav.TaskDetails
 import kotlinx.coroutines.Job
 
 class HomeViewModel(
@@ -35,41 +34,20 @@ class HomeViewModel(
     private var assignedTasksJob: Job? = null
 
     fun getAssignedTasks() {
-        // Cancel any previous collection to avoid duplicate listeners
         assignedTasksJob?.cancel()
         assignedTasksJob = viewModelScope.launch {
             setComposeUILoading(true)
             try {
-                homeRepository.getAssignedTasks(
-                    userId = 1, districtId = 1,
-                    "drivers"
-                ).collect { tasks ->
-                    Log.d("assignedTasksVM", "$tasks")
-
-                    // Dismiss loading on the first (and every subsequent) emission
+                homeRepository.getAssignedTasks(userId = 1, districtId = 1).collect { tasks ->
                     setComposeUILoading(false)
-
-                    val previousTasks = _viewState.value.tasks
-
                     _viewState.update { it.copy(tasks = tasks, filteredTasks = tasks) }
-
-                    // Vibrate only if there are new orders
-                    // if (tasks.size > previousTasks.size) {
-                    //     orderVibrator.vibrateNewOrder()
-                    // }
                 }
             } catch (ex: Exception) {
-                // CancellationException is expected when the job is cancelled (e.g. refresh/rotation)
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
                 setComposeUILoading(false)
                 updateViewStateWithFail(ex)
             }
         }
-    }
-
-
-    suspend fun getUserData(): User? {
-        return settingsRepository.getUseData()
     }
 
     private val _searchKey = MutableStateFlow<String?>(null)
@@ -162,7 +140,9 @@ class HomeViewModel(
                 }
             }
 
-            is HomeItemActions.TaskClicked -> taskClicked(taskItemAction.homeTask)
+            is HomeItemActions.TaskClicked -> {
+                emitScreenDirectionEvent(ScreenDirection.Push(TaskDetails(taskId = taskItemAction.taskId)))
+            }
 
             is HomeItemActions.DismissContactBottomSheet -> {
                 _showContactSheet.value = null

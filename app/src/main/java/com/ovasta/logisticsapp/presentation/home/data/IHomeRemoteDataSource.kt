@@ -9,8 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface IHomeRemoteDataSource {
     suspend fun getAssignedTasks(
         userId: Int,
-        districtId: Int,
-        userType: String
+        districtId: Int
     ): Flow<List<HomeTask>>
 
     suspend fun logLocation(

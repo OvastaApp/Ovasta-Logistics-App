@@ -36,14 +36,27 @@ object SessionPreferencesSerializer : Serializer<SessionPreferences> {
     }
 
     override suspend fun readFrom(input: InputStream): SessionPreferences {
-        val encryptedBytes = withContext(Dispatchers.IO) {
-            input.use { it.readBytes() }
+        return try {
+            val encryptedBytes = withContext(Dispatchers.IO) {
+                input.use { it.readBytes() }
+            }
+            if (encryptedBytes.isEmpty()) return defaultValue
+
+            val jsonString = try {
+                val decoded = Base64.decode(encryptedBytes, Base64.NO_WRAP)
+                val decrypted = Crypto.decrypt(decoded)
+                decrypted.decodeToString()
+            } catch (e: Exception) {
+                encryptedBytes.decodeToString()
+            }
+
+            json.decodeFromString(jsonString)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            defaultValue
         }
-        val encryptedBytesDecoded =
-            Base64.decode(encryptedBytes, Base64.DEFAULT)
-        val decryptedBytes = Crypto.decrypt(encryptedBytesDecoded)
-        val decodedJsonString = decryptedBytes.decodeToString()
-        return json.decodeFromString(decodedJsonString)
     }
 
     override suspend fun writeTo(
