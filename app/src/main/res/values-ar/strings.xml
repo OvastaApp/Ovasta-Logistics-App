@@ -163,4 +163,22 @@
     <string name="orders_progress">تقدّم الطلبات</string>
     <string name="orders_progress_count">%1$d / %2$d طلب</string>
     <string name="target_end_date">ينتهي الهدف: %s</string>
+
+    <!-- Order Details Screen -->
+    <string name="client_information">معلومات العميل</string>
+    <string name="client_name">اسم العميل</string>
+    <string name="client_phone">هاتف العميل</string>
+    <string name="products_summary">ملخص المنتجات</string>
+    <string name="total_products">إجمالي المنتجات</string>
+    <string name="collected_products">المُجمّع</string>
+    <string name="remaining_products">المتبقي</string>
+    <string name="products_list">قائمة المنتجات</string>
+    <string name="product_name">اسم المنتج</string>
+    <string name="quantity">الكمية</string>
+    <string name="price">السعر</string>
+    <string name="source">المصدر</string>
+    <string name="no_products_available">لا توجد منتجات</string>
+    <string name="product_quantity">الكمية: %d</string>
+    <string name="product_price_format">%.2f ج.م</string>
+    <string name="source_label">المصدر: %s</string>
 </resources>

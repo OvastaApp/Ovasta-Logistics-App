@@ -98,9 +98,13 @@ data class FirebaseProduct(
     @PropertyName("source")
     val source: String? = null,
 
+    @get:PropertyName("image_url")
+    @PropertyName("source")
+    val imageUrl: String? = null,
+
     @get:PropertyName("total_price")
     @PropertyName("total_price")
-    val totalPrice: Int? = null,
+    val totalPrice: Double? = null,
     @get:PropertyName("updated_at")
     @PropertyName("updated_at")
     val updatedAt: Timestamp? = null

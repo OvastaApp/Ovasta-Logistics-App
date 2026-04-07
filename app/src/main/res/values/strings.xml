@@ -164,4 +164,22 @@
     <string name="orders_progress">Orders Progress</string>
     <string name="orders_progress_count">%1$d / %2$d orders</string>
     <string name="target_end_date">Target ends: %s</string>
+
+    <!-- Order Details Screen -->
+    <string name="client_information">Client Information</string>
+    <string name="client_name">Client Name</string>
+    <string name="client_phone">Client Phone</string>
+    <string name="products_summary">Products Summary</string>
+    <string name="total_products">Total Products</string>
+    <string name="collected_products">Collected</string>
+    <string name="remaining_products">Remaining</string>
+    <string name="products_list">Products List</string>
+    <string name="product_name">Product Name</string>
+    <string name="quantity">Quantity</string>
+    <string name="price">Price</string>
+    <string name="source">Source</string>
+    <string name="no_products_available">No products available</string>
+    <string name="product_quantity">Qty: %d</string>
+    <string name="product_price_format">%.2f EGP</string>
+    <string name="source_label">Source: %s</string>
 </resources>
