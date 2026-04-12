@@ -15,6 +15,6 @@ interface HomeApi {
     @GET("get-partner-status")
     suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
 
-    @GET("partner/statistics")
+    @GET("partner-statistics")
     suspend fun getPartnerStatistics(): ApiResponse<PartnerStatistics>
 }

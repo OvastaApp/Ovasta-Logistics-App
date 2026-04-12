@@ -160,18 +160,18 @@ fun TasksContent(
                     }
 
                     // Search bar
-                    item(key = "search") {
-                        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-                        SearchWithFilterBar(
-                            searchKey = searchKey,
-                            onSearchKeyChange = {
-                                onTasksScreenAction(
-                                    HomeScreenActions.OnSearchKeyChange(it)
-                                )
-                            },
-                            onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
-                        )
-                    }
+//                    item(key = "search") {
+//                        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+//                        SearchWithFilterBar(
+//                            searchKey = searchKey,
+//                            onSearchKeyChange = {
+//                                onTasksScreenAction(
+//                                    HomeScreenActions.OnSearchKeyChange(it)
+//                                )
+//                            },
+//                            onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
+//                        )
+//                    }
 
                     // Tasks list
                     if (tasks.isEmpty()) {
@@ -183,10 +183,10 @@ fun TasksContent(
                                     .testTag("emptyState"),
                                 contentAlignment = Alignment.TopCenter
                             ) {
-                                Text(
-                                    text = stringResource(R.string.no_tasks_available),
-                                    style = mdRegular.copy(color = Gray500)
-                                )
+//                                Text(
+//                                    text = stringResource(R.string.no_tasks_available),
+//                                    style = mdRegular.copy(color = Gray500)
+//                                )
                             }
                         }
                     } else {

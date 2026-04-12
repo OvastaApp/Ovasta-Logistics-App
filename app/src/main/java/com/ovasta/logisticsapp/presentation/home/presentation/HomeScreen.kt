@@ -31,7 +31,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
         viewModel = viewModel
     ) {
         LaunchedEffect(Unit) {
-            viewModel.getAssignedTasks()
+//            viewModel.getAssignedTasks()
             viewModel.taskItemActions
                 .filterNotNull()
                 .collectLatest { event ->

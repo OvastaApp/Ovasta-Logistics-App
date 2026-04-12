@@ -285,20 +285,20 @@ class HomeViewModel(
                 setComposeUILoading(false)
                 updateUiState(viewState.value.copy(partnerStatistics = response.data))
             }.onFailure {
-//                setComposeUILoading(false)
-//                emitComposeUIExceptionEvent(it.toComposeUIException())
+                setComposeUILoading(false)
+                emitComposeUIExceptionEvent(it.toComposeUIException())
 
-                updateUiState(
-                    viewState.value.copy(
-                        partnerStatistics = PartnerStatistics(
-                            300.0,
-                            1500.0,
-                            7,
-                            50,
-                            "2024-12-31"
-                        )
-                    )
-                )
+//                updateUiState(
+//                    viewState.value.copy(
+//                        partnerStatistics = PartnerStatistics(
+//                            2300.0,
+//                            1500.0,
+//                            7,
+//                            50,
+//                            "2024-12-31"
+//                        )
+//                    )
+//                )
             }
         }
     }
