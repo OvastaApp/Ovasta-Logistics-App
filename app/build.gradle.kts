@@ -9,6 +9,8 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.gms.google.service)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.firebase.crashlytics)
+
 }
 
 
@@ -122,6 +124,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.coil.compose)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.auth)

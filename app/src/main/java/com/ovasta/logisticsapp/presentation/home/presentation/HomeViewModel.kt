@@ -82,7 +82,9 @@ class HomeViewModel(
             HomeScreenActions.LoadTasks -> {}
             HomeScreenActions.OnSearchTriggered -> {}
             HomeScreenActions.RefreshTasks -> {
-                getAssignedTasks()
+//                getAssignedTasks()
+                getPartnerStatistics()
+                getPartnerStatus()
             }
 
             HomeScreenActions.ToggleTracking -> {

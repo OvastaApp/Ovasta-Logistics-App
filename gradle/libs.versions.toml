@@ -34,6 +34,7 @@ constraintlayout-compose = "1.1.1"
 sdp = "1.1.1"
 ssp = "1.1.1"
 googleServices = "4.4.3"
+firebaseCrashlytics = "3.0.7"
 playServicesLocation = "21.2.0"
 nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.11.0-alpha03"
@@ -54,6 +55,8 @@ coil-kt-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
@@ -106,4 +109,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 gms-google-service = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
-
+firebase-crashlytics ={id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
