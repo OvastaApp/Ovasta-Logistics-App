@@ -48,11 +48,13 @@ import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Primary
-import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import androidx.compose.ui.text.font.FontWeight
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
+import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
@@ -107,7 +109,7 @@ fun PartnerStatisticsSection(
                         // Collapsed summary - show net profit (profit - withdrawals)
                         if (!isExpanded) {
                             val netProfit = (statistics.deliveryProfitSum ?: 0.0) - (statistics.withdrawTransactionsSum ?: 0.0)
-                            val netColor = if (netProfit >= 0) Color(0xFF4CAF50) else Color(0xFFE57373)
+                            val netColor = if (netProfit >= 0.0) Color(0xFF4CAF50) else Color(0xFFE57373)
                             Text(
                                 text = String.format(
                                     stringResource(R.string.price_currency),
@@ -179,14 +181,10 @@ fun PartnerStatisticsSection(
                         )
                     }
 
-                    // Orders progress card - only show when target is set
-                    val targetCount = statistics.targetOrdersCount ?: 0
-                    if (targetCount > 0) {
-                        OrdersProgressCard(
-                            ordersCount = statistics.ordersCount ?: 0,
-                            targetOrdersCount = targetCount,
-                            targetEndDate = statistics.targetEndDate
-                        )
+                    // Incentives progress card - show milestones from incentives
+                    val incentives = statistics.incentives
+                    if (incentives != null && incentives.milestones.isNotEmpty()) {
+                        IncentivesProgressCard(incentives = incentives)
                     }
                 }
             }
@@ -248,30 +246,10 @@ private fun StatCard(
 }
 
 @Composable
-private fun OrdersProgressCard(
-    ordersCount: Int,
-    targetOrdersCount: Int,
-    targetEndDate: String?
+private fun IncentivesProgressCard(
+    incentives: Incentives
 ) {
-    val progress = if (targetOrdersCount > 0) {
-        (ordersCount.toFloat() / targetOrdersCount.toFloat()).coerceIn(0f, 1f)
-    } else {
-        0f
-    }
-
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 800),
-        label = "progressAnimation"
-    )
-
-    val progressColor = when {
-        progress >= 1.0f -> Color(0xFF2E7D32)   // Dark green - target achieved
-        progress >= 0.75f -> Color(0xFF4CAF50)   // Green - almost there
-        progress >= 0.50f -> Color(0xFFFFA726)   // Orange - halfway
-        progress >= 0.25f -> Color(0xFFFF7043)   // Deep orange - still early
-        else -> Color(0xFFEF5350)                // Red - just started
-    }
+    val completedOrders = incentives.completedOrders ?: 0
 
     Card(
         shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
@@ -285,8 +263,9 @@ private fun OrdersProgressCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
         ) {
+            // Header row with icon and title
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -300,67 +279,257 @@ private fun OrdersProgressCard(
                         painter = painterResource(R.drawable.ic_delivery_truck),
                         contentDescription = null,
                         tint = Primary,
-                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
+                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
                     )
                     Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                     Text(
-                        text = stringResource(R.string.orders_progress),
-                        style = mdMedium.copy(color = Gray800),
+                        text = if (!incentives.month.isNullOrBlank()) {
+                            stringResource(R.string.incentives) + " (" + formatMonthDisplay(incentives.month!!) + ")"
+                        } else {
+                            stringResource(R.string.incentives)
+                        },
+                        style = smNormal.copy(color = Gray800, fontWeight = FontWeight.SemiBold),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                // Show completed orders count
                 Text(
                     text = String.format(
                         Locale.ENGLISH,
-                        stringResource(R.string.orders_progress_count),
-                        ordersCount,
-                        targetOrdersCount
-                    ),
-                    style = smNormal.copy(color = progressColor),
+                        "%,d",
+                        completedOrders
+                    ) + " " + stringResource(R.string.orders),
+                    style = xsMedium.copy(color = Primary, fontWeight = FontWeight.SemiBold),
                     maxLines = 1
                 )
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
 
-            // Progress bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
-                    .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
-                    .background(progressColor.copy(alpha = 0.15f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(fraction = animatedProgress)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
-                        .background(progressColor)
-                )
+            // Current bonus info
+            val bonusPercentage = incentives.currentBonusPercentage ?: 0.0
+            val bonusAmount = incentives.currentBonusAmount ?: 0.0
+            if (bonusPercentage > 0.0 || bonusAmount > 0.0) {
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.current_bonus),
+                        style = xsMedium.copy(color = Gray500),
+                        maxLines = 1
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (bonusPercentage > 0.0) {
+                            Text(
+                                text = String.format(Locale.ENGLISH, stringResource(R.string.bonus_percentage), bonusPercentage.toInt()),
+                                style = xsMedium.copy(color = Color(0xFF4CAF50), fontWeight = FontWeight.SemiBold),
+                                maxLines = 1
+                            )
+                        }
+                        if (bonusPercentage > 0.0 && bonusAmount > 0.0) {
+                            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                            Text(
+                                text = "•",
+                                style = xsMedium.copy(color = Gray500)
+                            )
+                            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                        }
+                        if (bonusAmount > 0.0) {
+                            Text(
+                                text = String.format(
+                                    stringResource(R.string.price_currency),
+                                    formatAmount(bonusAmount)
+                                ),
+                                style = xsMedium.copy(color = Color(0xFF4CAF50), fontWeight = FontWeight.SemiBold),
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
             }
 
-            if (!targetEndDate.isNullOrBlank()) {
+            // Milestones list - each with its own progress
+            if (incentives.milestones.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._6sdp))
+                ) {
+                    incentives.milestones.forEach { milestone ->
+                        MilestoneRow(
+                            milestone = milestone,
+                            completedOrders = completedOrders
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MilestoneRow(
+    milestone: Milestones,
+    completedOrders: Int
+) {
+    val isAchieved = milestone.isAchieved == true
+    val targetOrders = milestone.targetOrders ?: 0
+    val bonusPercentage = milestone.bonusPercentage ?: 0.0
+    val remaining = milestone.remainingOrders ?: 0
+    val bonusAmount = milestone.bonusAmount ?: 0.0
+
+    val progress = if (targetOrders > 0) {
+        (completedOrders.toFloat() / targetOrders.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 600),
+        label = "milestoneProgress"
+    )
+
+    val progressColor = when {
+        isAchieved -> Color(0xFF2E7D32)
+        progress >= 0.75f -> Color(0xFF4CAF50)
+        progress >= 0.50f -> Color(0xFFFFA726)
+        progress >= 0.25f -> Color(0xFFFF7043)
+        else -> Color(0xFFEF5350)
+    }
+
+    val bgColor = if (isAchieved) Color(0xFFF0F9F0) else Color(0xFFF5F5F5)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            .background(bgColor)
+            .padding(
+                horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
+                vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+            )
+    ) {
+        // Top row: target info and status
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Target orders and bonus percentage
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    text = stringResource(R.string.target_end_date, targetEndDate),
-                    style = xsMedium.copy(color = Gray500),
+                    text = String.format(
+                        Locale.ENGLISH,
+                        stringResource(R.string.milestone_target),
+                        targetOrders,
+                        bonusPercentage.toInt()
+                    ),
+                    style = xsMedium.copy(
+                        color = if (isAchieved) Color(0xFF2E7D32) else Gray800,
+                        fontWeight = if (isAchieved) FontWeight.SemiBold else FontWeight.Normal
+                    ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            // Status badge
+            Text(
+                text = if (isAchieved) {
+                    stringResource(R.string.achieved)
+                } else {
+                    String.format(Locale.ENGLISH, stringResource(R.string.remaining_orders), remaining)
+                },
+                style = xsMedium.copy(
+                    color = progressColor,
+                    fontWeight = if (isAchieved) FontWeight.SemiBold else FontWeight.Normal
+                ),
+                maxLines = 1
+            )
+        }
+
+        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+
+        // Progress bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._2sdp)))
+                .background(progressColor.copy(alpha = 0.15f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = animatedProgress)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._2sdp)))
+                    .background(progressColor)
+            )
+        }
+
+        // Bottom row: progress count and bonus amount
+        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._3sdp)))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = String.format(
+                    Locale.ENGLISH,
+                    stringResource(R.string.orders_progress_count),
+                    completedOrders.coerceAtMost(targetOrders),
+                    targetOrders
+                ),
+                style = xsMedium.copy(
+                    color = progressColor,
+                    fontWeight = FontWeight.Normal
+                ),
+                maxLines = 1
+            )
+            if (bonusAmount > 0.0) {
+                Text(
+                    text = String.format(
+                        stringResource(R.string.milestone_bonus),
+                        String.format(
+                            stringResource(R.string.price_currency),
+                            formatAmount(bonusAmount)
+                        )
+                    ),
+                    style = xsMedium.copy(
+                        color = if (isAchieved) Color(0xFF2E7D32) else Color(0xFFFFA726),
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    maxLines = 1
                 )
             }
         }
     }
 }
 
+private fun formatMonthDisplay(monthString: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM", Locale.ENGLISH)
+        val outputFormat = SimpleDateFormat("MMMM yyyy", Locale("ar"))
+        val date = inputFormat.parse(monthString) ?: return monthString
+        outputFormat.format(date)
+    } catch (_: Exception) {
+        monthString
+    }
+}
+
 private fun formatAmount(value: Double?): String {
     if (value == null) return "0"
     return if (value == value.toLong().toDouble()) {
-        value.toLong().toString()
+        String.format(Locale.ENGLISH, "%,d", value.toLong())
     } else {
-        String.format(Locale.US, "%.2f", value)
+        String.format(Locale.ENGLISH, "%,.2f", value)
     }
 }
 
@@ -372,8 +541,43 @@ fun PartnerStatisticsSectionPreview() {
             withdrawTransactionsSum = 1500.0,
             deliveryProfitSum = 750.0,
             ordersCount = 45,
-            targetOrdersCount = 100,
-            targetEndDate = "2024-12-31"
+            incentives = Incentives(
+                month = "2026-04",
+                completedOrders = 45,
+                totalDeliveryValue = 5000.0,
+                highestAchievedMilestone = "silver",
+                currentBonusPercentage = 5.0,
+                currentBonusAmount = 250.0,
+                milestones = arrayListOf(
+                    Milestones(
+                        targetOrders = 30,
+                        bonusPercentage = 3.0,
+                        realPercentage = 3.0,
+                        isAchieved = true,
+                        remainingOrders = 0,
+                        progressPercentage = 100.0,
+                        bonusAmount = 150.0
+                    ),
+                    Milestones(
+                        targetOrders = 50,
+                        bonusPercentage = 5.0,
+                        realPercentage = 5.0,
+                        isAchieved = false,
+                        remainingOrders = 5,
+                        progressPercentage = 90.0,
+                        bonusAmount = 350.0
+                    ),
+                    Milestones(
+                        targetOrders = 100,
+                        bonusPercentage = 10.0,
+                        realPercentage = 10.0,
+                        isAchieved = false,
+                        remainingOrders = 55,
+                        progressPercentage = 45.0,
+                        bonusAmount = 800.0
+                    )
+                )
+            )
         )
     )
 }

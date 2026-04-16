@@ -163,6 +163,16 @@
     <string name="orders_progress">تقدّم الطلبات</string>
     <string name="orders_progress_count">%1$d / %2$d طلب</string>
     <string name="target_end_date">ينتهي الهدف: %s</string>
+    <string name="incentives">الحوافز</string>
+    <string name="incentives_month">الشهر: %s</string>
+    <string name="current_bonus">المكافأة الحالية</string>
+    <string name="bonus_percentage">%d%%</string>
+    <string name="bonus_amount_format">مكافأة: %s</string>
+    <string name="milestone_target">%1$d طلب → %2$d%%</string>
+    <string name="remaining_orders">%d متبقي</string>
+    <string name="milestone_bonus">المكافأة: %s</string>
+    <string name="achieved">تم ✓</string>
+    <string name="completed_orders_count">%1$d مكتمل</string>
 
     <!-- Order Details Screen -->
     <string name="client_information">معلومات العميل</string>

@@ -6,14 +6,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.openWhatsApp
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
+import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
@@ -128,10 +128,36 @@ fun TasksContentPreview() {
         startedTaskId = -1,
         partnerStatistics = PartnerStatistics(
             withdrawTransactionsSum = 1500.0,
-            deliveryProfitSum = 3200.50,
+            deliveryProfitSum = 3200.0,
             ordersCount = 25,
-            targetOrdersCount = 40,
-            targetEndDate = "2026-04-15"
+            incentives = Incentives(
+                month = "2026-04",
+                completedOrders = 25,
+                totalDeliveryValue = 3200.0,
+                highestAchievedMilestone = "bronze",
+                currentBonusPercentage = 3.0,
+                currentBonusAmount = 96.0,
+                milestones = arrayListOf(
+                    Milestones(
+                        targetOrders = 20,
+                        bonusPercentage = 3.0,
+                        realPercentage = 3.0,
+                        isAchieved = true,
+                        remainingOrders = 0,
+                        progressPercentage = 100.0,
+                        bonusAmount = 96.0
+                    ),
+                    Milestones(
+                        targetOrders = 40,
+                        bonusPercentage = 5.0,
+                        realPercentage = 5.0,
+                        isAchieved = false,
+                        remainingOrders = 15,
+                        progressPercentage = 62.5,
+                        bonusAmount = 0.0
+                    )
+                )
+            )
         ),
         onTasksScreenAction = {},
         onTaskItemAction = {}

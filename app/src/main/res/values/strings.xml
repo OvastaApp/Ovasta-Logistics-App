@@ -164,6 +164,16 @@
     <string name="orders_progress">Orders Progress</string>
     <string name="orders_progress_count">%1$d / %2$d orders</string>
     <string name="target_end_date">Target ends: %s</string>
+    <string name="incentives">Incentives</string>
+    <string name="incentives_month">Month: %s</string>
+    <string name="current_bonus">Current Bonus</string>
+    <string name="bonus_percentage">%d%%</string>
+    <string name="bonus_amount_format">Bonus: %s</string>
+    <string name="milestone_target">%1$d orders → %2$d%%</string>
+    <string name="remaining_orders">%d remaining</string>
+    <string name="milestone_bonus">Reward: %s</string>
+    <string name="achieved">Achieved ✓</string>
+    <string name="completed_orders_count">%1$d completed</string>
 
     <!-- Order Details Screen -->
     <string name="client_information">Client Information</string>

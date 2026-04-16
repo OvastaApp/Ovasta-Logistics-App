@@ -192,34 +192,34 @@ fun TasksContent(
                     } else {
 
                         itemsIndexed(tasks, key = { _, task -> task.taskId }) { _, task ->
-                        TaskCard(
-                            homeTask = task,
-                            currency = currency,
-                            startedTaskId = startedTaskId,
-                            onTaskDetailsClick = { taskId, retailerId ->
-                                onTaskItemAction(
-                                    HomeItemActions.ShowTaskDetails(taskId, retailerId)
-                                )
-                            },
-                            onDirectionClick = { lat, long ->
-                                onTaskItemAction(
-                                    HomeItemActions.OpenDirection(lat, long)
-                                )
-                            },
-                            onContactClick = { phone ->
-                                onTaskItemAction(
-                                    HomeItemActions.CallRetailer(phone)
-                                )
-                            },
-                            onWhatsAppClick = { phone ->
-                                onTaskItemAction(
-                                    HomeItemActions.WhatsAppRetailer(phone)
-                                )
-                            },
-                            onClick = {
-                                onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
-                            }
-                        )
+                            TaskCard(
+                                homeTask = task,
+                                currency = currency,
+                                startedTaskId = startedTaskId,
+                                onTaskDetailsClick = { taskId, retailerId ->
+                                    onTaskItemAction(
+                                        HomeItemActions.ShowTaskDetails(taskId, retailerId)
+                                    )
+                                },
+                                onDirectionClick = { lat, long ->
+                                    onTaskItemAction(
+                                        HomeItemActions.OpenDirection(lat, long)
+                                    )
+                                },
+                                onContactClick = { phone ->
+                                    onTaskItemAction(
+                                        HomeItemActions.CallRetailer(phone)
+                                    )
+                                },
+                                onWhatsAppClick = { phone ->
+                                    onTaskItemAction(
+                                        HomeItemActions.WhatsAppRetailer(phone)
+                                    )
+                                },
+                                onClick = {
+                                    onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
+                                }
+                            )
                         }
                     }
 
@@ -251,19 +251,19 @@ fun TasksContent(
 @Preview
 @Composable
 fun TasksContentPreview() {
-        TasksContent(
-            viewState = HomeViewState(
-                filteredTasks = listOf(),
-                isTracking = false,
-                showToastMessage = null
-            ),
-            searchKey = "",
-            currency = "$",
-            startedTaskId = -1,
-            partnerStatistics = PartnerStatistics(
-            12.3, 450.0, 67, 89
-            ),
-            onTasksScreenAction = {},
-            onTaskItemAction = {}
-        )
+    TasksContent(
+        viewState = HomeViewState(
+            filteredTasks = listOf(),
+            isTracking = false,
+            showToastMessage = null
+        ),
+        searchKey = "",
+        currency = "$",
+        startedTaskId = -1,
+        partnerStatistics = PartnerStatistics(
+            12.3, 450.0, 67,
+        ),
+        onTasksScreenAction = {},
+        onTaskItemAction = {}
+    )
 }
