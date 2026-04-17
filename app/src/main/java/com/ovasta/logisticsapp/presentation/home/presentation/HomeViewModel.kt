@@ -254,8 +254,14 @@ class HomeViewModel(
             }.onSuccess { profileConfig ->
                 setComposeUILoading(false)
                 val isOnline = profileConfig.data.isOnline ?: false
-                updateUiState(_viewState.value.copy(isTracking = isOnline))
-                toggleTracking(shouldBeTracking = isOnline)
+                if (isOnline && !isLocationEnabled()) {
+                    // Backend says online but location is off — don't start tracking, set offline
+                    updateUiState(_viewState.value.copy(isTracking = false))
+                    changePartnerStatus(false)
+                } else {
+                    updateUiState(_viewState.value.copy(isTracking = isOnline))
+                    toggleTracking(shouldBeTracking = isOnline)
+                }
             }.onFailure {
                 setComposeUILoading(false)
                 emitComposeUIExceptionEvent(it.toComposeUIException())
@@ -264,6 +270,10 @@ class HomeViewModel(
     }
 
     private fun changePartnerStatus(isOnline: Boolean) {
+        if (isOnline && !isLocationEnabled()) {
+            updateUiState(_viewState.value.copy(showToastMessage = R.string.enable_location_to_go_online))
+            return
+        }
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
@@ -309,6 +319,12 @@ class HomeViewModel(
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)
         emitComposeUIExceptionEvent(throwable.toComposeUIException())
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
     }
 
     fun updateUiState(homeViewState: HomeViewState) {

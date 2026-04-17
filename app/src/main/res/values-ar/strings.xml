@@ -123,6 +123,7 @@
     <string name="no_address">لا يوجد عنوان</string>
     <string name="phone_number_not_available">رقم الهاتف غير متاح</string>
     <string name="location_not_available">الموقع غير متاح</string>
+    <string name="enable_location_to_go_online">يرجي تفعيل تتبع الموقع</string>
     <string name="tasks">المهام</string>
     <string name="phone_number_copied">تم نسخ رقم الهاتف</string>
     <string name="whatsapp_is_not_installed_on_the_device">واتساب غير مثبت على الجهاز</string>

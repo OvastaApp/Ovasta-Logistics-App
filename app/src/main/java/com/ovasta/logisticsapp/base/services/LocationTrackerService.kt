@@ -48,6 +48,15 @@ class LocationTrackerService() : Service(), KoinComponent {
     }
 
     private fun start() {
+        // Don't start tracking if location services are disabled
+        val androidLocationManager = getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        if (!androidLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) &&
+            !androidLocationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)) {
+            Log.w("LocationTracker", "Location services disabled, stopping service")
+            stop()
+            return
+        }
+
         // Cancel any existing tracking job to prevent duplicate collections
         trackingJob?.cancel()
 
