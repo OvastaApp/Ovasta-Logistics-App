@@ -159,6 +159,7 @@
     <string name="tracking_inactive">Tracking is off</string>
     <string name="logout_message">Are you sure you want to log out of your account?</string>
     <string name="total_withdrawals">Total Withdrawals</string>
+    <string name="achieved_bonus">Achieved Bonus</string>
     <string name="delivery_profit">Delivery Profit</string>
     <string name="statistics">Statistics</string>
     <string name="orders_progress">Orders Progress</string>

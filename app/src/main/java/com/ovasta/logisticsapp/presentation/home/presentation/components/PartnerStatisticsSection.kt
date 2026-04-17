@@ -179,6 +179,19 @@ fun PartnerStatisticsSection(
                             containerColor = Color(0xFFFFF8F0),
                             borderColor = Color(0xFFFFE0B2)
                         )
+
+                        StatCard(
+                            modifier = Modifier.weight(1f),
+                            icon = R.drawable.ic_price,
+                            iconTint = Color(0xFFFF9800),
+                            label = stringResource(R.string.achieved_bonus),
+                            value = String.format(
+                                stringResource(R.string.price_currency),
+                                formatAmount((statistics.achievedBonusAmount ?: 0).toDouble())
+                            ),
+                            containerColor = Color(0xFFFFF3E0),
+                            borderColor = Color(0xFFFFCC80)
+                        )
                     }
 
                     // Incentives progress card - show milestones from incentives

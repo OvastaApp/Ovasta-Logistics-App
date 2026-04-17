@@ -6,6 +6,7 @@ data class PartnerStatistics(
     @SerializedName("withdraw_transactions_sum") var withdrawTransactionsSum: Double? = null,
     @SerializedName("delivery_profit_sum") var deliveryProfitSum: Double? = null,
     @SerializedName("orders_count") var ordersCount: Int? = null,
+    @SerializedName("achieved_bonus_amount") var achievedBonusAmount: Int? = null,
     @SerializedName("incentives") var incentives: Incentives? = Incentives()
 
 )

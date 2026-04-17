@@ -158,6 +158,7 @@
     <string name="tracking_active">متاح</string>
     <string name="tracking_inactive">غير متاح</string>
     <string name="total_withdrawals">سحوبات</string>
+    <string name="achieved_bonus">المكافأة المحققة</string>
     <string name="delivery_profit">ارباحك</string>
     <string name="statistics">الإحصائيات</string>
     <string name="orders_progress">تقدّم الطلبات</string>

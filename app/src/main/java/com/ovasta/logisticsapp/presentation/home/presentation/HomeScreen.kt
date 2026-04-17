@@ -130,6 +130,7 @@ fun TasksContentPreview() {
             withdrawTransactionsSum = 1500.0,
             deliveryProfitSum = 3200.0,
             ordersCount = 25,
+            achievedBonusAmount = 96,
             incentives = Incentives(
                 month = "2026-04",
                 completedOrders = 25,
