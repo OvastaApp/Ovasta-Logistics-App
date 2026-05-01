@@ -22,8 +22,8 @@ android {
         applicationId = "com.ovasta.logisticsapp"
         minSdk = 24
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.0.6"
+        versionCode = 7
+        versionName = "1.0.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     }
@@ -132,6 +132,6 @@ dependencies {
     implementation(libs.coil.kt.coil.compose)
     implementation(libs.security.crypto)
 
-    implementation (libs.play.services.location)
+    implementation(libs.play.services.location)
 
 }

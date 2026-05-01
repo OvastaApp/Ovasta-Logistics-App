@@ -62,5 +62,8 @@ class HomeRepository(
 
     override suspend fun getPartnerStatus() = homeRemoteDataSource.getPartnerStatus()
 
-    override suspend fun getPartnerStatistics() = homeRemoteDataSource.getPartnerStatistics()
+    override suspend fun getPartnerStatistics(
+        month: Int,
+        year: Int,
+    ) = homeRemoteDataSource.getPartnerStatistics(month, year)
 }

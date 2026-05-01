@@ -7,6 +7,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface HomeApi {
     @POST("change-partner-status")
@@ -16,5 +17,8 @@ interface HomeApi {
     suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
 
     @GET("partner-statistics")
-    suspend fun getPartnerStatistics(): ApiResponse<PartnerStatistics>
+    suspend fun getPartnerStatistics(
+        @Query("month") month: Int,
+        @Query("year") year: Int,
+    ): ApiResponse<PartnerStatistics>
 }

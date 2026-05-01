@@ -1,5 +1,7 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -25,7 +27,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,10 +61,17 @@ import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.time.LocalDate
+import java.time.Month
+import java.time.format.TextStyle
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PartnerStatisticsSection(
-    statistics: PartnerStatistics
+    statistics: PartnerStatistics,
+    selectedMonth: Int = LocalDate.now().monthValue,
+    selectedYear: Int = LocalDate.now().year,
+    onMonthYearChanged: (month: Int, year: Int) -> Unit = { _, _ -> }
 ) {
     var isExpanded by remember { mutableStateOf(true) }
     val rotationAngle by animateFloatAsState(
@@ -147,6 +159,13 @@ fun PartnerStatisticsSection(
                     verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
                     modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._12sdp))
                 ) {
+                    // Month/Year filter row
+                    MonthYearFilter(
+                        selectedMonth = selectedMonth,
+                        selectedYear = selectedYear,
+                        onMonthYearChanged = onMonthYearChanged
+                    )
+
                     // Row with Delivery Profit and Withdrawals side by side
                     Row(
                         modifier = Modifier
@@ -186,6 +205,101 @@ fun PartnerStatisticsSection(
                     if (incentives != null && incentives.milestones.isNotEmpty()) {
                         IncentivesProgressCard(incentives = incentives)
                     }
+                }
+            }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+private fun MonthYearFilter(
+    selectedMonth: Int,
+    selectedYear: Int,
+    onMonthYearChanged: (month: Int, year: Int) -> Unit
+) {
+    var monthExpanded by remember { mutableStateOf(false) }
+    var yearExpanded by remember { mutableStateOf(false) }
+
+    val currentYear = LocalDate.now().year
+    val years = (2026..currentYear).toList().reversed()
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Month dropdown
+        Box(modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = { monthExpanded = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+            ) {
+                Text(
+                    text = selectedMonth.toString(),
+                    style = xsMedium.copy(color = Gray800),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            DropdownMenu(
+                expanded = monthExpanded,
+                onDismissRequest = { monthExpanded = false }
+            ) {
+                (1..12).forEach { month ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = month.toString(),
+                                style = xsMedium.copy(
+                                    color = if (month == selectedMonth) Primary else Gray800,
+                                    fontWeight = if (month == selectedMonth) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            )
+                        },
+                        onClick = {
+                            monthExpanded = false
+                            onMonthYearChanged(month, selectedYear)
+                        }
+                    )
+                }
+            }
+        }
+
+        // Year dropdown
+        Box(modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = { yearExpanded = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+            ) {
+                Text(
+                    text = selectedYear.toString(),
+                    style = xsMedium.copy(color = Gray800),
+                    maxLines = 1
+                )
+            }
+            DropdownMenu(
+                expanded = yearExpanded,
+                onDismissRequest = { yearExpanded = false }
+            ) {
+                years.forEach { year ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = year.toString(),
+                                style = xsMedium.copy(
+                                    color = if (year == selectedYear) Primary else Gray800,
+                                    fontWeight = if (year == selectedYear) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            )
+                        },
+                        onClick = {
+                            yearExpanded = false
+                            onMonthYearChanged(selectedMonth, year)
+                        }
+                    )
                 }
             }
         }
@@ -533,51 +647,56 @@ private fun formatAmount(value: Double?): String {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true, locale = "ar")
 @Composable
 fun PartnerStatisticsSectionPreview() {
-    PartnerStatisticsSection(
-        statistics = PartnerStatistics(
-            withdrawTransactionsSum = 1500.0,
-            deliveryProfitSum = 750.0,
-            ordersCount = 45,
-            incentives = Incentives(
-                month = "2026-04",
-                completedOrders = 45,
-                totalDeliveryValue = 5000.0,
-                highestAchievedMilestone = "silver",
-                currentBonusPercentage = 5.0,
-                currentBonusAmount = 250.0,
-                milestones = arrayListOf(
-                    Milestones(
-                        targetOrders = 30,
-                        bonusPercentage = 3.0,
-                        realPercentage = 3.0,
-                        isAchieved = true,
-                        remainingOrders = 0,
-                        progressPercentage = 100.0,
-                        bonusAmount = 150.0
-                    ),
-                    Milestones(
-                        targetOrders = 50,
-                        bonusPercentage = 5.0,
-                        realPercentage = 5.0,
-                        isAchieved = false,
-                        remainingOrders = 5,
-                        progressPercentage = 90.0,
-                        bonusAmount = 350.0
-                    ),
-                    Milestones(
-                        targetOrders = 100,
-                        bonusPercentage = 10.0,
-                        realPercentage = 10.0,
-                        isAchieved = false,
-                        remainingOrders = 55,
-                        progressPercentage = 45.0,
-                        bonusAmount = 800.0
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        PartnerStatisticsSection(
+            statistics = PartnerStatistics(
+                withdrawTransactionsSum = 1500.0,
+                deliveryProfitSum = 750.0,
+                ordersCount = 45,
+                incentives = Incentives(
+                    month = "2026-04",
+                    completedOrders = 45,
+                    totalDeliveryValue = 5000.0,
+                    highestAchievedMilestone = "silver",
+                    currentBonusPercentage = 5.0,
+                    currentBonusAmount = 250.0,
+                    milestones = arrayListOf(
+                        Milestones(
+                            targetOrders = 30,
+                            bonusPercentage = 3.0,
+                            realPercentage = 3.0,
+                            isAchieved = true,
+                            remainingOrders = 0,
+                            progressPercentage = 100.0,
+                            bonusAmount = 150.0
+                        ),
+                        Milestones(
+                            targetOrders = 50,
+                            bonusPercentage = 5.0,
+                            realPercentage = 5.0,
+                            isAchieved = false,
+                            remainingOrders = 5,
+                            progressPercentage = 90.0,
+                            bonusAmount = 350.0
+                        ),
+                        Milestones(
+                            targetOrders = 100,
+                            bonusPercentage = 10.0,
+                            realPercentage = 10.0,
+                            isAchieved = false,
+                            remainingOrders = 55,
+                            progressPercentage = 45.0,
+                            bonusAmount = 800.0
+                        )
                     )
                 )
-            )
+            ),
+            selectedMonth = 4,
+            selectedYear = 2026
         )
-    )
+    }
 }

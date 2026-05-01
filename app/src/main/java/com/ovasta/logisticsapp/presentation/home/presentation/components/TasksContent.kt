@@ -149,12 +149,17 @@ fun TasksContent(
                         )
                     }
 
-                    // Partner statistics
-                    if (partnerStatistics != null) {
+                    // Partner statistics - only show when tracking is enabled
+                    if (partnerStatistics != null && viewState.isTracking) {
                         item(key = "statistics") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                             PartnerStatisticsSection(
-                                statistics = partnerStatistics
+                                statistics = partnerStatistics,
+                                selectedMonth = viewState.monthFilter,
+                                selectedYear = viewState.yearFilter,
+                                onMonthYearChanged = { month, year ->
+                                    onTasksScreenAction(HomeScreenActions.OnMonthYearFilterChanged(month, year))
+                                }
                             )
                         }
                     }

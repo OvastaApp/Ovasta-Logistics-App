@@ -20,6 +20,9 @@ interface IHomeRemoteDataSource {
 
     suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
 
-    suspend fun getPartnerStatistics(): ApiResponse<PartnerStatistics>
+    suspend fun getPartnerStatistics(
+        month: Int,
+        year: Int,
+    ): ApiResponse<PartnerStatistics>
 
 }

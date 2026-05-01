@@ -82,7 +82,6 @@ class HomeViewModel(
             HomeScreenActions.LoadTasks -> {}
             HomeScreenActions.OnSearchTriggered -> {}
             HomeScreenActions.RefreshTasks -> {
-//                getAssignedTasks()
                 getPartnerStatistics()
                 getPartnerStatus()
             }
@@ -97,6 +96,13 @@ class HomeViewModel(
 
             HomeScreenActions.OnLogoutClicked -> {
                 logout()
+            }
+
+            is HomeScreenActions.OnMonthYearFilterChanged -> {
+                _viewState.update {
+                    it.copy(monthFilter = tasksScreenAction.month, yearFilter = tasksScreenAction.year)
+                }
+                getPartnerStatistics()
             }
         }
     }
@@ -288,11 +294,14 @@ class HomeViewModel(
         }
     }
 
-    private fun getPartnerStatistics() {
+    private fun getPartnerStatistics(
+    ) {
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
-                homeRepository.getPartnerStatistics()
+                homeRepository.getPartnerStatistics(
+                    viewState.value.monthFilter, viewState.value.yearFilter
+                )
             }.onSuccess { response ->
                 setComposeUILoading(false)
                 updateUiState(viewState.value.copy(partnerStatistics = response.data))
@@ -322,7 +331,8 @@ class HomeViewModel(
     }
 
     private fun isLocationEnabled(): Boolean {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        val locationManager =
+            context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
         return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
     }

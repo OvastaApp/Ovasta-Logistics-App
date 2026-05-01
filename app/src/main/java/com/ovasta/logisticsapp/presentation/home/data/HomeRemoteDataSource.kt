@@ -17,6 +17,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import retrofit2.http.Query
 
 class HomeRemoteDataSource(
     private val db: FirebaseFirestore, private val homeApi: HomeApi
@@ -108,5 +109,8 @@ class HomeRemoteDataSource(
 
     override suspend fun getPartnerStatus() = homeApi.getPartnerStatus()
 
-    override suspend fun getPartnerStatistics() = homeApi.getPartnerStatistics()
+    override suspend fun getPartnerStatistics(
+        month: Int,
+        year: Int,
+    ) = homeApi.getPartnerStatistics(month, year)
 }
