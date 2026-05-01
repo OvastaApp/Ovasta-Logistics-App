@@ -100,7 +100,10 @@ class HomeViewModel(
 
             is HomeScreenActions.OnMonthYearFilterChanged -> {
                 _viewState.update {
-                    it.copy(monthFilter = tasksScreenAction.month, yearFilter = tasksScreenAction.year)
+                    it.copy(
+                        monthFilter = tasksScreenAction.month,
+                        yearFilter = tasksScreenAction.year
+                    )
                 }
                 getPartnerStatistics()
             }

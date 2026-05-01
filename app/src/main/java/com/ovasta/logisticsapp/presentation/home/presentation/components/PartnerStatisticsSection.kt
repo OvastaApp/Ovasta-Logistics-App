@@ -54,6 +54,7 @@ import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.smNormal
+import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.text.font.FontWeight
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
@@ -698,5 +699,37 @@ fun PartnerStatisticsSectionPreview() {
             selectedMonth = 4,
             selectedYear = 2026
         )
+    }
+}
+
+@Composable
+fun StatisticsTrackingHint() {
+    Card(
+        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
+        border = BorderStroke(
+            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            color = Color(0xFFFFCC02).copy(alpha = 0.4f)
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_price),
+                contentDescription = null,
+                tint = Color(0xFFF9A825),
+                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
+            )
+            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+            Text(
+                text = stringResource(R.string.statistics_tracking_hint),
+                style = xsMedium.copy(color = Color(0xFF795548))
+            )
+        }
     }
 }
