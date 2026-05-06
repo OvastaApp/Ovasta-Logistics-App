@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
@@ -37,11 +36,11 @@ fun SellerTaskItem(
 ) {
     val isPicked = task.statusId >= OrderSteps.toStatus(OrderSteps.Picked)
     val statusColor = when (OrderSteps.fromStatusId(task.statusId)) {
-        OrderSteps.Pending -> Color(0xFFFFA000)
-        OrderSteps.Assigned -> Color(0xFF1976D2)
-        OrderSteps.Picked -> Color(0xFF7B1FA2)
-        OrderSteps.Delivered -> Color(0xFF388E3C)
-        OrderSteps.Canceled -> Color(0xFFD32F2F)
+        OrderSteps.Pending -> StatusPending
+        OrderSteps.Assigned -> StatusAssigned
+        OrderSteps.Picked -> StatusPicked
+        OrderSteps.Delivered -> StatusDelivered
+        OrderSteps.Canceled -> StatusCanceled
     }
 
     Card(
@@ -50,7 +49,7 @@ fun SellerTaskItem(
             .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Base_white),
         onClick = onClick
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -80,25 +79,44 @@ fun SellerTaskItem(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                    .background(SellerBackground, RoundedCornerShape(8.dp))
                     .padding(12.dp)
             ) {
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.seller_info),
-                        style = xsMedium.copy(color = MaterialTheme.colorScheme.primary)
+                        style = xsMedium.copy(color = SellerLabel)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Default.Person,
                             contentDescription = null,
-                            tint = Gray600,
+                            tint = SellerText,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = task.sellerName, style = smSemiBold)
+                        Text(text = task.sellerName, style = smSemiBold.copy(color = SellerText))
+                    }
+                    if (!task.sellerAddress.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.Top) {
+                            Icon(
+                                Icons.Default.Home,
+                                contentDescription = null,
+                                tint = SellerText,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = task.sellerAddress,
+                                style = smNormal.copy(color = SellerText),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                     if (!task.sellerMobile.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
@@ -106,11 +124,11 @@ fun SellerTaskItem(
                             Icon(
                                 Icons.Default.Phone,
                                 contentDescription = null,
-                                tint = Gray600,
+                                tint = SellerText,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = task.sellerMobile, style = smNormal)
+                            Text(text = task.sellerMobile, style = smNormal.copy(color = SellerText))
                         }
                     }
                 }
@@ -122,12 +140,9 @@ fun SellerTaskItem(
                         Icon(
                             Icons.Default.Call,
                             contentDescription = "Call Seller",
-                            tint = Color.White,
+                            tint = Base_white,
                             modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.primary,
-                                    RoundedCornerShape(20.dp)
-                                )
+                                .background(SellerAction, RoundedCornerShape(20.dp))
                                 .padding(8.dp)
                         )
                     }
@@ -138,10 +153,13 @@ fun SellerTaskItem(
 
             // Customer Info Section
             Row(
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                    .background(
+                        if (isPicked) CustomerBackground else CustomerBackgroundDisabled,
+                        RoundedCornerShape(8.dp)
+                    )
                     .padding(12.dp)
             ) {
 
@@ -149,7 +167,7 @@ fun SellerTaskItem(
                     Text(
                         text = stringResource(R.string.customer_info),
                         style = xsMedium.copy(
-                            color = if (isPicked) MaterialTheme.colorScheme.primary else Gray500
+                            color = if (isPicked) CustomerLabel else Gray500
                         )
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -160,11 +178,11 @@ fun SellerTaskItem(
                                 Icon(
                                     Icons.Default.Person,
                                     contentDescription = null,
-                                    tint = Gray600,
+                                    tint = CustomerText,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = task.customerName, style = smSemiBold)
+                                Text(text = task.customerName, style = smSemiBold.copy(color = CustomerText))
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                         }
@@ -173,11 +191,11 @@ fun SellerTaskItem(
                                 Icon(
                                     Icons.Default.Phone,
                                     contentDescription = null,
-                                    tint = Gray600,
+                                    tint = CustomerText,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = task.clientPhone, style = smNormal)
+                                Text(text = task.clientPhone, style = smNormal.copy(color = CustomerText))
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                         }
@@ -186,13 +204,13 @@ fun SellerTaskItem(
                                 Icon(
                                     Icons.Default.Home,
                                     contentDescription = null,
-                                    tint = Gray600,
+                                    tint = CustomerText,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = task.customerAddress,
-                                    style = smNormal,
+                                    style = smNormal.copy(color = CustomerText),
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f)
@@ -216,50 +234,19 @@ fun SellerTaskItem(
                     }
                 }
 
-                if (isPicked) {
-                    Column(horizontalAlignment = Alignment.End) {
-                        if (!task.clientPhone.isNullOrBlank()) {
-                            IconButton(
-                                onClick = { onCallCustomer(task.clientPhone) },
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.Call,
-                                    contentDescription = "Call Customer",
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .background(
-                                            MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(20.dp)
-                                        )
-                                        .padding(8.dp)
-                                )
-                            }
-                        }
-                        if (!task.customerAddress.isNullOrBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            IconButton(
-                                onClick = {
-                                    onNavigateToCustomer(
-                                        task.clientLat,
-                                        task.clientLang
-                                    )
-                                },
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.LocationOn,
-                                    contentDescription = "Navigate",
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .background(
-                                            Color(0xFF4CAF50),
-                                            RoundedCornerShape(20.dp)
-                                        )
-                                        .padding(8.dp)
-                                )
-                            }
-                        }
+                if (isPicked && !task.clientPhone.isNullOrBlank()) {
+                    IconButton(
+                        onClick = { onCallCustomer(task.clientPhone) },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Call,
+                            contentDescription = "Call Customer",
+                            tint = Base_white,
+                            modifier = Modifier
+                                .background(CustomerAction, RoundedCornerShape(20.dp))
+                                .padding(8.dp)
+                        )
                     }
                 }
             }
@@ -269,7 +256,10 @@ fun SellerTaskItem(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Order details
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Column {
                     Text(text = stringResource(R.string.total_price), style = xsMedium)
                     Text(text = "${task.totalPrice} $currency", style = smSemiBold)
@@ -298,7 +288,8 @@ fun SellerTaskItemPreview() {
             sellerId = 1,
             sellerName = "Shop ABC",
             sellerMobile = "01012345678",
-            statusId = 2,
+            sellerAddress = "15 El-Tahrir St, Downtown, Cairo",
+            statusId = 3,
             statusName = "Assigned",
             customerName = "Ahmed",
             customerAddress = "Nasr City, Cairo",

@@ -62,9 +62,10 @@ class HomeFirebaseRemoteDataSource(
             listenToOrdersChanges(orderIds, districtId)
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getAvailableSellerOrders(
         userId: Int, districtId: Int
-    ): Flow<List<SellerTask>> = callbackFlow {
+    ): Flow<List<SellerTask>> {
 
         val collection = db.collection(FIRESTORE_ROOT_DISTRICT_NAME)
             .document(districtId.toString())
@@ -74,36 +75,69 @@ class HomeFirebaseRemoteDataSource(
         val nullCourierQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, null)
         val emptyCourierQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, 0)
 
+        // First: emit the merged set of matching document IDs from the 3 queries
+        val idsFlow: Flow<Set<String>> = callbackFlow {
+            val queryOwnedIds = mutableMapOf<Int, Set<String>>()
+            val listeners = mutableListOf<ListenerRegistration>()
+
+            listOf(myOrdersQuery, nullCourierQuery, emptyCourierQuery)
+                .forEachIndexed { index, query ->
+                    val registration = query.addSnapshotListener { value, error ->
+                        if (error != null) {
+                            Log.e("sellerOrders", "Error fetching seller order ids", error)
+                            close(error)
+                            return@addSnapshotListener
+                        }
+                        val currentIds =
+                            value?.documents?.map { it.id }?.toSet() ?: emptySet()
+                        queryOwnedIds[index] = currentIds
+
+                        val mergedIds = queryOwnedIds.values.flatten().toSet()
+                        trySend(mergedIds)
+                    }
+                    listeners.add(registration)
+                }
+
+            awaitClose { listeners.forEach { it.remove() } }
+        }
+
+        // Then: switch to per-document listeners so any field change is observed
+        return idsFlow.flatMapLatest { ids ->
+            listenToSellerOrdersChanges(ids.toList(), collection)
+        }
+    }
+
+    private fun listenToSellerOrdersChanges(
+        orderIds: List<String>,
+        collection: com.google.firebase.firestore.CollectionReference
+    ): Flow<List<SellerTask>> = callbackFlow {
+
+        if (orderIds.isEmpty()) {
+            trySend(emptyList())
+            return@callbackFlow awaitClose { }
+        }
+
         val tasksMap = mutableMapOf<String, SellerTask>()
         val listeners = mutableListOf<ListenerRegistration>()
 
-        // Track which doc IDs each query "owns"
-        val queryOwnedIds = mutableMapOf<Int, Set<String>>()
-
-        listOf(myOrdersQuery, nullCourierQuery, emptyCourierQuery).forEachIndexed { index, query ->
-            val registration = query.addSnapshotListener { value, error ->
-                if (error != null) {
-                    Log.e("sellerOrders", "Error fetching seller orders", error)
-                    close(error)
-                    return@addSnapshotListener
-                }
-
-                val currentIds = value?.documents?.map { it.id }?.toSet() ?: emptySet()
-
-                val previousIds = queryOwnedIds[index] ?: emptySet()
-                val removedIds = previousIds - currentIds
-                removedIds.forEach { tasksMap.remove(it) }
-
-                queryOwnedIds[index] = currentIds
-
-                value?.documents?.forEach { doc ->
-                    doc.toObject(SellerTask::class.java)?.let {
-                        tasksMap[doc.id] = it
+        orderIds.forEach { orderId ->
+            val registration = collection.document(orderId)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.e("sellerOrderDocListener", "Error", error)
+                        return@addSnapshotListener
+                    }
+                    if (snapshot == null || !snapshot.exists()) {
+                        if (tasksMap.remove(orderId) != null) {
+                            trySend(tasksMap.values.toList())
+                        }
+                        return@addSnapshotListener
+                    }
+                    snapshot.toObject(SellerTask::class.java)?.let { task ->
+                        tasksMap[orderId] = task
+                        trySend(tasksMap.values.toList())
                     }
                 }
-
-                trySend(tasksMap.values.toList())
-            }
             listeners.add(registration)
         }
 

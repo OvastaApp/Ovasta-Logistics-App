@@ -41,3 +41,23 @@ val Gray200 = Color(0xFFEAECF0)
 val Error300 = Color(0xFFFDA29B)
 
 val White = Color(0xFFFEFFFFF)
+
+// Seller (green) palette
+val SellerBackground = Color(0xFFE8F5E9)
+val SellerLabel = Color(0xFF2E7D32)
+val SellerText = Color(0xFF1B5E20)
+val SellerAction = Color(0xFF4CAF50)
+
+// Customer (blue) palette
+val CustomerBackground = Color(0xFFE3F2FD)
+val CustomerBackgroundDisabled = Color(0xFFF5F5F5)
+val CustomerLabel = Color(0xFF1565C0)
+val CustomerText = Color(0xFF0D47A1)
+val CustomerAction = Color(0xFF2196F3)
+
+// Status colors
+val StatusPending = Color(0xFFFFA000)
+val StatusAssigned = Color(0xFF1976D2)
+val StatusPicked = Color(0xFF7B1FA2)
+val StatusDelivered = Color(0xFF388E3C)
+val StatusCanceled = Color(0xFFD32F2F)

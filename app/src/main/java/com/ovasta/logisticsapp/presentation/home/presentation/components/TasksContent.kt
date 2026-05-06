@@ -154,7 +154,7 @@ fun TasksContent(
                         item(key = "seller_tasks_header") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                             Text(
-                                text = stringResource(R.string.seller_tasks),
+                                text = stringResource(R.string.tasks),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
                                 color = MaterialTheme.colorScheme.onBackground,
@@ -232,7 +232,7 @@ fun TasksContentPreview() {
                     orderId = 101,
                     sellerName = "Shop ABC",
                     sellerMobile = "01012345678",
-                    statusId = 2,
+                    statusId = 3,
                     statusName = "Assigned",
                     totalPrice = 350f,
                     deliveryFees = 25.0,
