@@ -5,31 +5,44 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
-import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
-import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
+import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import retrofit2.http.Query
 
-class HomeRemoteDataSource(
-    private val db: FirebaseFirestore, private val homeApi: HomeApi
-) : IHomeRemoteDataSource {
+class HomeFirebaseRemoteDataSource(
+    private val db: FirebaseFirestore
+) : IHomeFirebaseRemoteDataSource {
+
+    override suspend fun logLocation(
+        userId: Int, districtId: Int, latitude: Double, longitude: Double
+    ) {
+        val locationData = hashMapOf(
+            "userId" to userId,
+            "latitude" to latitude,
+            "longitude" to longitude,
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+        db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
+            .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME).document(userId.toString())
+            .set(locationData, SetOptions.merge()).addOnFailureListener {
+                Log.e("logLocation", "Failed to update location", it)
+            }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getAssignedTasks(userId: Int, districtId: Int): Flow<List<HomeTask>> =
         callbackFlow {
             val listenerRegistration =
                 db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
-                    .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME)
-                    .document(userId.toString())
+                    .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME).document(userId.toString())
                     .collection(FIRESTORE_ROOT_ORDERS_NAME).addSnapshotListener { value, error ->
                         if (error != null) {
                             Log.e("assignedOrders", "Error fetching orders", error)
@@ -47,10 +60,15 @@ class HomeRemoteDataSource(
             listenToOrdersChanges(orderIds, districtId)
         }
 
+    override suspend fun getAvailableSellerOrders(
+        userId: Int, districtId: Int
+    ): Flow<List<SellerTask>> {
+        TODO("Not yet implemented")
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenToOrdersChanges(
-        orderIds: List<String>,
-        districtId: Int
+        orderIds: List<String>, districtId: Int
     ): Flow<List<HomeTask>> = callbackFlow {
 
         if (orderIds.isEmpty()) {
@@ -86,31 +104,4 @@ class HomeRemoteDataSource(
         }
     }
 
-    override suspend fun logLocation(
-        userId: Int, districtId: Int, latitude: Double, longitude: Double
-    ) {
-        val locationData = hashMapOf(
-            "userId" to userId,
-            "latitude" to latitude,
-            "longitude" to longitude,
-            "timestamp" to FieldValue.serverTimestamp()
-        )
-        db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
-            .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME).document(userId.toString())
-            .set(locationData, SetOptions.merge()).addOnFailureListener {
-                Log.e("logLocation", "Failed to update location", it)
-            }
-    }
-
-    override suspend fun changePartnerStatus(isOnline: Boolean) {
-        val changeStatusRequest = ChangeStatusRequest(isOnline = isOnline)
-        homeApi.changePartnerStatus(changeStatusRequest)
-    }
-
-    override suspend fun getPartnerStatus() = homeApi.getPartnerStatus()
-
-    override suspend fun getPartnerStatistics(
-        month: Int,
-        year: Int,
-    ) = homeApi.getPartnerStatistics(month, year)
 }

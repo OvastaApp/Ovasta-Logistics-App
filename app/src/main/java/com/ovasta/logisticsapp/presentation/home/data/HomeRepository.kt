@@ -9,12 +9,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class HomeRepository(
-    private val homeRemoteDataSource: IHomeRemoteDataSource,
+    private val homeFirebaseRemoteDataSource: IHomeFirebaseRemoteDataSource,
+    private val homeServerRemoteDataSource: IHomeServerRemoteDataSource,
     val settingsRepository: ISettingsRepository
 ) : IHomeRepository {
     override suspend fun getAssignedTasks(
         userId: Int, districtId: Int
-    ) = homeRemoteDataSource.getAssignedTasks(userId, districtId)
+    ) = homeFirebaseRemoteDataSource.getAssignedTasks(userId, districtId)
 
     override suspend fun startLocationTracking(context: Context) {
         withContext(Dispatchers.Main) {
@@ -48,7 +49,7 @@ class HomeRepository(
 
     override suspend fun sendLocation(lat: Double, long: Double) {
         with(settingsRepository.getUseData()) {
-            homeRemoteDataSource.logLocation(
+            homeFirebaseRemoteDataSource.logLocation(
                 userId = this?.deliveryId ?: 0,
                 districtId = this?.districtId ?: 0,
                 lat,
@@ -58,12 +59,12 @@ class HomeRepository(
     }
 
     override suspend fun changePartnerStatus(isOnline: Boolean) =
-        homeRemoteDataSource.changePartnerStatus(isOnline = isOnline)
+        homeServerRemoteDataSource.changePartnerStatus(isOnline = isOnline)
 
-    override suspend fun getPartnerStatus() = homeRemoteDataSource.getPartnerStatus()
+    override suspend fun getPartnerStatus() = homeServerRemoteDataSource.getPartnerStatus()
 
     override suspend fun getPartnerStatistics(
         month: Int,
         year: Int,
-    ) = homeRemoteDataSource.getPartnerStatistics(month, year)
+    ) = homeServerRemoteDataSource.getPartnerStatistics(month, year)
 }
