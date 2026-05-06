@@ -34,6 +34,10 @@ data class SellerTask(
     @PropertyName("customer_mobile")
     val clientPhone: String? = null,
 
+    @get:PropertyName("seller_mobile")
+    @PropertyName("seller_mobile")
+    val sellerMobile: String? = null,
+
     @get:PropertyName("delivery_fees")
     @PropertyName("delivery_fees")
     val deliveryFees: Double = 00.0,

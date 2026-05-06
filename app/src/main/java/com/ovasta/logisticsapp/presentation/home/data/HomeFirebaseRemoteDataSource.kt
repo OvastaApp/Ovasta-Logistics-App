@@ -5,9 +5,11 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_COURIER_ID_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_SELLERS_ORDERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
@@ -62,8 +64,50 @@ class HomeFirebaseRemoteDataSource(
 
     override suspend fun getAvailableSellerOrders(
         userId: Int, districtId: Int
-    ): Flow<List<SellerTask>> {
-        TODO("Not yet implemented")
+    ): Flow<List<SellerTask>> = callbackFlow {
+
+        val collection = db.collection(FIRESTORE_ROOT_DISTRICT_NAME)
+            .document(districtId.toString())
+            .collection(FIRESTORE_ROOT_SELLERS_ORDERS_NAME)
+
+        val myOrdersQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, userId)
+        val nullCourierQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, null)
+        val emptyCourierQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, 0)
+
+        val tasksMap = mutableMapOf<String, SellerTask>()
+        val listeners = mutableListOf<ListenerRegistration>()
+
+        // Track which doc IDs each query "owns"
+        val queryOwnedIds = mutableMapOf<Int, Set<String>>()
+
+        listOf(myOrdersQuery, nullCourierQuery, emptyCourierQuery).forEachIndexed { index, query ->
+            val registration = query.addSnapshotListener { value, error ->
+                if (error != null) {
+                    Log.e("sellerOrders", "Error fetching seller orders", error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val currentIds = value?.documents?.map { it.id }?.toSet() ?: emptySet()
+
+                val previousIds = queryOwnedIds[index] ?: emptySet()
+                val removedIds = previousIds - currentIds
+                removedIds.forEach { tasksMap.remove(it) }
+
+                queryOwnedIds[index] = currentIds
+
+                value?.documents?.forEach { doc ->
+                    doc.toObject(SellerTask::class.java)?.let {
+                        tasksMap[doc.id] = it
+                    }
+                }
+
+                trySend(tasksMap.values.toList())
+            }
+            listeners.add(registration)
+        }
+
+        awaitClose { listeners.forEach { it.remove() } }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

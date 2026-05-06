@@ -31,7 +31,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
         viewModel = viewModel
     ) {
         LaunchedEffect(Unit) {
-//            viewModel.getAssignedTasks()
+            viewModel.getSellersTasks()
             viewModel.taskItemActions
                 .filterNotNull()
                 .collectLatest { event ->
@@ -68,15 +68,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
             }, onDismiss = {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
-        TasksContent(
-            viewState = viewState,
-            searchKey = searchKey.orEmpty(),
-            currency,
-            viewModel.startedTaskId,
-            partnerStatistics = viewState.partnerStatistics,
-            onTasksScreenAction = viewModel::onTasksScreenAction,
-            onTaskItemAction = viewModel::onTaskItemAction
-        )
+
     }
 }
 

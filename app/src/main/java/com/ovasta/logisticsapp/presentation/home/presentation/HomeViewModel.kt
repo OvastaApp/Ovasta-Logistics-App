@@ -32,6 +32,25 @@ class HomeViewModel(
     val viewState = _viewState.asStateFlow()
 
     private var assignedTasksJob: Job? = null
+    private var sellersTasksJob: Job? = null
+
+    fun getSellersTasks() {
+        sellersTasksJob?.cancel()
+        sellersTasksJob = viewModelScope.launch {
+            setComposeUILoading(true)
+            try {
+                homeRepository.getAvailableSellerOrders(userId = 1, districtId = 1)
+                    .collect { tasks ->
+                        setComposeUILoading(false)
+                        _viewState.update { it.copy(sellerTasks = tasks) }
+                    }
+            } catch (ex: Exception) {
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
+                setComposeUILoading(false)
+                updateViewStateWithFail(ex)
+            }
+        }
+    }
 
     fun getAssignedTasks() {
         assignedTasksJob?.cancel()

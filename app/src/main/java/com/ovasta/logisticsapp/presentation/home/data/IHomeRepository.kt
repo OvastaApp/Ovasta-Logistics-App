@@ -5,6 +5,7 @@ import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
+import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
 import kotlinx.coroutines.flow.Flow
 
 interface IHomeRepository {
@@ -13,11 +14,17 @@ interface IHomeRepository {
         districtId: Int
     ): Flow<List<HomeTask>>
 
+    suspend fun getAvailableSellerOrders(
+        userId: Int, districtId: Int
+    ): Flow<List<SellerTask>>
+
     /**
      * Starts location tracking by launching the LocationTrackerService
      * @param context Android application context
      */
-    suspend fun startLocationTracking(context: Context)
+    suspend
+
+    fun startLocationTracking(context: Context)
 
     /**
      * Stops location tracking by stopping the LocationTrackerService
