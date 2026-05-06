@@ -30,6 +30,10 @@ data class SellerTask(
     @PropertyName("customer_address")
     val customerAddress: String? = null,
 
+    @get:PropertyName("seller_address")
+    @PropertyName("seller_address")
+    val sellerAddress: String? = null,
+
     @get:PropertyName("customer_mobile")
     @PropertyName("customer_mobile")
     val clientPhone: String? = null,
