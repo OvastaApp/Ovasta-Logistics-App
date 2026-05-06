@@ -15,6 +15,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
+import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
 import kotlinx.coroutines.flow.collectLatest
@@ -58,7 +59,15 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 }
         }
 
-
+        TasksContent(
+            viewState = viewState,
+            searchKey = searchKey ?: "",
+            currency = currency,
+            startedTaskId = viewModel.startedTaskId,
+            partnerStatistics = viewState.partnerStatistics,
+            onTasksScreenAction = viewModel::onTasksScreenAction,
+            onTaskItemAction = viewModel::onTaskItemAction
+        )
 
         LogoutDialog(
             viewState.isLogoutDialogVisible,
@@ -74,6 +83,41 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
 private fun fakeHomeViewState(): HomeViewState {
     return HomeViewState(
+        sellerTasks = listOf(
+            SellerTask(
+                orderId = 1,
+                sellerId = 101,
+                sellerName = "Retailer A",
+                courierId = 201,
+                customerAddress = "Nasr City, Cairo",
+                clientPhone = "01012345678",
+                sellerMobile = "01234567890",
+                deliveryFees = 50.0,
+                notes = "Handle with care",
+                statusId = 1,
+                clientLat = 30.0444,
+                clientLang = 31.2357,
+                customerName = "John Doe",
+                totalPrice = 250f,
+                clientWhatsapp = "01012345678"
+            ), SellerTask(
+                orderId = 2,
+                sellerId = 102,
+                sellerName = "Retailer B",
+                courierId = 202,
+                customerAddress = "Maadi, Cairo",
+                clientPhone = "01198765432",
+                sellerMobile = "01234567891",
+                deliveryFees = 80.0,
+                notes = "Leave at the door",
+                statusId = 3,
+                clientLat = 29.9602,
+                clientLang = 31.2569,
+                customerName = "Jane Smith",
+                totalPrice = 480f,
+                clientWhatsapp = "01198765432"
+            )
+        ),
         filteredTasks = listOf(
             HomeTask(
                 taskId = 1,

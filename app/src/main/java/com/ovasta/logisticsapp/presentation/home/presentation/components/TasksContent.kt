@@ -2,20 +2,14 @@ package com.ovasta.logisticsapp.presentation.home.presentation.components
 
 import android.os.Build
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -27,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,8 +28,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
@@ -44,12 +39,11 @@ import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.components.sharedComposable.ToastMsg
 import com.ovasta.logisticsapp.base.mdRegular
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
+import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewState
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +84,7 @@ fun TasksContent(
                             onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = true))
                         }) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_logout), // Use ic_logout if available
+                                painter = painterResource(R.drawable.ic_logout),
                                 contentDescription = "Logout",
                                 tint = Color.Black
                             )
@@ -100,19 +94,6 @@ fun TasksContent(
             }
         ) { padding ->
             val listState = rememberLazyListState()
-            val tasks = viewState.filteredTasks
-
-            LaunchedEffect(listState) {
-                snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-                    .filterNotNull()
-                    .distinctUntilChanged()
-                    .collect { lastVisibleItemIndex ->
-                        val totalItems = listState.layoutInfo.totalItemsCount
-                        if (lastVisibleItemIndex >= totalItems - 1) {
-                            onTasksScreenAction(HomeScreenActions.LoadTasks)
-                        }
-                    }
-            }
 
             PullToRefreshBox(
                 state = pullToRefreshState,
@@ -134,10 +115,6 @@ fun TasksContent(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(
-                            start = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                            end = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                        )
                         .testTag("tasksList"),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
@@ -150,7 +127,7 @@ fun TasksContent(
                         )
                     }
 
-                    // Partner statistics - only show when tracking is enabled
+                    // Partner statistics
                     if (partnerStatistics != null && viewState.isTracking) {
                         item(key = "statistics") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
@@ -172,71 +149,55 @@ fun TasksContent(
                         }
                     }
 
-                    // Search bar
-//                    item(key = "search") {
-//                        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-//                        SearchWithFilterBar(
-//                            searchKey = searchKey,
-//                            onSearchKeyChange = {
-//                                onTasksScreenAction(
-//                                    HomeScreenActions.OnSearchKeyChange(it)
-//                                )
-//                            },
-//                            onSearchTriggered = { onTasksScreenAction(HomeScreenActions.OnSearchTriggered) },
-//                        )
-//                    }
-
-                    // Tasks list
-                    if (tasks.isEmpty()) {
+                    // Seller Tasks section
+                    if (viewState.sellerTasks.isNotEmpty()) {
+                        item(key = "seller_tasks_header") {
+                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                            Text(
+                                text = stringResource(R.string.seller_tasks),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                        items(viewState.sellerTasks, key = { it.orderId }) { task ->
+                            SellerTaskItem(
+                                task = task,
+                                currency = currency,
+                                onCallSeller = { phone ->
+                                    onTaskItemAction(HomeItemActions.CallRetailer(phone))
+                                },
+                                onNavigateToSeller = { lat, lng ->
+                                    onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
+                                },
+                                onCallCustomer = { phone ->
+                                    onTaskItemAction(HomeItemActions.CallRetailer(phone))
+                                },
+                                onNavigateToCustomer = { lat, lng ->
+                                    onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
+                                },
+                                onClick = {
+                                    onTaskItemAction(HomeItemActions.TaskClicked(task.orderId))
+                                }
+                            )
+                        }
+                    } else {
                         item(key = "empty") {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp))
-                                    .testTag("emptyState"),
+                                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp)),
                                 contentAlignment = Alignment.TopCenter
                             ) {
-//                                Text(
-//                                    text = stringResource(R.string.no_tasks_available),
-//                                    style = mdRegular.copy(color = Gray500)
-//                                )
+                                Text(
+                                    text = stringResource(R.string.no_tasks_available),
+                                    style = mdRegular.copy(color = Gray500)
+                                )
                             }
-                        }
-                    } else {
-
-                        itemsIndexed(tasks, key = { _, task -> task.taskId }) { _, task ->
-                            TaskCard(
-                                homeTask = task,
-                                currency = currency,
-                                startedTaskId = startedTaskId,
-                                onTaskDetailsClick = { taskId, retailerId ->
-                                    onTaskItemAction(
-                                        HomeItemActions.ShowTaskDetails(taskId, retailerId)
-                                    )
-                                },
-                                onDirectionClick = { lat, long ->
-                                    onTaskItemAction(
-                                        HomeItemActions.OpenDirection(lat, long)
-                                    )
-                                },
-                                onContactClick = { phone ->
-                                    onTaskItemAction(
-                                        HomeItemActions.CallRetailer(phone)
-                                    )
-                                },
-                                onWhatsAppClick = { phone ->
-                                    onTaskItemAction(
-                                        HomeItemActions.WhatsAppRetailer(phone)
-                                    )
-                                },
-                                onClick = {
-                                    onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
-                                }
-                            )
                         }
                     }
 
-                    // Bottom spacing
                     item { Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp))) }
                 }
             }
@@ -266,16 +227,25 @@ fun TasksContent(
 fun TasksContentPreview() {
     TasksContent(
         viewState = HomeViewState(
-            filteredTasks = listOf(),
+            sellerTasks = listOf(
+                SellerTask(
+                    orderId = 101,
+                    sellerName = "Shop ABC",
+                    sellerMobile = "01012345678",
+                    statusId = 2,
+                    statusName = "Assigned",
+                    totalPrice = 350f,
+                    deliveryFees = 25.0,
+                    itemsCount = 3
+                )
+            ),
             isTracking = false,
             showToastMessage = null
         ),
         searchKey = "",
-        currency = "$",
+        currency = "EGP",
         startedTaskId = -1,
-        partnerStatistics = PartnerStatistics(
-            12.3, 450.0, 67,
-        ),
+        partnerStatistics = null,
         onTasksScreenAction = {},
         onTaskItemAction = {}
     )

@@ -89,6 +89,7 @@
     <string name="enter_password">أدخل كلمة المرور</string>
     <string name="invalid_password">كلمة المرور غير صحيحة</string>
     <string name="password">كلمة المرور</string>
+    <string name="seller_tasks">مهام البائع</string>
     <string name="items_count">عدد العناصر</string>
     <string name="delivery_fees">رسوم التوصيل</string>
     <string name="Status">الحالة</string>
@@ -193,4 +194,7 @@
     <string name="product_price_format">%.2f ج.م</string>
     <string name="source_label">المصدر: %s</string>
     <string name="statistics_tracking_hint">قم بتفعيل التتبع لعرض الإحصائيات والأرباح والحوافز.</string>
+    <string name="seller_info">بيانات البائع</string>
+    <string name="customer_info">بيانات العميل</string>
+    <string name="customer_data_hidden">متاح بعد الاستلام</string>
 </resources>
