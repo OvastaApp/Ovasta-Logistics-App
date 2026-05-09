@@ -115,7 +115,8 @@ fun TasksContent(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .testTag("tasksList"),
+                        .testTag("tasksList")
+                        .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     // Tracking toggle
@@ -137,7 +138,12 @@ fun TasksContent(
                                     selectedMonth = viewState.monthFilter,
                                     selectedYear = viewState.yearFilter,
                                     onMonthYearChanged = { month, year ->
-                                        onTasksScreenAction(HomeScreenActions.OnMonthYearFilterChanged(month, year))
+                                        onTasksScreenAction(
+                                            HomeScreenActions.OnMonthYearFilterChanged(
+                                                month,
+                                                year
+                                            )
+                                        )
                                     }
                                 )
                             }
@@ -158,7 +164,7 @@ fun TasksContent(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
                         items(viewState.sellerTasks, key = { it.orderId }) { task ->

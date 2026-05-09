@@ -32,7 +32,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
         viewModel = viewModel
     ) {
         LaunchedEffect(Unit) {
-            viewModel.getSellersTasks()
+//            viewModel.getSellersTasks()
             viewModel.taskItemActions
                 .filterNotNull()
                 .collectLatest { event ->

@@ -198,4 +198,6 @@
     <string name="customer_info">Customer Info</string>
     <string name="customer_data_hidden">Available after pickup</string>
     <string name="seller_tasks">Seller Tasks</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
 </resources>

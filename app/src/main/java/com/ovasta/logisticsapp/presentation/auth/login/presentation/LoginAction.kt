@@ -7,6 +7,5 @@ sealed interface LoginAction {
     data class PasswordChanged(val password: String) : LoginAction
     data class UserTypeChanged(val type: UserType) : LoginAction
     object Login : LoginAction
-
-
+    object ResetState : LoginAction
 }

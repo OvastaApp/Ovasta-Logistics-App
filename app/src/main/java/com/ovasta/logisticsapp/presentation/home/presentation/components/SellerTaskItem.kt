@@ -46,7 +46,7 @@ fun SellerTaskItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Base_white),
@@ -128,7 +128,10 @@ fun SellerTaskItem(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = task.sellerMobile, style = smNormal.copy(color = SellerText))
+                            Text(
+                                text = task.sellerMobile,
+                                style = smNormal.copy(color = SellerText)
+                            )
                         }
                     }
                 }
@@ -182,7 +185,10 @@ fun SellerTaskItem(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = task.customerName, style = smSemiBold.copy(color = CustomerText))
+                                Text(
+                                    text = task.customerName,
+                                    style = smSemiBold.copy(color = CustomerText)
+                                )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                         }
@@ -195,7 +201,10 @@ fun SellerTaskItem(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = task.clientPhone, style = smNormal.copy(color = CustomerText))
+                                Text(
+                                    text = task.clientPhone,
+                                    style = smNormal.copy(color = CustomerText)
+                                )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                         }

@@ -32,13 +32,12 @@ class LoginViewModel(
 
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)
-        if (throwable is APIException && !throwable.errorMessage.isNullOrBlank()) {
-            emitContextEvent { context ->
-                ToastHelper.showLongToaster(context, throwable.errorMessage)
+        val exception = throwable.toComposeUIException().also {
+            if (it.code == RemoteConstants.UNAUTHORIZED_CODE) {
+                it.code = 0
             }
-        } else {
-            emitComposeUIExceptionEvent(throwable.toComposeUIException())
         }
+        emitComposeUIExceptionEvent(exception)
     }
 
 
@@ -54,7 +53,12 @@ class LoginViewModel(
                     this.selectedUserType
                 )
             }
+            is LoginAction.ResetState -> resetState()
         }
+    }
+
+    private fun resetState() {
+        _viewState.value = LoginViewState()
     }
 
     private fun onUserTypeChanged(type: UserType) {
