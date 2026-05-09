@@ -76,7 +76,7 @@ fun PartnerStatisticsSection(
     selectedYear: Int = LocalDate.now().year,
     onMonthYearChanged: (month: Int, year: Int) -> Unit = { _, _ -> }
 ) {
-    var isExpanded by remember { mutableStateOf(true) }
+    var isExpanded by remember { mutableStateOf(false) }
     val rotationAngle by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
         animationSpec = tween(300),
