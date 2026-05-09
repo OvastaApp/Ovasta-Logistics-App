@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.R
@@ -57,6 +58,7 @@ import com.ovasta.logisticsapp.base.smNormal
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.text.font.FontWeight
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.xsRegular
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
@@ -121,8 +123,10 @@ fun PartnerStatisticsSection(
                         )
                         // Collapsed summary - show net profit (profit - withdrawals)
                         if (!isExpanded) {
-                            val netProfit = (statistics.deliveryProfitSum ?: 0.0) - (statistics.withdrawTransactionsSum ?: 0.0)
-                            val netColor = if (netProfit >= 0.0) Color(0xFF4CAF50) else Color(0xFFE57373)
+                            val netProfit = (statistics.deliveryProfitSum
+                                ?: 0.0) - (statistics.withdrawTransactionsSum ?: 0.0)
+                            val netColor =
+                                if (netProfit >= 0.0) Color(0xFF4CAF50) else Color(0xFFE57373)
                             Text(
                                 text = String.format(
                                     stringResource(R.string.price_currency),
@@ -222,11 +226,47 @@ private fun MonthYearFilter(
     var monthExpanded by remember { mutableStateOf(false) }
     var yearExpanded by remember { mutableStateOf(false) }
 
-    val currentYear = LocalDate.now().year
-    val years = (2026..currentYear).toList().reversed()
+    val monthRotation by animateFloatAsState(
+        targetValue = if (monthExpanded) 180f else 0f,
+        animationSpec = tween(300),
+        label = "monthIconRotation"
+    )
+    val yearRotation by animateFloatAsState(
+        targetValue = if (yearExpanded) 180f else 0f,
+        animationSpec = tween(300),
+        label = "yearIconRotation"
+    )
+
+    val today = LocalDate.now()
+    val currentYear = today.year
+    val currentMonth = today.monthValue
+    val startYear = 2026
+
+    // Years from 2026 up to current year (descending). Ensure at least 2026 is present.
+    val years = remember(currentYear) {
+        if (currentYear < startYear) listOf(startYear)
+        else (startYear..currentYear).toList().reversed()
+    }
+
+    // Months allowed for the currently selected year
+    val availableMonths = remember(selectedYear, currentYear, currentMonth) {
+        if (selectedYear >= currentYear) (1..currentMonth).toList()
+        else (1..12).toList()
+    }
+
+    val monthName = remember(selectedMonth) {
+        String.format(Locale.ENGLISH, "%02d", selectedMonth)
+    }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            .background(Color(0xFFF5F5F5))
+            .padding(
+                horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
+                vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+            ),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -238,21 +278,33 @@ private fun MonthYearFilter(
                 shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
             ) {
                 Text(
-                    text = selectedMonth.toString(),
+                    text = monthName,
                     style = xsMedium.copy(color = Gray800),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Icon(
+                    painter = painterResource(R.drawable.ic_black_arrow_down),
+                    contentDescription = "Change month",
+                    tint = Gray500,
+                    modifier = Modifier
+                        .size(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                        .rotate(monthRotation)
                 )
             }
             DropdownMenu(
                 expanded = monthExpanded,
                 onDismissRequest = { monthExpanded = false }
             ) {
-                (1..12).forEach { month ->
+                availableMonths.forEach { month ->
+                    val name = String.format(Locale.ENGLISH, "%02d", month)
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = month.toString(),
+                                text = name,
                                 style = xsMedium.copy(
                                     color = if (month == selectedMonth) Primary else Gray800,
                                     fontWeight = if (month == selectedMonth) FontWeight.SemiBold else FontWeight.Normal
@@ -278,7 +330,18 @@ private fun MonthYearFilter(
                 Text(
                     text = selectedYear.toString(),
                     style = xsMedium.copy(color = Gray800),
-                    maxLines = 1
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Icon(
+                    painter = painterResource(R.drawable.ic_black_arrow_down),
+                    contentDescription = "Change year",
+                    tint = Gray500,
+                    modifier = Modifier
+                        .size(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                        .rotate(yearRotation)
                 )
             }
             DropdownMenu(
@@ -298,7 +361,13 @@ private fun MonthYearFilter(
                         },
                         onClick = {
                             yearExpanded = false
-                            onMonthYearChanged(selectedMonth, year)
+                            // Clamp month if switching to current year and selected month is in the future
+                            val newMonth = if (year >= currentYear && selectedMonth > currentMonth) {
+                                currentMonth
+                            } else {
+                                selectedMonth
+                            }
+                            onMonthYearChanged(newMonth, year)
                         }
                     )
                 }
@@ -345,7 +414,7 @@ private fun StatCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = label,
-                    style = xsMedium.copy(color = Gray500),
+                    style = xsRegular.copy(color = Gray500),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -399,7 +468,9 @@ private fun IncentivesProgressCard(
                     Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                     Text(
                         text = if (!incentives.month.isNullOrBlank()) {
-                            stringResource(R.string.incentives) + " (" + formatMonthDisplay(incentives.month!!) + ")"
+                            stringResource(R.string.incentives) + " (" + formatMonthDisplay(
+                                incentives.month!!
+                            ) + ")"
                         } else {
                             stringResource(R.string.incentives)
                         },
@@ -439,8 +510,15 @@ private fun IncentivesProgressCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (bonusPercentage > 0.0) {
                             Text(
-                                text = String.format(Locale.ENGLISH, stringResource(R.string.bonus_percentage), bonusPercentage.toInt()),
-                                style = xsMedium.copy(color = Color(0xFF4CAF50), fontWeight = FontWeight.SemiBold),
+                                text = String.format(
+                                    Locale.ENGLISH,
+                                    stringResource(R.string.bonus_percentage),
+                                    bonusPercentage.toInt()
+                                ),
+                                style = xsMedium.copy(
+                                    color = Color(0xFF4CAF50),
+                                    fontWeight = FontWeight.SemiBold
+                                ),
                                 maxLines = 1
                             )
                         }
@@ -458,7 +536,10 @@ private fun IncentivesProgressCard(
                                     stringResource(R.string.price_currency),
                                     formatAmount(bonusAmount)
                                 ),
-                                style = xsMedium.copy(color = Color(0xFF4CAF50), fontWeight = FontWeight.SemiBold),
+                                style = xsMedium.copy(
+                                    color = Color(0xFF4CAF50),
+                                    fontWeight = FontWeight.SemiBold
+                                ),
                                 maxLines = 1
                             )
                         }
@@ -559,7 +640,11 @@ private fun MilestoneRow(
                 text = if (isAchieved) {
                     stringResource(R.string.achieved)
                 } else {
-                    String.format(Locale.ENGLISH, stringResource(R.string.remaining_orders), remaining)
+                    String.format(
+                        Locale.ENGLISH,
+                        stringResource(R.string.remaining_orders),
+                        remaining
+                    )
                 },
                 style = xsMedium.copy(
                     color = progressColor,
