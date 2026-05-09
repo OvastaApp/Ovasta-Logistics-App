@@ -32,7 +32,13 @@ class LoginViewModel(
 
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)
-        emitComposeUIExceptionEvent(throwable.toComposeUIException())
+        if (throwable is APIException && !throwable.errorMessage.isNullOrBlank()) {
+            emitContextEvent { context ->
+                ToastHelper.showLongToaster(context, throwable.errorMessage)
+            }
+        } else {
+            emitComposeUIExceptionEvent(throwable.toComposeUIException())
+        }
     }
 
 
@@ -91,20 +97,7 @@ class LoginViewModel(
 
     private fun login(phone: String, password: String, userType: UserType) {
         val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-            setComposeUILoading(false)
-            if (throwable is APIException) {
-                if (throwable.code == RemoteConstants.UNAUTHORIZED_CODE) {
-                    emitContextEvent { context ->
-                        ToastHelper.showLongToaster(
-                            context, throwable.errorMessage
-                        )
-                    }
-                } else {
-                    error.value = throwable
-                }
-            } else {
-                error.value = throwable
-            }
+            updateViewStateWithFail(throwable)
         }
 
         viewModelScope.launch(dispatcher + coroutineExceptionHandler) {
@@ -116,16 +109,8 @@ class LoginViewModel(
                 user.token = response.token
                 settingsRepository.saveUserData(user)
                 setComposeUILoading(false)
-//                loginRepository.authenticateWithFirebase(user.firebaseToken, onSuccess = {
-//                    setComposeUILoading(false)
                 emitScreenDirectionEvent(ScreenDirection.Replace(Home))
-//                }, onFailure = {
-//                    setComposeUILoading(false)
-//                })
             }.onFailure {
-                if (it is APIException) {
-                    updateViewState { state -> state.copy(isPhoneValid = false) }
-                }
                 updateViewStateWithFail(it)
             }
         }
