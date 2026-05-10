@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import android.content.Context
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.nav.Home
 import com.ovasta.logisticsapp.presentation.nav.Login
@@ -120,8 +121,7 @@ class HomeViewModel(
             is HomeScreenActions.OnMonthYearFilterChanged -> {
                 _viewState.update {
                     it.copy(
-                        monthFilter = tasksScreenAction.month,
-                        yearFilter = tasksScreenAction.year
+                        monthFilter = tasksScreenAction.month, yearFilter = tasksScreenAction.year
                     )
                 }
                 getPartnerStatistics()
@@ -346,6 +346,19 @@ class HomeViewModel(
         }
     }
 
+    fun changeDeliveryOrderStatus(orderId: Int, status: OrderSteps) {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.changeOrderStatus(orderId, status)
+            }.onSuccess {
+                setComposeUILoading(false)
+            }.onFailure {
+                updateViewStateWithFail(it)
+            }
+        }
+    }
+
 
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)
@@ -355,8 +368,9 @@ class HomeViewModel(
     private fun isLocationEnabled(): Boolean {
         val locationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
-        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+            android.location.LocationManager.NETWORK_PROVIDER
+        )
     }
 
     fun updateUiState(homeViewState: HomeViewState) {

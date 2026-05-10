@@ -5,9 +5,8 @@ import android.content.Intent
 import android.util.Log
 import com.ovasta.logisticsapp.base.services.LocationTrackerService
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
-import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class HomeRepository(
@@ -77,4 +76,8 @@ class HomeRepository(
         month: Int,
         year: Int,
     ) = homeServerRemoteDataSource.getPartnerStatistics(month, year)
+
+    override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps) =
+        homeServerRemoteDataSource.changeOrderStatus(orderId, status)
+
 }

@@ -194,9 +194,8 @@
     <string name="product_price_format">%.2f EGP</string>
     <string name="source_label">Source: %s</string>
     <string name="statistics_tracking_hint">Enable tracking to view your statistics, profits, and incentives.</string>
-    <string name="seller_info">Seller Info</string>
-    <string name="customer_info">Customer Info</string>
-    <string name="customer_data_hidden">Available after pickup</string>
+    <string name="sender_info">Sender Info</string>
+    <string name="receiver_info">Receiver Info</string>
     <string name="seller_tasks">Seller Tasks</string>
     <string name="error">Error</string>
     <string name="ok">OK</string>

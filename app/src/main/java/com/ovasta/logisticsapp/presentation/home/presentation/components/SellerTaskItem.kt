@@ -5,16 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,14 +24,11 @@ import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
 fun SellerTaskItem(
     task: SellerTask,
     currency: String,
-    onCallSeller: (String) -> Unit,
-    onNavigateToSeller: (Double, Double) -> Unit,
-    onCallCustomer: (String) -> Unit,
-    onNavigateToCustomer: (Double, Double) -> Unit,
+    onCallSender: (String) -> Unit,
+    onCallReceiver: (String) -> Unit,
     onClick: () -> Unit
 ) {
-    val isPicked = task.statusId >= OrderSteps.toStatus(OrderSteps.Picked)
-    val statusColor = when (OrderSteps.fromStatusId(task.statusId)) {
+    val statusColor = when (OrderSteps.fromStatusId(task.statusId ?: 0)) {
         OrderSteps.Pending -> StatusPending
         OrderSteps.Assigned -> StatusAssigned
         OrderSteps.Picked -> StatusPicked
@@ -59,10 +52,7 @@ fun SellerTaskItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "#${task.orderId}",
-                    style = mdSemiBold
-                )
+                Text(text = "#${task.orderId}", style = mdSemiBold)
                 Text(
                     text = task.statusName,
                     style = xsMedium.copy(color = statusColor),
@@ -74,7 +64,7 @@ fun SellerTaskItem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Seller Info Section
+            // Sender Info Section
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -82,35 +72,26 @@ fun SellerTaskItem(
                     .background(SellerBackground, RoundedCornerShape(8.dp))
                     .padding(12.dp)
             ) {
-
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.seller_info),
+                        text = stringResource(R.string.sender_info),
                         style = xsMedium.copy(color = SellerLabel)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = null,
-                            tint = SellerText,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = task.sellerName, style = smSemiBold.copy(color = SellerText))
-                    }
-                    if (!task.sellerAddress.isNullOrBlank()) {
+                    if (task.senderMobile.isNotBlank()) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Phone, contentDescription = null, tint = SellerText, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = task.senderMobile, style = smNormal.copy(color = SellerText))
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    if (task.fromAddress.isNotBlank()) {
                         Row(verticalAlignment = Alignment.Top) {
-                            Icon(
-                                Icons.Default.Home,
-                                contentDescription = null,
-                                tint = SellerText,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            Icon(Icons.Default.Home, contentDescription = null, tint = SellerText, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = task.sellerAddress,
+                                text = task.fromAddress,
                                 style = smNormal.copy(color = SellerText),
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
@@ -118,35 +99,12 @@ fun SellerTaskItem(
                             )
                         }
                     }
-                    if (!task.sellerMobile.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Phone,
-                                contentDescription = null,
-                                tint = SellerText,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = task.sellerMobile,
-                                style = smNormal.copy(color = SellerText)
-                            )
-                        }
-                    }
                 }
-                if (!task.sellerMobile.isNullOrBlank()) {
-                    IconButton(
-                        onClick = { onCallSeller(task.sellerMobile) },
-                        modifier = Modifier.size(40.dp)
-                    ) {
+                if (task.senderMobile.isNotBlank()) {
+                    IconButton(onClick = { onCallSender(task.senderMobile) }, modifier = Modifier.size(40.dp)) {
                         Icon(
-                            Icons.Default.Call,
-                            contentDescription = "Call Seller",
-                            tint = Base_white,
-                            modifier = Modifier
-                                .background(SellerAction, RoundedCornerShape(20.dp))
-                                .padding(8.dp)
+                            Icons.Default.Call, contentDescription = "Call Sender", tint = Base_white,
+                            modifier = Modifier.background(SellerAction, RoundedCornerShape(20.dp)).padding(8.dp)
                         )
                     }
                 }
@@ -154,107 +112,49 @@ fun SellerTaskItem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Customer Info Section
+            // Receiver Info Section
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        if (isPicked) CustomerBackground else CustomerBackgroundDisabled,
-                        RoundedCornerShape(8.dp)
-                    )
+                    .background(CustomerBackground, RoundedCornerShape(8.dp))
                     .padding(12.dp)
             ) {
-
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.customer_info),
-                        style = xsMedium.copy(
-                            color = if (isPicked) CustomerLabel else Gray500
-                        )
+                        text = stringResource(R.string.receiver_info),
+                        style = xsMedium.copy(color = CustomerLabel)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    if (isPicked) {
-                        if (!task.customerName.isNullOrBlank()) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Person,
-                                    contentDescription = null,
-                                    tint = CustomerText,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = task.customerName,
-                                    style = smSemiBold.copy(color = CustomerText)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        if (!task.clientPhone.isNullOrBlank()) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Phone,
-                                    contentDescription = null,
-                                    tint = CustomerText,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = task.clientPhone,
-                                    style = smNormal.copy(color = CustomerText)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        if (!task.customerAddress.isNullOrBlank()) {
-                            Row(verticalAlignment = Alignment.Top) {
-                                Icon(
-                                    Icons.Default.Home,
-                                    contentDescription = null,
-                                    tint = CustomerText,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = task.customerAddress,
-                                    style = smNormal.copy(color = CustomerText),
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                    } else {
+                    if (task.receiverMobile.isNotBlank()) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Lock,
-                                contentDescription = null,
-                                tint = Gray500,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(Icons.Default.Phone, contentDescription = null, tint = CustomerText, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = task.receiverMobile, style = smNormal.copy(color = CustomerText))
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    if (task.toAddress.isNotBlank()) {
+                        Row(verticalAlignment = Alignment.Top) {
+                            Icon(Icons.Default.Home, contentDescription = null, tint = CustomerText, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = stringResource(R.string.customer_data_hidden),
-                                style = smMedium.copy(color = Gray600)
+                                text = task.toAddress,
+                                style = smNormal.copy(color = CustomerText),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
                 }
 
-                if (isPicked && !task.clientPhone.isNullOrBlank()) {
-                    IconButton(
-                        onClick = { onCallCustomer(task.clientPhone) },
-                        modifier = Modifier.size(40.dp)
-                    ) {
+                if (task.receiverMobile.isNotBlank()) {
+                    IconButton(onClick = { onCallReceiver(task.receiverMobile) }, modifier = Modifier.size(40.dp)) {
                         Icon(
-                            Icons.Default.Call,
-                            contentDescription = "Call Customer",
-                            tint = Base_white,
-                            modifier = Modifier
-                                .background(CustomerAction, RoundedCornerShape(20.dp))
-                                .padding(8.dp)
+                            Icons.Default.Call, contentDescription = "Call Receiver", tint = Base_white,
+                            modifier = Modifier.background(CustomerAction, RoundedCornerShape(20.dp)).padding(8.dp)
                         )
                     }
                 }
@@ -270,19 +170,19 @@ fun SellerTaskItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(text = stringResource(R.string.total_price), style = xsMedium)
-                    Text(text = "${task.totalPrice} $currency", style = smSemiBold)
+                    Text(text = stringResource(R.string.delivery_fees), style = xsMedium)
+                    Text(text = "${task.deliveryPrice ?: 0} $currency", style = smMedium)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = stringResource(R.string.delivery_fees), style = xsMedium)
-                    Text(text = "${task.deliveryFees} $currency", style = smMedium)
+                    Text(text = stringResource(R.string.total_price), style = xsMedium)
+                    Text(text = "${task.collectionAmount ?: 0} $currency", style = smSemiBold)
                 }
             }
 
-            if (!task.notes.isNullOrBlank()) {
+            if (task.note.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = stringResource(R.string.notes), style = xsMedium)
-                Text(text = task.notes, style = smNormal)
+                Text(text = task.note, style = smNormal)
             }
         }
     }
@@ -294,25 +194,19 @@ fun SellerTaskItemPreview() {
     SellerTaskItem(
         task = SellerTask(
             orderId = 101,
-            sellerId = 1,
-            sellerName = "Shop ABC",
-            sellerMobile = "01012345678",
-            sellerAddress = "15 El-Tahrir St, Downtown, Cairo",
             statusId = 3,
             statusName = "Assigned",
-            customerName = "Ahmed",
-            customerAddress = "Nasr City, Cairo",
-            clientPhone = "01198765432",
-            totalPrice = 350f,
-            deliveryFees = 25.0,
-            itemsCount = 3,
-            notes = "Ring the bell twice"
+            senderMobile = "01012345678",
+            fromAddress = "15 El-Tahrir St, Downtown, Cairo",
+            toAddress = "Nasr City, Cairo",
+            receiverMobile = "01198765432",
+            deliveryPrice = 25,
+            collectionAmount = 350,
+            note = "Ring the bell twice"
         ),
         currency = "EGP",
-        onCallSeller = {},
-        onNavigateToSeller = { _, _ -> },
-        onCallCustomer = {},
-        onNavigateToCustomer = { _, _ -> },
+        onCallSender = {},
+        onCallReceiver = {},
         onClick = {}
     )
 }

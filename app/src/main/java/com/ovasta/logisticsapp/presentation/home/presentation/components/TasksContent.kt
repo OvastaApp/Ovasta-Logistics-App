@@ -171,17 +171,11 @@ fun TasksContent(
                             SellerTaskItem(
                                 task = task,
                                 currency = currency,
-                                onCallSeller = { phone ->
+                                onCallSender = { phone ->
                                     onTaskItemAction(HomeItemActions.CallRetailer(phone))
                                 },
-                                onNavigateToSeller = { lat, lng ->
-                                    onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
-                                },
-                                onCallCustomer = { phone ->
+                                onCallReceiver = { phone ->
                                     onTaskItemAction(HomeItemActions.CallRetailer(phone))
-                                },
-                                onNavigateToCustomer = { lat, lng ->
-                                    onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
                                 },
                                 onClick = {
                                     onTaskItemAction(HomeItemActions.TaskClicked(task.orderId))
@@ -228,22 +222,26 @@ fun TasksContent(
     }
 }
 
-@Preview
+@Preview(showBackground = true, locale = "ar")
 @Composable
 fun TasksContentPreview() {
     TasksContent(
         viewState = HomeViewState(
             sellerTasks = listOf(
                 SellerTask(
-                    orderId = 101,
-                    sellerName = "Shop ABC",
-                    sellerMobile = "01012345678",
-                    statusId = 3,
-                    statusName = "Assigned",
-                    totalPrice = 350f,
-                    deliveryFees = 25.0,
-                    itemsCount = 3
-                )
+                    orderId = 3,
+                    statusId = 2,
+                    statusName = "issued",
+                    senderMobile = "01012345678",
+                    fromAddress = "Nasr City, Cairo",
+                    toAddress = "Zamalek, Cairo",
+                    receiverMobile = "01198765432",
+                    deliveryPrice = 250,
+                    collectionAmount = 0,
+                    note = "",
+                    createdAt = "2026-04-03T09:15:00Z",
+                    updatedAt = "2026-04-03T10:45:00Z"
+                ),
             ),
             isTracking = false,
             showToastMessage = null

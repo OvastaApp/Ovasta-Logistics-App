@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 import android.content.Context
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
@@ -47,4 +48,7 @@ interface IHomeRepository {
         month: Int,
         year: Int,
     ): ApiResponse<PartnerStatistics>
+
+    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps)
+
 }
