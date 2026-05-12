@@ -24,4 +24,6 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
             else -> homeApi.deliverDeliveryOrder(orderId)
         }
     }
+
+    override suspend fun getAssignedDeliveryOrders() = homeApi.getDeliveryOrders().data
 }

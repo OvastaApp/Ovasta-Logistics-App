@@ -6,13 +6,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_COURIER_ID_NAME
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DELIVERY_ORDERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
-import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_SELLERS_ORDERS_NAME
-import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
-import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -40,7 +39,7 @@ class HomeFirebaseRemoteDataSource(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getAssignedTasks(userId: Int, districtId: Int): Flow<List<HomeTask>> =
+    override suspend fun getAssignedOrders(userId: Int, districtId: Int): Flow<List<HomeTask>> =
         callbackFlow {
             val listenerRegistration =
                 db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
@@ -61,88 +60,6 @@ class HomeFirebaseRemoteDataSource(
         }.flatMapLatest { orderIds ->
             listenToOrdersChanges(orderIds, districtId)
         }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getAvailableSellerOrders(
-        userId: Int, districtId: Int
-    ): Flow<List<SellerTask>> {
-
-        val collection = db.collection(FIRESTORE_ROOT_DISTRICT_NAME)
-            .document(districtId.toString())
-            .collection(FIRESTORE_ROOT_SELLERS_ORDERS_NAME)
-
-        val myOrdersQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, userId)
-        val nullCourierQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, null)
-        val emptyCourierQuery = collection.whereEqualTo(FIRESTORE_COURIER_ID_NAME, 0)
-
-        // First: emit the merged set of matching document IDs from the 3 queries
-        val idsFlow: Flow<Set<String>> = callbackFlow {
-            val queryOwnedIds = mutableMapOf<Int, Set<String>>()
-            val listeners = mutableListOf<ListenerRegistration>()
-
-            listOf(myOrdersQuery, nullCourierQuery, emptyCourierQuery)
-                .forEachIndexed { index, query ->
-                    val registration = query.addSnapshotListener { value, error ->
-                        if (error != null) {
-                            Log.e("sellerOrders", "Error fetching seller order ids", error)
-                            close(error)
-                            return@addSnapshotListener
-                        }
-                        val currentIds =
-                            value?.documents?.map { it.id }?.toSet() ?: emptySet()
-                        queryOwnedIds[index] = currentIds
-
-                        val mergedIds = queryOwnedIds.values.flatten().toSet()
-                        trySend(mergedIds)
-                    }
-                    listeners.add(registration)
-                }
-
-            awaitClose { listeners.forEach { it.remove() } }
-        }
-
-        // Then: switch to per-document listeners so any field change is observed
-        return idsFlow.flatMapLatest { ids ->
-            listenToSellerOrdersChanges(ids.toList(), collection)
-        }
-    }
-
-    private fun listenToSellerOrdersChanges(
-        orderIds: List<String>,
-        collection: com.google.firebase.firestore.CollectionReference
-    ): Flow<List<SellerTask>> = callbackFlow {
-
-        if (orderIds.isEmpty()) {
-            trySend(emptyList())
-            return@callbackFlow awaitClose { }
-        }
-
-        val tasksMap = mutableMapOf<String, SellerTask>()
-        val listeners = mutableListOf<ListenerRegistration>()
-
-        orderIds.forEach { orderId ->
-            val registration = collection.document(orderId)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) {
-                        Log.e("sellerOrderDocListener", "Error", error)
-                        return@addSnapshotListener
-                    }
-                    if (snapshot == null || !snapshot.exists()) {
-                        if (tasksMap.remove(orderId) != null) {
-                            trySend(tasksMap.values.toList())
-                        }
-                        return@addSnapshotListener
-                    }
-                    snapshot.toObject(SellerTask::class.java)?.let { task ->
-                        tasksMap[orderId] = task
-                        trySend(tasksMap.values.toList())
-                    }
-                }
-            listeners.add(registration)
-        }
-
-        awaitClose { listeners.forEach { it.remove() } }
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenToOrdersChanges(
@@ -182,4 +99,42 @@ class HomeFirebaseRemoteDataSource(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun listenToNewDeliveryTasks(
+        userId: Int,
+        districtId: Int
+    ): Flow<List<DeliveryTask>> = callbackFlow {
+
+        val listenerRegistration = db
+            .collection(FIRESTORE_ROOT_DISTRICT_NAME)
+            .document(districtId.toString())
+            .collection(FIRESTORE_ROOT_DELIVERY_ORDERS_NAME)
+            .addSnapshotListener { value, error ->
+
+                if (error != null) {
+                    Log.e("assignedOrders", "Error fetching orders", error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val orders = value?.documents?.mapNotNull { document ->
+                    Log.d("sda", "${document.id.toIntOrNull() ?: 0}")
+                    try {
+                        document.toObject(DeliveryTask::class.java)?.copy(
+                            orderId = document.id.toIntOrNull() ?: 0
+                        )
+                    } catch (e: Exception) {
+                        Log.d("Exceptionss", "Error parsing document ${document.id}: ${e.message}")
+                        null
+                    }
+
+                } ?: emptyList()
+
+                trySend(orders)
+            }
+
+        awaitClose {
+            listenerRegistration.remove()
+        }
+    }
 }

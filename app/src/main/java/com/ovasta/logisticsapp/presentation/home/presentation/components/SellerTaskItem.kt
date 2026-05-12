@@ -18,11 +18,11 @@ import androidx.compose.ui.unit.dp
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.*
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
-import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 
 @Composable
 fun SellerTaskItem(
-    task: SellerTask,
+    task: DeliveryTask,
     currency: String,
     onCallSender: (String) -> Unit,
     onCallReceiver: (String) -> Unit,
@@ -192,7 +192,7 @@ fun SellerTaskItem(
 @Composable
 fun SellerTaskItemPreview() {
     SellerTaskItem(
-        task = SellerTask(
+        task = DeliveryTask(
             orderId = 101,
             statusId = 3,
             statusName = "Assigned",

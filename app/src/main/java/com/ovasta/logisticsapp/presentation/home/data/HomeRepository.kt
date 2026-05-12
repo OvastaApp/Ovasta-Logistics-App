@@ -14,14 +14,14 @@ class HomeRepository(
     private val homeServerRemoteDataSource: IHomeServerRemoteDataSource,
     val settingsRepository: ISettingsRepository
 ) : IHomeRepository {
-    override suspend fun getAssignedTasks(
+    override suspend fun getAssignedOrders(
         userId: Int, districtId: Int
-    ) = homeFirebaseRemoteDataSource.getAssignedTasks(userId, districtId)
+    ) = homeFirebaseRemoteDataSource.getAssignedOrders(userId, districtId)
 
-    override suspend fun getAvailableSellerOrders(
+    override suspend fun listenToNewDeliveryTasks(
         userId: Int,
         districtId: Int
-    ) = homeFirebaseRemoteDataSource.getAvailableSellerOrders(
+    ) = homeFirebaseRemoteDataSource.listenToNewDeliveryTasks(
         userId = userId,
         districtId = districtId
     )
@@ -76,6 +76,9 @@ class HomeRepository(
         month: Int,
         year: Int,
     ) = homeServerRemoteDataSource.getPartnerStatistics(month, year)
+
+    override suspend fun getAssignedDeliveryOrders() =
+        homeServerRemoteDataSource.getAssignedDeliveryOrders()
 
     override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps) =
         homeServerRemoteDataSource.changeOrderStatus(orderId, status)

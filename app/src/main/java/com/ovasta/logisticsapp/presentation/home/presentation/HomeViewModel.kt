@@ -7,10 +7,7 @@ import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -18,11 +15,14 @@ import android.content.Context
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
-import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
-import com.ovasta.logisticsapp.presentation.nav.Home
 import com.ovasta.logisticsapp.presentation.nav.Login
 import com.ovasta.logisticsapp.presentation.nav.TaskDetails
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlin.math.log
 
 class HomeViewModel(
     private val context: Context,
@@ -35,43 +35,6 @@ class HomeViewModel(
     private var assignedTasksJob: Job? = null
     private var sellersTasksJob: Job? = null
 
-    fun getSellersTasks() {
-        sellersTasksJob?.cancel()
-        sellersTasksJob = viewModelScope.launch {
-            setComposeUILoading(true)
-            try {
-                homeRepository.getAvailableSellerOrders(userId = 1, districtId = 1)
-                    .collect { tasks ->
-                        setComposeUILoading(false)
-                        _viewState.update { it.copy(sellerTasks = tasks) }
-                    }
-            } catch (ex: Exception) {
-                if (ex is kotlinx.coroutines.CancellationException) throw ex
-                setComposeUILoading(false)
-                updateViewStateWithFail(ex)
-            }
-        }
-    }
-
-    fun getAssignedTasks() {
-        assignedTasksJob?.cancel()
-        assignedTasksJob = viewModelScope.launch {
-            setComposeUILoading(true)
-            try {
-                homeRepository.getAssignedTasks(userId = 1, districtId = 1).collect { tasks ->
-                    setComposeUILoading(false)
-                    _viewState.update { it.copy(tasks = tasks, filteredTasks = tasks) }
-                }
-            } catch (ex: Exception) {
-                if (ex is kotlinx.coroutines.CancellationException) throw ex
-                setComposeUILoading(false)
-                updateViewStateWithFail(ex)
-            }
-        }
-    }
-
-    private val _searchKey = MutableStateFlow<String?>(null)
-    var searchKey: StateFlow<String?> = _searchKey
 
     private val _currency = MutableStateFlow("")
     val currency: StateFlow<String> = _currency
@@ -86,21 +49,71 @@ class HomeViewModel(
 
     var startedTaskId = 0
 
+    fun listenToNewDeliveryTasks() {
+        sellersTasksJob?.cancel()
+        sellersTasksJob = viewModelScope.launch {
+            setComposeUILoading(true)
+            delay(3000)
+            try {
+                homeRepository.listenToNewDeliveryTasks(userId = 234, districtId = 1)
+                    .collect { tasks ->
+                        setComposeUILoading(false)
+                        Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
+                        _viewState.update { it.copy(deliveryTasks = tasks) }
+                    }
+            } catch (ex: Exception) {
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
+                setComposeUILoading(false)
+                updateViewStateWithFail(ex)
+            }
+        }
+    }
+
+    fun getAssignedOrders() {
+        assignedTasksJob?.cancel()
+        assignedTasksJob = viewModelScope.launch {
+            setComposeUILoading(true)
+            try {
+                homeRepository.getAssignedOrders(userId = 234, districtId = 1).collect { tasks ->
+                    setComposeUILoading(false)
+                    _viewState.update { it.copy(tasks = tasks) }
+                }
+            } catch (ex: Exception) {
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
+                setComposeUILoading(false)
+                updateViewStateWithFail(ex)
+            }
+        }
+    }
+
+    fun getAssignedDeliveryOrders() {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.getAssignedDeliveryOrders()
+            }.onSuccess {
+                setComposeUILoading(false)
+                updateUiState(_viewState.value.copy(deliveryTasks = it))
+            }.onFailure {
+                updateViewStateWithFail(it)
+            }
+        }
+    }
+
     init {
-        observeSearchKey()
         getPartnerStatus()
         getPartnerStatistics()
+//        getAssignedOrders()
+        listenToNewDeliveryTasks()
+
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
         when (tasksScreenAction) {
-            is HomeScreenActions.OnSearchKeyChange -> {
-                _searchKey.value = tasksScreenAction.searchKey
-            }
+
 
             is HomeScreenActions.ClearToastMessage -> clearToastMessage()
             HomeScreenActions.LoadTasks -> {}
-            HomeScreenActions.OnSearchTriggered -> {}
             HomeScreenActions.RefreshTasks -> {
                 getPartnerStatistics()
                 getPartnerStatus()
@@ -228,35 +241,6 @@ class HomeViewModel(
         }
     }
 
-    fun taskClicked(homeTask: HomeTask) {
-    }
-
-    private fun observeSearchKey() {
-
-    }
-
-    fun updateSearchKey(query: String) {
-        _searchKey.value = query
-    }
-
-    fun searchTasks() {
-        val query = _searchKey.value
-        if (query.isNullOrBlank()) {
-            updateUiState(_viewState.value.copy(filteredTasks = _viewState.value.tasks))
-            return
-        } else {
-            viewState.value.tasks.filter {
-                it.customerName?.contains(
-                    query, ignoreCase = true
-                ) == true || it.taskId.toString()
-                    .contains(query, ignoreCase = true) || it.clientPhone?.contains(
-                    query, ignoreCase = true
-                ) == true
-            }.let { filteredTasks ->
-                updateUiState(_viewState.value.copy(filteredTasks = filteredTasks))
-            }
-        }
-    }
 
     fun logout() {
         viewModelScope.launch {
@@ -330,18 +314,6 @@ class HomeViewModel(
             }.onFailure {
                 setComposeUILoading(false)
                 emitComposeUIExceptionEvent(it.toComposeUIException())
-
-//                updateUiState(
-//                    viewState.value.copy(
-//                        partnerStatistics = PartnerStatistics(
-//                            2300.0,
-//                            1500.0,
-//                            7,
-//                            50,
-//                            "2024-12-31"
-//                        )
-//                    )
-//                )
             }
         }
     }

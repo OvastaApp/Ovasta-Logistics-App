@@ -10,11 +10,10 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @IgnoreExtraProperties
 @Keep
-data class SellerTask(
+data class DeliveryTask(
     @get:PropertyName("order_id")
     @PropertyName("order_id")
-    val orderId: Int,
-
+    val orderId: Int = 0,
     @get:PropertyName("status_id")
     @PropertyName("status_id")
     val statusId: Int? = null,
@@ -53,10 +52,10 @@ data class SellerTask(
 
     @get:PropertyName("created_at")
     @PropertyName("created_at")
-    val createdAt: String = "",
+    val createdAt: Timestamp? = null,
 
     @get:PropertyName("updated_at")
     @PropertyName("updated_at")
-    val updatedAt: String = ""
+    val updatedAt: Timestamp? = null
 
 ) : Parcelable

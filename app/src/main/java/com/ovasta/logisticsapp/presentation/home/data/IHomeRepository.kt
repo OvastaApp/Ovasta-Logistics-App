@@ -6,18 +6,18 @@ import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
-import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import kotlinx.coroutines.flow.Flow
 
 interface IHomeRepository {
-    suspend fun getAssignedTasks(
+    suspend fun getAssignedOrders(
         userId: Int,
         districtId: Int
     ): Flow<List<HomeTask>>
 
-    suspend fun getAvailableSellerOrders(
+    suspend fun listenToNewDeliveryTasks(
         userId: Int, districtId: Int
-    ): Flow<List<SellerTask>>
+    ): Flow<List<DeliveryTask>>
 
     /**
      * Starts location tracking by launching the LocationTrackerService
@@ -49,6 +49,9 @@ interface IHomeRepository {
         year: Int,
     ): ApiResponse<PartnerStatistics>
 
+    suspend fun getAssignedDeliveryOrders(): List<DeliveryTask>
+
     suspend fun changeOrderStatus(orderId: Int, status: OrderSteps)
+
 
 }

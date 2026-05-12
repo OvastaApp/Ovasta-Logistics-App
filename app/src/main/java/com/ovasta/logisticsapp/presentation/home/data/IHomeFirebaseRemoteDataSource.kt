@@ -1,22 +1,19 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
-import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
-import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
-import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
-import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import kotlinx.coroutines.flow.Flow
 
 interface IHomeFirebaseRemoteDataSource {
-    suspend fun getAssignedTasks(
+    suspend fun getAssignedOrders(
         userId: Int,
         districtId: Int
     ): Flow<List<HomeTask>>
 
-    suspend fun getAvailableSellerOrders(
+    suspend fun listenToNewDeliveryTasks(
         userId: Int,
         districtId: Int
-    ): Flow<List<SellerTask>>
+    ): Flow<List<DeliveryTask>>
 
 
     suspend fun logLocation(

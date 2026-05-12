@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AcceptOrderRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import retrofit2.http.Body
@@ -23,6 +24,9 @@ interface HomeApi {
         @Query("month") month: Int,
         @Query("year") year: Int,
     ): ApiResponse<PartnerStatistics>
+
+    @GET("delivery-orders")
+    suspend fun getDeliveryOrders(): ApiResponse<List<DeliveryTask>>
 
     @POST("delivery-orders/{id}/accept")
     suspend fun acceptDeliveryOrder(@Path("id") orderId: Int)

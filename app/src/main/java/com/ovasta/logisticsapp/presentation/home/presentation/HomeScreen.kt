@@ -15,18 +15,18 @@ import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
-import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
+import kotlin.time.Instant
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel) {
     val context = LocalContext.current
     val navigator = LocalNavigator.current
     val viewState by viewModel.viewState.collectAsState()
-    val searchKey by viewModel.searchKey.collectAsState()
     val currency by viewModel.currency.collectAsState()
     BaseScreen(
         viewModel = viewModel
@@ -61,7 +61,6 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
         TasksContent(
             viewState = viewState,
-            searchKey = searchKey ?: "",
             currency = currency,
             startedTaskId = viewModel.startedTaskId,
             partnerStatistics = viewState.partnerStatistics,
@@ -83,8 +82,8 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
 private fun fakeHomeViewState(): HomeViewState {
     return HomeViewState(
-        sellerTasks = listOf(
-            SellerTask(
+        deliveryTasks = listOf(
+            DeliveryTask(
                 orderId = 1,
                 statusId = 1,
                 statusName = "in-progress",
@@ -95,10 +94,10 @@ private fun fakeHomeViewState(): HomeViewState {
                 deliveryPrice = 250,
                 collectionAmount = 0,
                 note = "Handle with care",
-                createdAt = "2026-04-01T10:00:00Z",
-                updatedAt = "2026-04-01T12:00:00Z"
+                createdAt = null,
+                updatedAt = null
             ),
-             SellerTask(
+            DeliveryTask(
                 orderId = 2,
                 statusId = 3,
                 statusName = "pending",
@@ -109,10 +108,10 @@ private fun fakeHomeViewState(): HomeViewState {
                 deliveryPrice = 480,
                 collectionAmount = 0,
                 note = "Fragile item",
-                createdAt = "2026-04-02T14:30:00Z",
-                updatedAt = "2026-04-02T15:00:00Z"
+                createdAt = null,
+                updatedAt = null
             ),
-             SellerTask(
+            DeliveryTask(
                 orderId = 3,
                 statusId = 2,
                 statusName = "issued",
@@ -123,41 +122,9 @@ private fun fakeHomeViewState(): HomeViewState {
                 deliveryPrice = 250,
                 collectionAmount = 0,
                 note = "",
-                createdAt = "2026-04-03T09:15:00Z",
-                updatedAt = "2026-04-03T10:45:00Z"
+                createdAt = null,
+                updatedAt = null
             ),
-        ),
-        filteredTasks = listOf(
-            HomeTask(
-                taskId = 1,
-                statusId = 1,
-                statusName = "in-progress",
-                totalPrice = 250f,
-                clientPhone = "01012345678",
-                customerAddress = "Nasr City, Cairo",
-                clientLang = 30.0444,
-                clientLat = 31.2357
-            ),
-            HomeTask(
-                taskId = 3,
-                statusId = 2,
-                statusName = "issued",
-                totalPrice = 250f,
-                clientPhone = "01012345678",
-                customerAddress = "Nasr City, Cairo",
-                clientLang = 30.0444,
-                clientLat = 31.2357
-            ),
-            HomeTask(
-                taskId = 2,
-                statusId = 3,
-                statusName = "pending",
-                totalPrice = 480f,
-                clientPhone = "01198765432",
-                customerAddress = "Maadi, Cairo",
-                clientLang = 29.9602,
-                clientLat = 31.2569
-            )
         ),
         showToastMessage = null
     )
@@ -168,7 +135,6 @@ private fun fakeHomeViewState(): HomeViewState {
 fun TasksContentPreview() {
     TasksContent(
         viewState = fakeHomeViewState(),
-        searchKey = "",
         currency = "EGP",
         startedTaskId = -1,
         partnerStatistics = PartnerStatistics(

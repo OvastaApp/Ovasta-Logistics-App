@@ -17,10 +17,8 @@ sealed interface HomeItemActions {
 
 sealed interface HomeScreenActions {
     data object LoadTasks : HomeScreenActions
-    data class OnSearchKeyChange(val searchKey: String) : HomeScreenActions
     data object ClearToastMessage : HomeScreenActions
 
-    data object OnSearchTriggered : HomeScreenActions
     data object RefreshTasks : HomeScreenActions
 
     object ToggleTracking : HomeScreenActions

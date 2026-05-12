@@ -39,7 +39,7 @@ import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.components.sharedComposable.ToastMsg
 import com.ovasta.logisticsapp.base.mdRegular
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
-import com.ovasta.logisticsapp.presentation.home.data.model.SellerTask
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewState
@@ -50,7 +50,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun TasksContent(
     viewState: HomeViewState,
-    searchKey: String,
     currency: String,
     startedTaskId: Int,
     partnerStatistics: PartnerStatistics?,
@@ -156,7 +155,7 @@ fun TasksContent(
                     }
 
                     // Seller Tasks section
-                    if (viewState.sellerTasks.isNotEmpty()) {
+                    if (viewState.deliveryTasks.isNotEmpty()) {
                         item(key = "seller_tasks_header") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                             Text(
@@ -167,7 +166,7 @@ fun TasksContent(
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
-                        items(viewState.sellerTasks, key = { it.orderId }) { task ->
+                        items(viewState.deliveryTasks, key = { it.orderId }) { task ->
                             SellerTaskItem(
                                 task = task,
                                 currency = currency,
@@ -227,8 +226,8 @@ fun TasksContent(
 fun TasksContentPreview() {
     TasksContent(
         viewState = HomeViewState(
-            sellerTasks = listOf(
-                SellerTask(
+            deliveryTasks = listOf(
+                DeliveryTask(
                     orderId = 3,
                     statusId = 2,
                     statusName = "issued",
@@ -239,14 +238,13 @@ fun TasksContentPreview() {
                     deliveryPrice = 250,
                     collectionAmount = 0,
                     note = "",
-                    createdAt = "2026-04-03T09:15:00Z",
-                    updatedAt = "2026-04-03T10:45:00Z"
+                    createdAt = null,
+                    updatedAt = null
                 ),
             ),
             isTracking = false,
             showToastMessage = null
         ),
-        searchKey = "",
         currency = "EGP",
         startedTaskId = -1,
         partnerStatistics = null,
