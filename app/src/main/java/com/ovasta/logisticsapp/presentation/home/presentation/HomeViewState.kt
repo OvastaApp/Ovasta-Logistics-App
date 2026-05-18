@@ -9,6 +9,8 @@ import java.time.LocalDate
 data class HomeViewState(
     val tasks: List<HomeTask> = emptyList(),
     val deliveryTasks: List<DeliveryTask> = emptyList(),
+    val assignedDeliveryTasks: List<DeliveryTask> = emptyList(),
+    val newDeliveryTasksAlert: List<DeliveryTask> = emptyList(),
     val error: ComposeUIException? = null,
     val showToastMessage: Int? = null,
     val isTracking: Boolean = false,

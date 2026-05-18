@@ -13,6 +13,8 @@ sealed interface HomeItemActions {
     data class CallRetailer(val clientPhone: String) : HomeItemActions
     data class WhatsAppRetailer(val clientWhatsapp: String) : HomeItemActions
     data object DismissContactBottomSheet : HomeItemActions
+    data class AcceptDeliveryTask(val orderId: Int) : HomeItemActions
+    data class DismissNewTaskAlert(val orderId: Int) : HomeItemActions
 }
 
 sealed interface HomeScreenActions {

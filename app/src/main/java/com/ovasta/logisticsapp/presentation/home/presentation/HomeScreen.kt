@@ -17,10 +17,10 @@ import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
+import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
-import kotlin.time.Instant
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel) {
@@ -76,6 +76,19 @@ fun HomeScreen(viewModel: HomeViewModel) {
             }, onDismiss = {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
+
+        if (viewState.newDeliveryTasksAlert.isNotEmpty()) {
+            NewDeliveryTaskBottomSheet(
+                tasks = viewState.newDeliveryTasksAlert,
+                currency = currency,
+                onAccept = { orderId ->
+                    viewModel.onTaskItemAction(HomeItemActions.AcceptDeliveryTask(orderId))
+                },
+                onDismiss = { orderId ->
+                    viewModel.onTaskItemAction(HomeItemActions.DismissNewTaskAlert(orderId))
+                }
+            )
+        }
 
     }
 }

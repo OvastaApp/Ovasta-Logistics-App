@@ -154,8 +154,34 @@ fun TasksContent(
                         }
                     }
 
-                    // Seller Tasks section
-                    if (viewState.deliveryTasks.isNotEmpty()) {
+                    // Pending delivery tasks (available to accept) - shown above Tasks
+                    val assignedIds = viewState.assignedDeliveryTasks.map { it.orderId }.toSet()
+                    val pendingTasks = viewState.deliveryTasks.filter { it.orderId !in assignedIds && it.statusId == 1 }
+
+                    if (pendingTasks.isNotEmpty()) {
+                        item(key = "pending_tasks_header") {
+                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                            Text(
+                                text = stringResource(R.string.new_delivery_tasks),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        items(pendingTasks, key = { "pending_${it.orderId}" }) { task ->
+                            PendingDeliveryTaskItem(
+                                task = task,
+                                currency = currency,
+                                onAccept = { onTaskItemAction(HomeItemActions.AcceptDeliveryTask(task.orderId)) }
+                            )
+                        }
+                    }
+
+                    // Assigned tasks section (already assigned to user)
+                    val assignedTasks = viewState.assignedDeliveryTasks
+
+                    if (assignedTasks.isNotEmpty()) {
                         item(key = "seller_tasks_header") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                             Text(
@@ -166,7 +192,7 @@ fun TasksContent(
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
-                        items(viewState.deliveryTasks, key = { it.orderId }) { task ->
+                        items(assignedTasks, key = { it.orderId }) { task ->
                             SellerTaskItem(
                                 task = task,
                                 currency = currency,
@@ -181,7 +207,9 @@ fun TasksContent(
                                 }
                             )
                         }
-                    } else {
+                    }
+
+                    if (pendingTasks.isEmpty() && assignedTasks.isEmpty()) {
                         item(key = "empty") {
                             Box(
                                 modifier = Modifier

@@ -197,6 +197,10 @@
     <string name="sender_info">Sender Info</string>
     <string name="receiver_info">Receiver Info</string>
     <string name="seller_tasks">Seller Tasks</string>
+    <string name="accept_order">Accept Order</string>
+    <string name="new_delivery_tasks">New Delivery Tasks</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
     <string name="error">Error</string>
     <string name="ok">OK</string>
 </resources>

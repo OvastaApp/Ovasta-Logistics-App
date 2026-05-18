@@ -59,7 +59,16 @@ class HomeViewModel(
                     .collect { tasks ->
                         setComposeUILoading(false)
                         Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
-                        _viewState.update { it.copy(deliveryTasks = tasks) }
+                        val previousIds = _viewState.value.deliveryTasks.map { it.orderId }.toSet()
+                        val newTasks = tasks.filter { it.orderId !in previousIds }
+                        _viewState.update { state ->
+                            state.copy(
+                                deliveryTasks = tasks,
+                                newDeliveryTasksAlert = if (previousIds.isNotEmpty() && newTasks.isNotEmpty())
+                                    (state.newDeliveryTasksAlert + newTasks).distinctBy { it.orderId }
+                                else state.newDeliveryTasksAlert
+                            )
+                        }
                     }
             } catch (ex: Exception) {
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
@@ -93,7 +102,7 @@ class HomeViewModel(
                 homeRepository.getAssignedDeliveryOrders()
             }.onSuccess {
                 setComposeUILoading(false)
-                updateUiState(_viewState.value.copy(deliveryTasks = it))
+                _viewState.update { state -> state.copy(assignedDeliveryTasks = it) }
             }.onFailure {
                 updateViewStateWithFail(it)
             }
@@ -104,8 +113,8 @@ class HomeViewModel(
         getPartnerStatus()
         getPartnerStatistics()
 //        getAssignedOrders()
-        listenToNewDeliveryTasks()
-
+//        listenToNewDeliveryTasks()
+//        getAssignedDeliveryOrders()
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -189,6 +198,16 @@ class HomeViewModel(
 
             is HomeItemActions.DismissContactBottomSheet -> {
                 _showContactSheet.value = null
+            }
+
+            is HomeItemActions.AcceptDeliveryTask -> {
+                acceptDeliveryOrder(taskItemAction.orderId)
+            }
+
+            is HomeItemActions.DismissNewTaskAlert -> {
+                _viewState.update { state ->
+                    state.copy(newDeliveryTasksAlert = state.newDeliveryTasksAlert.filter { it.orderId != taskItemAction.orderId })
+                }
             }
 
             else -> {
@@ -325,6 +344,30 @@ class HomeViewModel(
                 homeRepository.changeOrderStatus(orderId, status)
             }.onSuccess {
                 setComposeUILoading(false)
+            }.onFailure {
+                updateViewStateWithFail(it)
+            }
+        }
+    }
+
+    private fun acceptDeliveryOrder(orderId: Int) {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.changeOrderStatus(orderId, OrderSteps.Assigned)
+            }.onSuccess {
+                setComposeUILoading(false)
+                // Remove from alerts and pending list optimistically
+                _viewState.update { state ->
+                    state.copy(
+                        newDeliveryTasksAlert = state.newDeliveryTasksAlert.filter { it.orderId != orderId },
+                        deliveryTasks = state.deliveryTasks.filter { it.orderId != orderId }
+                    )
+                }
+                // Refresh assigned orders
+             //   getAssignedDeliveryOrders()
+                // Re-listen for pending tasks
+//                listenToNewDeliveryTasks()
             }.onFailure {
                 updateViewStateWithFail(it)
             }
