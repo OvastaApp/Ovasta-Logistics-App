@@ -38,7 +38,11 @@ class HomeViewModel(
     private var alertTimerJob: Job? = null
     private val _taskAlertTimestamps = mutableMapOf<Int, Long>()
     val taskAlertTimestamps: Map<Int, Long> get() = _taskAlertTimestamps
-    private val _seenTaskIds = mutableSetOf<Int>()
+    
+    // Persist seen task IDs across app restarts
+    private val prefs = context.getSharedPreferences("delivery_alerts", Context.MODE_PRIVATE)
+    private val _seenTaskIds = prefs.getStringSet("seen_task_ids", emptySet())!!
+        .mapTo(mutableSetOf()) { it.toInt() }
 
 
     private val _currency = MutableStateFlow("")
@@ -65,16 +69,12 @@ class HomeViewModel(
                         setComposeUILoading(false)
                         Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
                         
-                        // Filter out already-seen tasks (prevents re-showing on refresh)
-                        val newTasks = tasks.filter { it.orderId !in _seenTaskIds }
-                        
-                        // Mark new tasks as seen
-                        newTasks.forEach { task ->
-                            _seenTaskIds.add(task.orderId)
-                        }
-
-                        // Sync queue/current with Firebase reality (remove tasks that disappeared from Firebase)
+                        // Cleanup stale IDs (tasks no longer in Firebase)
                         val currentTaskIds = tasks.map { it.orderId }.toSet()
+                        _seenTaskIds.removeAll { it !in currentTaskIds }
+                        persistSeenTaskIds()
+                        
+                        // Sync queue/current with Firebase reality (remove tasks that disappeared from Firebase)
                         _viewState.update { state ->
                             val syncedQueue = state.alertQueue.filter { it.orderId in currentTaskIds }
                             val syncedCurrent = if (state.currentAlertTask?.orderId in currentTaskIds) {
@@ -87,6 +87,15 @@ class HomeViewModel(
                                 alertQueue = syncedQueue,
                                 currentAlertTask = syncedCurrent
                             )
+                        }
+
+                        // Filter out tasks that are already handled or currently in pipeline
+                        val alreadyInPipeline = buildSet {
+                            _viewState.value.currentAlertTask?.orderId?.let { add(it) }
+                            addAll(_viewState.value.alertQueue.map { it.orderId })
+                        }
+                        val newTasks = tasks.filter { 
+                            it.orderId !in _seenTaskIds && it.orderId !in alreadyInPipeline 
                         }
 
                         // Queue new tasks only if tracking is enabled
@@ -170,7 +179,9 @@ class HomeViewModel(
                 if (currentTask != null) {
                     val timestamp = _taskAlertTimestamps[currentTask.orderId]
                     if (timestamp != null && System.currentTimeMillis() - timestamp >= 30_000) {
-                        // Current task expired → pop next from queue
+                        // Current task expired → mark as seen and pop next from queue
+                        _seenTaskIds.add(currentTask.orderId)
+                        persistSeenTaskIds()
                         _taskAlertTimestamps.remove(currentTask.orderId)
                         popNextTaskFromQueue()
                     }
@@ -199,6 +210,10 @@ class HomeViewModel(
                 )
             }
         }
+    }
+
+    private fun persistSeenTaskIds() {
+        prefs.edit().putStringSet("seen_task_ids", _seenTaskIds.map { it.toString() }.toSet()).apply()
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -288,7 +303,14 @@ class HomeViewModel(
             }
 
             is HomeItemActions.MinimizeBottomSheet -> {
-                _viewState.update { it.copy(bottomSheetMinimized = true) }
+                // Mark only current task as seen (not queued tasks)
+                _viewState.value.currentAlertTask?.orderId?.let { orderId ->
+                    _seenTaskIds.add(orderId)
+                    persistSeenTaskIds()
+                    _taskAlertTimestamps.remove(orderId)
+                }
+                // Clear current task (it's been marked as seen) — keep queue intact
+                _viewState.update { it.copy(currentAlertTask = null, bottomSheetMinimized = true) }
                 orderAlarmSound.stopAlarm()
             }
 
@@ -321,9 +343,6 @@ class HomeViewModel(
                 val unseenTasks = waitingTasks.filter { it.orderId !in _seenTaskIds }
                 
                 if (unseenTasks.isNotEmpty()) {
-                    // Mark as seen
-                    unseenTasks.forEach { _seenTaskIds.add(it.orderId) }
-                    
                     _viewState.update { state ->
                         if (state.currentAlertTask == null) {
                             // Show first task immediately
@@ -473,6 +492,10 @@ class HomeViewModel(
                 homeRepository.changeOrderStatus(orderId, OrderSteps.Assigned)
             }.onSuccess {
                 setComposeUILoading(false)
+                // Mark as seen and persist
+                _seenTaskIds.add(orderId)
+                persistSeenTaskIds()
+                
                 // Remove timestamp
                 _taskAlertTimestamps.remove(orderId)
                 
