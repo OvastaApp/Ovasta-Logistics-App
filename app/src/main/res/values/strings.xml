@@ -205,4 +205,8 @@
     <string name="to">To</string>
     <string name="error">Error</string>
     <string name="ok">OK</string>
+    <string name="confirm_pickup">Confirm Pickup</string>
+    <string name="confirm_delivery">Confirm Delivery</string>
+    <string name="confirm_pickup_message">Are you sure you want to mark this order as picked?</string>
+    <string name="confirm_delivery_message">Are you sure you want to mark this order as delivered?</string>
 </resources>
