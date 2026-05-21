@@ -25,7 +25,10 @@ import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.components.sharedComposable.NavigationAction
 import com.ovasta.logisticsapp.base.mdMedium
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import kotlin.text.ifEmpty
 
 @Composable
@@ -38,6 +41,7 @@ fun TaskCard(
     onContactClick: (String) -> Unit,
     onWhatsAppClick: (String) -> Unit,
     onClick: () -> Unit,
+    onStatusChangeClick: ((orderId: Int, OrderSteps) -> Unit)? = null,
 ) {
     Card(
         onClick = onClick,
@@ -125,6 +129,33 @@ fun TaskCard(
                 onContactClick = { onContactClick(homeTask.clientPhone ?: "") },
                 onWhatsAppClick = { onWhatsAppClick(homeTask.clientWhatsapp ?: "") }
             )
+
+            val currentStep = OrderSteps.fromStatusId(homeTask.statusId)
+            val nextStep = when (currentStep) {
+                is OrderSteps.Assigned -> OrderSteps.Picked
+                is OrderSteps.Picked -> OrderSteps.Delivered
+                else -> null
+            }
+
+            if (nextStep != null && onStatusChangeClick != null) {
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                
+                Button(
+                    onClick = { onStatusChangeClick(homeTask.taskId, nextStep) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("statusChangeButton_${homeTask.taskId}"),
+                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                ) {
+                    Text(
+                        text = when (nextStep) {
+                            is OrderSteps.Picked -> stringResource(R.string.confirm_pickup)
+                            is OrderSteps.Delivered -> stringResource(R.string.confirm_delivery)
+                            else -> ""
+                        }
+                    )
+                }
+            }
         }
     }
 }
