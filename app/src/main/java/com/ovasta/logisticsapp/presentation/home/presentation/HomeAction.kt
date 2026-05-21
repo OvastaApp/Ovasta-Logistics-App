@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.presentation.home.presentation
 
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 
 
 sealed interface HomeItemActions {
@@ -14,6 +15,7 @@ sealed interface HomeItemActions {
     data class WhatsAppRetailer(val clientWhatsapp: String) : HomeItemActions
     data object DismissContactBottomSheet : HomeItemActions
     data class AcceptDeliveryTask(val orderId: Int) : HomeItemActions
+    data class ChangeOrderStatus(val orderId: Int, val status: OrderSteps) : HomeItemActions
     data object MinimizeBottomSheet : HomeItemActions
     data object NavigateToAvailableTasks : HomeItemActions
 }
