@@ -156,14 +156,12 @@ fun TasksContent(
 
                     // Only show orders and tasks if tracking is enabled
                     if (viewState.isTracking) {
-                        // Summary card for available orders (minimized or expired)
-                        val availableCount = if (viewState.bottomSheetMinimized) {
-                            viewState.activeAlertTasks.size + viewState.expiredWaitingTasks.size
-                        } else {
-                            viewState.expiredWaitingTasks.size
-                        }
+                        // Summary card for available orders (all waiting tasks from Firebase)
+                        val availableCount = viewState.waitingDeliveryTasks.size
+                        val shouldShowSummary = viewState.bottomSheetMinimized || 
+                                              (viewState.currentAlertTask == null && availableCount > 0)
 
-                        if (availableCount > 0) {
+                        if (shouldShowSummary && availableCount > 0) {
                             item(key = "available_orders_card") {
                                 Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                                 AvailableOrdersSummaryCard(

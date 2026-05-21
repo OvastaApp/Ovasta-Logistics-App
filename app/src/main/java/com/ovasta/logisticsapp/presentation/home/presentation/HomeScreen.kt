@@ -95,12 +95,13 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
 
-        if (viewState.activeAlertTasks.isNotEmpty() && !viewState.bottomSheetMinimized && viewState.isTracking) {
+        val currentTask = viewState.currentAlertTask
+        if (currentTask != null && !viewState.bottomSheetMinimized && viewState.isTracking) {
             // Flashing screen overlay (like Uber)
             ScreenFlashOverlay()
 
             NewDeliveryTaskBottomSheet(
-                tasks = viewState.activeAlertTasks,
+                task = currentTask,
                 currency = currency,
                 taskAlertTimestamps = viewModel.taskAlertTimestamps,
                 onAccept = { orderId ->

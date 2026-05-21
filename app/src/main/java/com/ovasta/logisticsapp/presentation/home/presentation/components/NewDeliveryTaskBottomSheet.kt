@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -58,7 +56,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewDeliveryTaskBottomSheet(
-    tasks: List<DeliveryTask>,
+    task: DeliveryTask,
     currency: String,
     taskAlertTimestamps: Map<Int, Long>,
     onAccept: (Int) -> Unit,
@@ -92,12 +90,10 @@ fun NewDeliveryTaskBottomSheet(
                         text = stringResource(R.string.new_delivery_tasks),
                         style = mdSemiBold
                     )
-                    if (tasks.size == 1) {
-                        Text(
-                            text = " #${tasks.first().orderId}",
-                            style = mdSemiBold.copy(color = Primary)
-                        )
-                    }
+                    Text(
+                        text = " #${task.orderId}",
+                        style = mdSemiBold.copy(color = Primary)
+                    )
                 }
                 IconButton(onClick = { onMinimize() }) {
                     Icon(
@@ -107,17 +103,14 @@ fun NewDeliveryTaskBottomSheet(
                     )
                 }
             }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(tasks, key = { it.orderId }) { task ->
-                    val startTime = taskAlertTimestamps[task.orderId] ?: System.currentTimeMillis()
-                    DeliveryTaskAlertCard(
-                        task = task,
-                        currency = currency,
-                        alertStartTime = startTime,
-                        onAccept = { onAccept(task.orderId) }
-                    )
-                }
-            }
+            
+            val startTime = taskAlertTimestamps[task.orderId] ?: System.currentTimeMillis()
+            DeliveryTaskAlertCard(
+                task = task,
+                currency = currency,
+                alertStartTime = startTime,
+                onAccept = { onAccept(task.orderId) }
+            )
         }
     }
 }
@@ -239,7 +232,7 @@ private fun DeliveryTaskAlertCard(
                     .height(48.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Gray500.copy(alpha = 0.2f))
-                    .clickable { onAccept() }.padding(16.dp),
+                    .clickable { onAccept() },
                 contentAlignment = Alignment.Center
             ) {
                 // Draining progress background
@@ -267,21 +260,19 @@ fun PreviewDeliveryTaskBottomSheet() {
         onAccept = {},
         onMinimize = {},
         taskAlertTimestamps = mapOf(1 to System.currentTimeMillis() - 10_000),
-        tasks = listOf(
-            DeliveryTask(
-                orderId = 1,
-                statusId = 1,
-                statusName = "in-progress",
-                senderMobile = "01012345678",
-                fromAddress = "Nasr City, Cairo",
-                toAddress = "Maadi, Cairo",
-                receiverMobile = "01198765432",
-                deliveryPrice = 250,
-                collectionAmount = 0,
-                note = "Handle with care",
-                createdAt = null,
-                updatedAt = null
-            )
+        task = DeliveryTask(
+            orderId = 1,
+            statusId = 1,
+            statusName = "in-progress",
+            senderMobile = "01012345678",
+            fromAddress = "Nasr City, Cairo",
+            toAddress = "Maadi, Cairo",
+            receiverMobile = "01198765432",
+            deliveryPrice = 250,
+            collectionAmount = 0,
+            note = "Handle with care",
+            createdAt = null,
+            updatedAt = null
         )
     )
 }

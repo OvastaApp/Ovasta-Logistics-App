@@ -38,6 +38,7 @@ class HomeViewModel(
     private var alertTimerJob: Job? = null
     private val _taskAlertTimestamps = mutableMapOf<Int, Long>()
     val taskAlertTimestamps: Map<Int, Long> get() = _taskAlertTimestamps
+    private val _seenTaskIds = mutableSetOf<Int>()
 
 
     private val _currency = MutableStateFlow("")
@@ -63,35 +64,52 @@ class HomeViewModel(
                     .collect { tasks ->
                         setComposeUILoading(false)
                         Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
-                        val previousIds =
-                            _viewState.value.waitingDeliveryTasks.map { it.orderId }.toSet()
-                        val newTasks = tasks.filter { it.orderId !in previousIds }
-
-                        // Record timestamps for genuinely new tasks
-                        val now = System.currentTimeMillis()
+                        
+                        // Filter out already-seen tasks (prevents re-showing on refresh)
+                        val newTasks = tasks.filter { it.orderId !in _seenTaskIds }
+                        
+                        // Mark new tasks as seen
                         newTasks.forEach { task ->
-                            if (task.orderId !in _taskAlertTimestamps) {
-                                _taskAlertTimestamps[task.orderId] = now
-                            }
+                            _seenTaskIds.add(task.orderId)
                         }
 
+                        // Sync queue/current with Firebase reality (remove tasks that disappeared from Firebase)
+                        val currentTaskIds = tasks.map { it.orderId }.toSet()
                         _viewState.update { state ->
-                            // Only add to active alerts if tracking is enabled
-                            val newActiveAlerts = if (newTasks.isNotEmpty() && state.isTracking) {
-                                (state.activeAlertTasks + newTasks).distinctBy { it.orderId }
+                            val syncedQueue = state.alertQueue.filter { it.orderId in currentTaskIds }
+                            val syncedCurrent = if (state.currentAlertTask?.orderId in currentTaskIds) {
+                                state.currentAlertTask
                             } else {
-                                state.activeAlertTasks
+                                null
                             }
                             state.copy(
                                 waitingDeliveryTasks = tasks,
-                                activeAlertTasks = newActiveAlerts,
-                                // Re-open bottom sheet when new tasks arrive (only if tracking enabled)
-                                bottomSheetMinimized = if (newTasks.isNotEmpty() && state.isTracking) false else state.bottomSheetMinimized
+                                alertQueue = syncedQueue,
+                                currentAlertTask = syncedCurrent
                             )
                         }
 
-                        // Start alarm sound when new tasks arrive AND tracking is enabled
+                        // Queue new tasks only if tracking is enabled
                         if (newTasks.isNotEmpty() && _viewState.value.isTracking) {
+                            _viewState.update { state ->
+                                if (state.currentAlertTask == null) {
+                                    // No task showing → show first one immediately
+                                    val firstTask = newTasks.first()
+                                    _taskAlertTimestamps[firstTask.orderId] = System.currentTimeMillis()
+                                    state.copy(
+                                        currentAlertTask = firstTask,
+                                        alertQueue = state.alertQueue + newTasks.drop(1),
+                                        bottomSheetMinimized = false
+                                    )
+                                } else {
+                                    // Task already showing → queue all new tasks
+                                    state.copy(
+                                        alertQueue = state.alertQueue + newTasks,
+                                        bottomSheetMinimized = false
+                                    )
+                                }
+                            }
+                            // Start alarm sound when new tasks arrive
                             orderAlarmSound.startAlarm()
                         }
                     }
@@ -148,26 +166,37 @@ class HomeViewModel(
         alertTimerJob = viewModelScope.launch {
             while (true) {
                 delay(500)
-                val now = System.currentTimeMillis()
-                val expiredIds = _taskAlertTimestamps.filter { (_, timestamp) ->
-                    now - timestamp >= 30_000
-                }.keys
-
-                if (expiredIds.isNotEmpty()) {
-                    _viewState.update { state ->
-                        val newlyExpired =
-                            state.activeAlertTasks.filter { it.orderId in expiredIds }
-                        state.copy(
-                            activeAlertTasks = state.activeAlertTasks.filter { it.orderId !in expiredIds },
-                            expiredWaitingTasks = (state.expiredWaitingTasks + newlyExpired).distinctBy { it.orderId }
-                        )
-                    }
-                    expiredIds.forEach { _taskAlertTimestamps.remove(it) }
-                    // Stop alarm if no more active alerts
-                    if (_viewState.value.activeAlertTasks.isEmpty()) {
-                        orderAlarmSound.stopAlarm()
+                val currentTask = _viewState.value.currentAlertTask
+                if (currentTask != null) {
+                    val timestamp = _taskAlertTimestamps[currentTask.orderId]
+                    if (timestamp != null && System.currentTimeMillis() - timestamp >= 30_000) {
+                        // Current task expired → pop next from queue
+                        _taskAlertTimestamps.remove(currentTask.orderId)
+                        popNextTaskFromQueue()
                     }
                 }
+            }
+        }
+    }
+
+    private fun popNextTaskFromQueue() {
+        _viewState.update { state ->
+            val nextTask = state.alertQueue.firstOrNull()
+            if (nextTask != null) {
+                // Pop from queue, set as current with fresh timestamp
+                _taskAlertTimestamps[nextTask.orderId] = System.currentTimeMillis()
+                state.copy(
+                    currentAlertTask = nextTask,
+                    alertQueue = state.alertQueue.drop(1),
+                    bottomSheetMinimized = false
+                )
+            } else {
+                // Queue empty → clear current task, stop alarm
+                orderAlarmSound.stopAlarm()
+                state.copy(
+                    currentAlertTask = null,
+                    bottomSheetMinimized = false
+                )
             }
         }
     }
@@ -287,20 +316,31 @@ class HomeViewModel(
                 homeRepository.startLocationTracking(context)
                 updateUiState(_viewState.value.copy(isTracking = true))
 
-                // If there are waiting tasks, add them to active alerts and start alarm
+                // If there are waiting tasks not yet seen, queue them
                 val waitingTasks = _viewState.value.waitingDeliveryTasks
-                if (waitingTasks.isNotEmpty()) {
-                    val now = System.currentTimeMillis()
-                    // Reset timestamps - timer starts NOW (30s from when tracking is enabled)
-                    waitingTasks.forEach { task ->
-                        _taskAlertTimestamps[task.orderId] = now
-                    }
-                    // Add to active alerts and open bottom sheet
+                val unseenTasks = waitingTasks.filter { it.orderId !in _seenTaskIds }
+                
+                if (unseenTasks.isNotEmpty()) {
+                    // Mark as seen
+                    unseenTasks.forEach { _seenTaskIds.add(it.orderId) }
+                    
                     _viewState.update { state ->
-                        state.copy(
-                            activeAlertTasks = waitingTasks,
-                            bottomSheetMinimized = false
-                        )
+                        if (state.currentAlertTask == null) {
+                            // Show first task immediately
+                            val firstTask = unseenTasks.first()
+                            _taskAlertTimestamps[firstTask.orderId] = System.currentTimeMillis()
+                            state.copy(
+                                currentAlertTask = firstTask,
+                                alertQueue = state.alertQueue + unseenTasks.drop(1),
+                                bottomSheetMinimized = false
+                            )
+                        } else {
+                            // Queue all unseen tasks
+                            state.copy(
+                                alertQueue = state.alertQueue + unseenTasks,
+                                bottomSheetMinimized = false
+                            )
+                        }
                     }
                     // Start alarm
                     orderAlarmSound.startAlarm()
@@ -320,8 +360,8 @@ class HomeViewModel(
                 updateUiState(_viewState.value.copy(isTracking = false))
                 // Stop alarm when tracking is disabled
                 orderAlarmSound.stopAlarm()
-                // Clear active alerts
-                _viewState.update { it.copy(activeAlertTasks = emptyList()) }
+                // Clear current task and queue
+                _viewState.update { it.copy(currentAlertTask = null, alertQueue = emptyList()) }
             } catch (ex: Exception) {
                 updateUiState(_viewState.value.copy(isTracking = true))
                 error.value = ex
@@ -433,19 +473,19 @@ class HomeViewModel(
                 homeRepository.changeOrderStatus(orderId, OrderSteps.Assigned)
             }.onSuccess {
                 setComposeUILoading(false)
-                // Optimistically remove from alerts and waiting list
+                // Remove timestamp
                 _taskAlertTimestamps.remove(orderId)
+                
+                // Remove from waiting list
                 _viewState.update { state ->
                     state.copy(
-                        activeAlertTasks = state.activeAlertTasks.filter { it.orderId != orderId },
-                        expiredWaitingTasks = state.expiredWaitingTasks.filter { it.orderId != orderId },
                         waitingDeliveryTasks = state.waitingDeliveryTasks.filter { it.orderId != orderId }
                     )
                 }
-                // Stop alarm if no more active alerts
-                if (_viewState.value.activeAlertTasks.isEmpty()) {
-                    orderAlarmSound.stopAlarm()
-                }
+                
+                // Pop next task from queue
+                popNextTaskFromQueue()
+                
                 // Refresh assigned orders to get fresh data
                 getAssignedDeliveryOrders()
             }.onFailure {
