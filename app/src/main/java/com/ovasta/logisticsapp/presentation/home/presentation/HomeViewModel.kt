@@ -303,6 +303,10 @@ class HomeViewModel(
                 acceptDeliveryOrder(taskItemAction.orderId)
             }
 
+            is HomeItemActions.ChangeOrderStatus -> {
+                changeDeliveryOrderStatus(taskItemAction.orderId, taskItemAction.status)
+            }
+
             is HomeItemActions.MinimizeBottomSheet -> {
                 // Mark only current task as seen (not queued tasks)
                 _viewState.value.currentAlertTask?.orderId?.let { orderId ->
@@ -480,6 +484,7 @@ class HomeViewModel(
                 homeRepository.changeOrderStatus(orderId, status)
             }.onSuccess {
                 setComposeUILoading(false)
+                getAssignedDeliveryOrders()
             }.onFailure {
                 updateViewStateWithFail(it)
             }
