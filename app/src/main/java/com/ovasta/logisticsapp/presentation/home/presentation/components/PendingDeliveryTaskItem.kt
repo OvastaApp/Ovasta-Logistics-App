@@ -1,12 +1,9 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,12 +29,12 @@ fun PendingDeliveryTaskItem(
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Base_white)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Order ID
-            Text(text = "#${task.orderId}", style = mdSemiBold)
+            Text(text = "#${task.orderId}", style = mdSemiBold.copy(color = Primary))
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -48,8 +45,8 @@ fun PendingDeliveryTaskItem(
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .clip(CircleShape)
-                            .background(SellerAction)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(Primary)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -65,7 +62,7 @@ fun PendingDeliveryTaskItem(
                     modifier = Modifier
                         .padding(start = 4.dp)
                         .width(2.dp)
-                        .height(20.dp)
+                        .height(16.dp)
                         .background(Gray500.copy(alpha = 0.4f))
                 )
                 // Destination row
@@ -73,8 +70,8 @@ fun PendingDeliveryTaskItem(
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .clip(CircleShape)
-                            .background(CustomerAction)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(Gray500)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -87,8 +84,6 @@ fun PendingDeliveryTaskItem(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            HorizontalDivider()
             Spacer(modifier = Modifier.height(8.dp))
 
             // Delivery fees + Total price
@@ -104,10 +99,10 @@ fun PendingDeliveryTaskItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Column {
-                        Text(text = stringResource(R.string.delivery_fees), style = xsMedium)
-                        Text(text = "${task.deliveryPrice ?: 0} $currency", style = smMedium)
-                    }
+                    Text(
+                        text = "${task.deliveryPrice ?: 0} $currency",
+                        style = smNormal
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -117,23 +112,40 @@ fun PendingDeliveryTaskItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(text = stringResource(R.string.total_price), style = xsMedium)
-                        Text(text = "${task.collectionAmount ?: 0} $currency", style = smSemiBold)
-                    }
+                    Text(
+                        text = "${task.collectionAmount ?: 0} $currency",
+                        style = smNormal
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Accept button
-            Button(
-                onClick = onAccept,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SellerAction)
+            // Notes
+            if (task.note.isNotBlank()) {
+                Text(
+                    text = "${stringResource(R.string.notes)}: ${task.note}",
+                    style = smNormal
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            } else {
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            // Accept button (Box-based, matching bottom sheet style)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Primary)
+                    .clickable { onAccept() },
+                contentAlignment = Alignment.Center
             ) {
-                Text(text = stringResource(R.string.accept_order), style = smMedium.copy(color = Base_white))
+                Text(
+                    text = stringResource(R.string.accept_order),
+                    style = smMedium.copy(color = Base_white)
+                )
             }
         }
     }

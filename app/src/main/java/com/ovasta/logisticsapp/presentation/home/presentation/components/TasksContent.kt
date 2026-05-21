@@ -161,7 +161,12 @@ fun TasksContent(
                         val shouldShowSummary = viewState.bottomSheetMinimized || 
                                               (viewState.currentAlertTask == null && availableCount > 0)
 
-                        if (shouldShowSummary && availableCount > 0) {
+                        if (viewState.isAvailableTasksLoading) {
+                            item(key = "available_orders_shimmer") {
+                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                ShimmerAvailableOrdersCard()
+                            }
+                        } else if (shouldShowSummary && availableCount > 0) {
                             item(key = "available_orders_card") {
                                 Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                                 AvailableOrdersSummaryCard(
@@ -175,7 +180,12 @@ fun TasksContent(
                         val hasAppTasks = viewState.appTasks.isNotEmpty()
                         val hasDeliveryTasks = viewState.assignedDeliveryTasks.isNotEmpty()
 
-                        if (hasAppTasks || hasDeliveryTasks) {
+                        if (viewState.isTasksLoading) {
+                            item(key = "tasks_shimmer") {
+                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                ShimmerTasksList()
+                            }
+                        } else if (hasAppTasks || hasDeliveryTasks) {
                             item(key = "tasks_header") {
                                 Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                                 Text(
@@ -227,7 +237,7 @@ fun TasksContent(
                             }
                         }
 
-                        if (!hasAppTasks && !hasDeliveryTasks) {
+                        if (!hasAppTasks && !hasDeliveryTasks && !viewState.isTasksLoading) {
                             item(key = "empty") {
                                 Box(
                                     modifier = Modifier

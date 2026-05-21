@@ -61,12 +61,11 @@ class HomeViewModel(
     fun listenToNewDeliveryTasks() {
         sellersTasksJob?.cancel()
         sellersTasksJob = viewModelScope.launch {
-            setComposeUILoading(true)
-            delay(3000)
+            _viewState.update { it.copy(isAvailableTasksLoading = true) }
             try {
                 homeRepository.listenToNewDeliveryTasks(userId = 234, districtId = 1)
                     .collect { tasks ->
-                        setComposeUILoading(false)
+                        _viewState.update { it.copy(isAvailableTasksLoading = false) }
                         Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
                         
                         // Cleanup stale IDs (tasks no longer in Firebase)
@@ -124,7 +123,7 @@ class HomeViewModel(
                     }
             } catch (ex: Exception) {
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
-                setComposeUILoading(false)
+                _viewState.update { it.copy(isAvailableTasksLoading = false) }
                 updateViewStateWithFail(ex)
             }
         }
@@ -133,15 +132,14 @@ class HomeViewModel(
     fun getAssignedOrders() {
         assignedTasksJob?.cancel()
         assignedTasksJob = viewModelScope.launch {
-            setComposeUILoading(true)
+            _viewState.update { it.copy(isTasksLoading = true) }
             try {
                 homeRepository.getAssignedOrders(userId = 234, districtId = 1).collect { tasks ->
-                    setComposeUILoading(false)
-                    _viewState.update { it.copy(appTasks = tasks) }
+                    _viewState.update { it.copy(isTasksLoading = false, appTasks = tasks) }
                 }
             } catch (ex: Exception) {
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
-                setComposeUILoading(false)
+                _viewState.update { it.copy(isTasksLoading = false) }
                 updateViewStateWithFail(ex)
             }
         }
@@ -149,13 +147,13 @@ class HomeViewModel(
 
     fun getAssignedDeliveryOrders() {
         viewModelScope.launch {
-            setComposeUILoading(true)
+            _viewState.update { it.copy(isTasksLoading = true) }
             kotlin.runCatching {
                 homeRepository.getAssignedDeliveryOrders()
             }.onSuccess {
-                setComposeUILoading(false)
-                _viewState.update { state -> state.copy(assignedDeliveryTasks = it) }
+                _viewState.update { state -> state.copy(isTasksLoading = false, assignedDeliveryTasks = it) }
             }.onFailure {
+                _viewState.update { state -> state.copy(isTasksLoading = false) }
                 updateViewStateWithFail(it)
             }
         }
@@ -221,9 +219,12 @@ class HomeViewModel(
             is HomeScreenActions.ClearToastMessage -> clearToastMessage()
             HomeScreenActions.LoadTasks -> {}
             HomeScreenActions.RefreshTasks -> {
+                _viewState.update { it.copy(isTasksLoading = true, isAvailableTasksLoading = true) }
                 getPartnerStatistics()
                 getPartnerStatus()
                 listenToNewDeliveryTasks()
+                getAssignedOrders()
+                getAssignedDeliveryOrders()
             }
 
             HomeScreenActions.ToggleTracking -> {

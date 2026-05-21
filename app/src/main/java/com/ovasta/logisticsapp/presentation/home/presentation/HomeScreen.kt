@@ -95,24 +95,6 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
 
-        val currentTask = viewState.currentAlertTask
-        if (currentTask != null && !viewState.bottomSheetMinimized && viewState.isTracking) {
-            // Flashing screen overlay (like Uber)
-            ScreenFlashOverlay()
-
-            NewDeliveryTaskBottomSheet(
-                task = currentTask,
-                currency = currency,
-                taskAlertTimestamps = viewModel.taskAlertTimestamps,
-                onAccept = { orderId ->
-                    viewModel.onTaskItemAction(HomeItemActions.AcceptDeliveryTask(orderId))
-                },
-                onMinimize = {
-                    viewModel.onTaskItemAction(HomeItemActions.MinimizeBottomSheet)
-                }
-            )
-        }
-
     }
 }
 
@@ -212,7 +194,7 @@ fun TasksContentPreview() {
 }
 
 @Composable
-private fun ScreenFlashOverlay() {
+internal fun ScreenFlashOverlay() {
     val context = LocalContext.current
     val activity = context as? Activity
 

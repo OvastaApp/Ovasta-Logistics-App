@@ -28,7 +28,7 @@ interface HomeApi {
     @GET("delivery-orders")
     suspend fun getDeliveryOrders(): ApiResponse<List<DeliveryTask>>
 
-    @POST("delivery-orders/{id}/accept")
+    @GET("delivery-orders/{id}/accept")
     suspend fun acceptDeliveryOrder(@Path("id") orderId: Int)
 
     @POST("delivery-orders/{id}/pick")
