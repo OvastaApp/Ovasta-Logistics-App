@@ -38,11 +38,13 @@ import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.components.sharedComposable.ToastMsg
 import com.ovasta.logisticsapp.base.mdRegular
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewState
+import com.ovasta.logisticsapp.presentation.home.presentation.components.ConfirmStatusDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -61,6 +63,7 @@ fun TasksContent(
     var isRefreshing by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
     val coroutineScope = rememberCoroutineScope()
+    var confirmDialogState by remember { mutableStateOf<Pair<Int, OrderSteps>?>(null) }
 
     LaunchedEffect(viewState.showToastMessage) {
         if (viewState.showToastMessage != null) {
@@ -215,6 +218,9 @@ fun TasksContent(
                                     },
                                     onClick = {
                                         onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
+                                    },
+                                    onStatusChangeClick = { orderId, status ->
+                                        confirmDialogState = Pair(orderId, status)
                                     }
                                 )
                             }
@@ -274,6 +280,16 @@ fun TasksContent(
                     ToastMsg(text = toastText)
                 }
             }
+        }
+        confirmDialogState?.let { (orderId, status) ->
+            ConfirmStatusDialog(
+                status = status,
+                onConfirm = {
+                    onTaskItemAction(HomeItemActions.ChangeOrderStatus(orderId, status))
+                    confirmDialogState = null
+                },
+                onDismiss = { confirmDialogState = null }
+            )
         }
     }
 }
