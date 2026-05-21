@@ -196,9 +196,10 @@
     <string name="statistics_tracking_hint">قم بتفعيل التتبع لعرض الإحصائيات والأرباح والحوافز.</string>
     <string name="sender_info">بيانات المرسل</string>
     <string name="receiver_info">بيانات الاستلام</string>
-    <string name="customer_data_hidden">متاح بعد الاستلام</string>
     <string name="accept_order">قبول الطلب</string>
     <string name="new_delivery_tasks">طلبات توصيل جديدة</string>
+    <string name="orders_available_to_take">لديك %1$d طلبات متاحة للاستلام</string>
+    <string name="available_orders">الطلبات المتاحة</string>
     <string name="from">من</string>
     <string name="to">إلى</string>
     <string name="error">خطأ</string>

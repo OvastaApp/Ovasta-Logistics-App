@@ -199,6 +199,8 @@
     <string name="seller_tasks">Seller Tasks</string>
     <string name="accept_order">Accept Order</string>
     <string name="new_delivery_tasks">New Delivery Tasks</string>
+    <string name="orders_available_to_take">You have %1$d orders available to take</string>
+    <string name="available_orders">Available Orders</string>
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="error">Error</string>

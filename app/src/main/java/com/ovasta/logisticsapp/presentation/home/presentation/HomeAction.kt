@@ -14,7 +14,8 @@ sealed interface HomeItemActions {
     data class WhatsAppRetailer(val clientWhatsapp: String) : HomeItemActions
     data object DismissContactBottomSheet : HomeItemActions
     data class AcceptDeliveryTask(val orderId: Int) : HomeItemActions
-    data class DismissNewTaskAlert(val orderId: Int) : HomeItemActions
+    data object MinimizeBottomSheet : HomeItemActions
+    data object NavigateToAvailableTasks : HomeItemActions
 }
 
 sealed interface HomeScreenActions {

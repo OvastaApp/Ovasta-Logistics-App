@@ -7,10 +7,12 @@ import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import java.time.LocalDate
 
 data class HomeViewState(
-    val tasks: List<HomeTask> = emptyList(),
-    val deliveryTasks: List<DeliveryTask> = emptyList(),
+    val appTasks: List<HomeTask> = emptyList(),
+    val waitingDeliveryTasks: List<DeliveryTask> = emptyList(),
     val assignedDeliveryTasks: List<DeliveryTask> = emptyList(),
-    val newDeliveryTasksAlert: List<DeliveryTask> = emptyList(),
+    val activeAlertTasks: List<DeliveryTask> = emptyList(),
+    val expiredWaitingTasks: List<DeliveryTask> = emptyList(),
+    val bottomSheetMinimized: Boolean = false,
     val error: ComposeUIException? = null,
     val showToastMessage: Int? = null,
     val isTracking: Boolean = false,

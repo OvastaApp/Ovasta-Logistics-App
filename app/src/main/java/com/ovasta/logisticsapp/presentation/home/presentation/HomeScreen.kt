@@ -11,7 +11,6 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.openWhatsApp
-import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
@@ -19,6 +18,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
+import com.ovasta.logisticsapp.presentation.nav.AvailableTasks
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -53,6 +53,10 @@ fun HomeScreen(viewModel: HomeViewModel) {
                             context.openWhatsApp(event.clientWhatsapp)
                         }
 
+                        is HomeItemActions.NavigateToAvailableTasks -> {
+                            navigator.push(AvailableTasks)
+                        }
+
                         else -> Unit
                     }
                     viewModel.clearTasksItemActions()
@@ -77,15 +81,16 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
 
-        if (viewState.newDeliveryTasksAlert.isNotEmpty()) {
+        if (viewState.activeAlertTasks.isNotEmpty() && !viewState.bottomSheetMinimized) {
             NewDeliveryTaskBottomSheet(
-                tasks = viewState.newDeliveryTasksAlert,
+                tasks = viewState.activeAlertTasks,
                 currency = currency,
+                taskAlertTimestamps = viewModel.taskAlertTimestamps,
                 onAccept = { orderId ->
                     viewModel.onTaskItemAction(HomeItemActions.AcceptDeliveryTask(orderId))
                 },
-                onDismiss = { orderId ->
-                    viewModel.onTaskItemAction(HomeItemActions.DismissNewTaskAlert(orderId))
+                onMinimize = {
+                    viewModel.onTaskItemAction(HomeItemActions.MinimizeBottomSheet)
                 }
             )
         }
@@ -95,7 +100,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
 private fun fakeHomeViewState(): HomeViewState {
     return HomeViewState(
-        deliveryTasks = listOf(
+        waitingDeliveryTasks = listOf(
             DeliveryTask(
                 orderId = 1,
                 statusId = 1,

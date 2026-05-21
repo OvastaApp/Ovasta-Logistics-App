@@ -9,6 +9,7 @@ import com.ovasta.logisticsapp.presentation.home.data.IHomeFirebaseRemoteDataSou
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeServerRemoteDataSource
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewModel
+import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -21,4 +22,5 @@ val homeModule = module {
     single<IHomeRepository> { HomeRepository(get(), get(), get()) }
     single { LocationManager(androidContext()) }
     viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { AvailableTasksViewModel(get()) }
 }

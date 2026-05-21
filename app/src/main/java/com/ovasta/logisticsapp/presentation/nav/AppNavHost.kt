@@ -19,6 +19,8 @@ import com.ovasta.logisticsapp.presentation.auth.splash.SplashScreen
 import com.ovasta.logisticsapp.presentation.auth.splash.SplashViewModel
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewModel
+import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksScreen
+import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksViewModel
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.DropOfOrderDetailsScreen
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.TaskDetailsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -26,6 +28,7 @@ import org.koin.androidx.compose.koinViewModel
 data object Splash
 data object Login
 data object Home
+data object AvailableTasks
 data class TaskDetails(val taskId: Int)
 
 
@@ -56,6 +59,11 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                         is Home -> NavEntry(key) {
                             val viewModel: HomeViewModel = koinViewModel()
                             HomeScreen(viewModel)
+                        }
+
+                        is AvailableTasks -> NavEntry(key) {
+                            val viewModel: AvailableTasksViewModel = koinViewModel()
+                            AvailableTasksScreen(viewModel)
                         }
 
                         is TaskDetails -> NavEntry(key) {

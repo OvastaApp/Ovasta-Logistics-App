@@ -22,7 +22,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlin.math.log
 
 class HomeViewModel(
     private val context: Context,
@@ -34,6 +33,9 @@ class HomeViewModel(
 
     private var assignedTasksJob: Job? = null
     private var sellersTasksJob: Job? = null
+    private var alertTimerJob: Job? = null
+    private val _taskAlertTimestamps = mutableMapOf<Int, Long>()
+    val taskAlertTimestamps: Map<Int, Long> get() = _taskAlertTimestamps
 
 
     private val _currency = MutableStateFlow("")
@@ -59,14 +61,28 @@ class HomeViewModel(
                     .collect { tasks ->
                         setComposeUILoading(false)
                         Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
-                        val previousIds = _viewState.value.deliveryTasks.map { it.orderId }.toSet()
+                        val previousIds = _viewState.value.waitingDeliveryTasks.map { it.orderId }.toSet()
                         val newTasks = tasks.filter { it.orderId !in previousIds }
+
+                        // Record timestamps for genuinely new tasks
+                        val now = System.currentTimeMillis()
+                        newTasks.forEach { task ->
+                            if (task.orderId !in _taskAlertTimestamps) {
+                                _taskAlertTimestamps[task.orderId] = now
+                            }
+                        }
+
                         _viewState.update { state ->
+                            val newActiveAlerts = if (newTasks.isNotEmpty()) {
+                                (state.activeAlertTasks + newTasks).distinctBy { it.orderId }
+                            } else {
+                                state.activeAlertTasks
+                            }
                             state.copy(
-                                deliveryTasks = tasks,
-                                newDeliveryTasksAlert = if (previousIds.isNotEmpty() && newTasks.isNotEmpty())
-                                    (state.newDeliveryTasksAlert + newTasks).distinctBy { it.orderId }
-                                else state.newDeliveryTasksAlert
+                                waitingDeliveryTasks = tasks,
+                                activeAlertTasks = newActiveAlerts,
+                                // Re-open bottom sheet when new tasks arrive
+                                bottomSheetMinimized = if (newTasks.isNotEmpty()) false else state.bottomSheetMinimized
                             )
                         }
                     }
@@ -85,7 +101,7 @@ class HomeViewModel(
             try {
                 homeRepository.getAssignedOrders(userId = 234, districtId = 1).collect { tasks ->
                     setComposeUILoading(false)
-                    _viewState.update { it.copy(tasks = tasks) }
+                    _viewState.update { it.copy(appTasks = tasks) }
                 }
             } catch (ex: Exception) {
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
@@ -112,20 +128,44 @@ class HomeViewModel(
     init {
         getPartnerStatus()
         getPartnerStatistics()
-//        getAssignedOrders()
-//        listenToNewDeliveryTasks()
-//        getAssignedDeliveryOrders()
+        getAssignedOrders()
+        listenToNewDeliveryTasks()
+        getAssignedDeliveryOrders()
+        startAlertExpiryTimer()
+    }
+
+    private fun startAlertExpiryTimer() {
+        alertTimerJob?.cancel()
+        alertTimerJob = viewModelScope.launch {
+            while (true) {
+                delay(500)
+                val now = System.currentTimeMillis()
+                val expiredIds = _taskAlertTimestamps.filter { (_, timestamp) ->
+                    now - timestamp >= 30_000
+                }.keys
+
+                if (expiredIds.isNotEmpty()) {
+                    _viewState.update { state ->
+                        val newlyExpired = state.activeAlertTasks.filter { it.orderId in expiredIds }
+                        state.copy(
+                            activeAlertTasks = state.activeAlertTasks.filter { it.orderId !in expiredIds },
+                            expiredWaitingTasks = (state.expiredWaitingTasks + newlyExpired).distinctBy { it.orderId }
+                        )
+                    }
+                    expiredIds.forEach { _taskAlertTimestamps.remove(it) }
+                }
+            }
+        }
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
         when (tasksScreenAction) {
-
-
             is HomeScreenActions.ClearToastMessage -> clearToastMessage()
             HomeScreenActions.LoadTasks -> {}
             HomeScreenActions.RefreshTasks -> {
                 getPartnerStatistics()
                 getPartnerStatus()
+                listenToNewDeliveryTasks()
             }
 
             HomeScreenActions.ToggleTracking -> {
@@ -204,10 +244,8 @@ class HomeViewModel(
                 acceptDeliveryOrder(taskItemAction.orderId)
             }
 
-            is HomeItemActions.DismissNewTaskAlert -> {
-                _viewState.update { state ->
-                    state.copy(newDeliveryTasksAlert = state.newDeliveryTasksAlert.filter { it.orderId != taskItemAction.orderId })
-                }
+            is HomeItemActions.MinimizeBottomSheet -> {
+                _viewState.update { it.copy(bottomSheetMinimized = true) }
             }
 
             else -> {
@@ -357,17 +395,17 @@ class HomeViewModel(
                 homeRepository.changeOrderStatus(orderId, OrderSteps.Assigned)
             }.onSuccess {
                 setComposeUILoading(false)
-                // Remove from alerts and pending list optimistically
+                // Optimistically remove from alerts and waiting list
+                _taskAlertTimestamps.remove(orderId)
                 _viewState.update { state ->
                     state.copy(
-                        newDeliveryTasksAlert = state.newDeliveryTasksAlert.filter { it.orderId != orderId },
-                        deliveryTasks = state.deliveryTasks.filter { it.orderId != orderId }
+                        activeAlertTasks = state.activeAlertTasks.filter { it.orderId != orderId },
+                        expiredWaitingTasks = state.expiredWaitingTasks.filter { it.orderId != orderId },
+                        waitingDeliveryTasks = state.waitingDeliveryTasks.filter { it.orderId != orderId }
                     )
                 }
-                // Refresh assigned orders
-             //   getAssignedDeliveryOrders()
-                // Re-listen for pending tasks
-//                listenToNewDeliveryTasks()
+                // Refresh assigned orders to get fresh data
+                getAssignedDeliveryOrders()
             }.onFailure {
                 updateViewStateWithFail(it)
             }

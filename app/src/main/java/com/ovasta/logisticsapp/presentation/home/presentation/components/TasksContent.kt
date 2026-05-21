@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -28,7 +27,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,8 +34,10 @@ import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray500
+import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.components.sharedComposable.ToastMsg
 import com.ovasta.logisticsapp.base.mdRegular
+import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
@@ -154,45 +154,63 @@ fun TasksContent(
                         }
                     }
 
-                    // Pending delivery tasks (available to accept) - shown above Tasks
-                    val assignedIds = viewState.assignedDeliveryTasks.map { it.orderId }.toSet()
-                    val pendingTasks = viewState.deliveryTasks.filter { it.orderId !in assignedIds && it.statusId == 1 }
+                    // Summary card for available orders (minimized or expired)
+                    val availableCount = if (viewState.bottomSheetMinimized) {
+                        viewState.activeAlertTasks.size + viewState.expiredWaitingTasks.size
+                    } else {
+                        viewState.expiredWaitingTasks.size
+                    }
 
-                    if (pendingTasks.isNotEmpty()) {
-                        item(key = "pending_tasks_header") {
+                    if (availableCount > 0) {
+                        item(key = "available_orders_card") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-                            Text(
-                                text = stringResource(R.string.new_delivery_tasks),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                        }
-                        items(pendingTasks, key = { "pending_${it.orderId}" }) { task ->
-                            PendingDeliveryTaskItem(
-                                task = task,
-                                currency = currency,
-                                onAccept = { onTaskItemAction(HomeItemActions.AcceptDeliveryTask(task.orderId)) }
+                            AvailableOrdersSummaryCard(
+                                count = availableCount,
+                                onClick = { onTaskItemAction(HomeItemActions.NavigateToAvailableTasks) }
                             )
                         }
                     }
 
-                    // Assigned tasks section (already assigned to user)
-                    val assignedTasks = viewState.assignedDeliveryTasks
+                    // Unified assigned list (appTasks + assignedDeliveryTasks)
+                    val hasAppTasks = viewState.appTasks.isNotEmpty()
+                    val hasDeliveryTasks = viewState.assignedDeliveryTasks.isNotEmpty()
 
-                    if (assignedTasks.isNotEmpty()) {
-                        item(key = "seller_tasks_header") {
+                    if (hasAppTasks || hasDeliveryTasks) {
+                        item(key = "tasks_header") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                             Text(
                                 text = stringResource(R.string.tasks),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                color = MaterialTheme.colorScheme.onBackground,
+                                style = lgSemiBold,
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
-                        items(assignedTasks, key = { it.orderId }) { task ->
+
+                        // App tasks (HomeTask items)
+                        items(viewState.appTasks, key = { "app_${it.taskId}" }) { task ->
+                            TaskCard(
+                                homeTask = task,
+                                currency = currency,
+                                startedTaskId = startedTaskId,
+                                onTaskDetailsClick = { taskId, retailerId ->
+                                    onTaskItemAction(HomeItemActions.ShowTaskDetails(taskId, retailerId))
+                                },
+                                onDirectionClick = { lat, lng ->
+                                    onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
+                                },
+                                onContactClick = {
+                                    onTaskItemAction(HomeItemActions.OpenContactBottomSheet(task))
+                                },
+                                onWhatsAppClick = { whatsapp ->
+                                    onTaskItemAction(HomeItemActions.WhatsAppRetailer(whatsapp))
+                                },
+                                onClick = {
+                                    onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
+                                }
+                            )
+                        }
+
+                        // Assigned delivery tasks
+                        items(viewState.assignedDeliveryTasks, key = { "delivery_${it.orderId}" }) { task ->
                             SellerTaskItem(
                                 task = task,
                                 currency = currency,
@@ -209,7 +227,7 @@ fun TasksContent(
                         }
                     }
 
-                    if (pendingTasks.isEmpty() && assignedTasks.isEmpty()) {
+                    if (!hasAppTasks && !hasDeliveryTasks) {
                         item(key = "empty") {
                             Box(
                                 modifier = Modifier
@@ -254,7 +272,7 @@ fun TasksContent(
 fun TasksContentPreview() {
     TasksContent(
         viewState = HomeViewState(
-            deliveryTasks = listOf(
+            waitingDeliveryTasks = listOf(
                 DeliveryTask(
                     orderId = 3,
                     statusId = 2,
