@@ -154,91 +154,94 @@ fun TasksContent(
                         }
                     }
 
-                    // Summary card for available orders (minimized or expired)
-                    val availableCount = if (viewState.bottomSheetMinimized) {
-                        viewState.activeAlertTasks.size + viewState.expiredWaitingTasks.size
-                    } else {
-                        viewState.expiredWaitingTasks.size
-                    }
-
-                    if (availableCount > 0) {
-                        item(key = "available_orders_card") {
-                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-                            AvailableOrdersSummaryCard(
-                                count = availableCount,
-                                onClick = { onTaskItemAction(HomeItemActions.NavigateToAvailableTasks) }
-                            )
-                        }
-                    }
-
-                    // Unified assigned list (appTasks + assignedDeliveryTasks)
-                    val hasAppTasks = viewState.appTasks.isNotEmpty()
-                    val hasDeliveryTasks = viewState.assignedDeliveryTasks.isNotEmpty()
-
-                    if (hasAppTasks || hasDeliveryTasks) {
-                        item(key = "tasks_header") {
-                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-                            Text(
-                                text = stringResource(R.string.tasks),
-                                style = lgSemiBold,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
+                    // Only show orders and tasks if tracking is enabled
+                    if (viewState.isTracking) {
+                        // Summary card for available orders (minimized or expired)
+                        val availableCount = if (viewState.bottomSheetMinimized) {
+                            viewState.activeAlertTasks.size + viewState.expiredWaitingTasks.size
+                        } else {
+                            viewState.expiredWaitingTasks.size
                         }
 
-                        // App tasks (HomeTask items)
-                        items(viewState.appTasks, key = { "app_${it.taskId}" }) { task ->
-                            TaskCard(
-                                homeTask = task,
-                                currency = currency,
-                                startedTaskId = startedTaskId,
-                                onTaskDetailsClick = { taskId, retailerId ->
-                                    onTaskItemAction(HomeItemActions.ShowTaskDetails(taskId, retailerId))
-                                },
-                                onDirectionClick = { lat, lng ->
-                                    onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
-                                },
-                                onContactClick = {
-                                    onTaskItemAction(HomeItemActions.OpenContactBottomSheet(task))
-                                },
-                                onWhatsAppClick = { whatsapp ->
-                                    onTaskItemAction(HomeItemActions.WhatsAppRetailer(whatsapp))
-                                },
-                                onClick = {
-                                    onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
-                                }
-                            )
-                        }
-
-                        // Assigned delivery tasks
-                        items(viewState.assignedDeliveryTasks, key = { "delivery_${it.orderId}" }) { task ->
-                            SellerTaskItem(
-                                task = task,
-                                currency = currency,
-                                onCallSender = { phone ->
-                                    onTaskItemAction(HomeItemActions.CallRetailer(phone))
-                                },
-                                onCallReceiver = { phone ->
-                                    onTaskItemAction(HomeItemActions.CallRetailer(phone))
-                                },
-                                onClick = {
-                                    onTaskItemAction(HomeItemActions.TaskClicked(task.orderId))
-                                }
-                            )
-                        }
-                    }
-
-                    if (!hasAppTasks && !hasDeliveryTasks) {
-                        item(key = "empty") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp)),
-                                contentAlignment = Alignment.TopCenter
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.no_tasks_available),
-                                    style = mdRegular.copy(color = Gray500)
+                        if (availableCount > 0) {
+                            item(key = "available_orders_card") {
+                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                AvailableOrdersSummaryCard(
+                                    count = availableCount,
+                                    onClick = { onTaskItemAction(HomeItemActions.NavigateToAvailableTasks) }
                                 )
+                            }
+                        }
+
+                        // Unified assigned list (appTasks + assignedDeliveryTasks)
+                        val hasAppTasks = viewState.appTasks.isNotEmpty()
+                        val hasDeliveryTasks = viewState.assignedDeliveryTasks.isNotEmpty()
+
+                        if (hasAppTasks || hasDeliveryTasks) {
+                            item(key = "tasks_header") {
+                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                Text(
+                                    text = stringResource(R.string.tasks),
+                                    style = lgSemiBold,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+
+                            // App tasks (HomeTask items)
+                            items(viewState.appTasks, key = { "app_${it.taskId}" }) { task ->
+                                TaskCard(
+                                    homeTask = task,
+                                    currency = currency,
+                                    startedTaskId = startedTaskId,
+                                    onTaskDetailsClick = { taskId, retailerId ->
+                                        onTaskItemAction(HomeItemActions.ShowTaskDetails(taskId, retailerId))
+                                    },
+                                    onDirectionClick = { lat, lng ->
+                                        onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
+                                    },
+                                    onContactClick = {
+                                        onTaskItemAction(HomeItemActions.OpenContactBottomSheet(task))
+                                    },
+                                    onWhatsAppClick = { whatsapp ->
+                                        onTaskItemAction(HomeItemActions.WhatsAppRetailer(whatsapp))
+                                    },
+                                    onClick = {
+                                        onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
+                                    }
+                                )
+                            }
+
+                            // Assigned delivery tasks
+                            items(viewState.assignedDeliveryTasks, key = { "delivery_${it.orderId}" }) { task ->
+                                SellerTaskItem(
+                                    task = task,
+                                    currency = currency,
+                                    onCallSender = { phone ->
+                                        onTaskItemAction(HomeItemActions.CallRetailer(phone))
+                                    },
+                                    onCallReceiver = { phone ->
+                                        onTaskItemAction(HomeItemActions.CallRetailer(phone))
+                                    },
+                                    onClick = {
+                                        onTaskItemAction(HomeItemActions.TaskClicked(task.orderId))
+                                    }
+                                )
+                            }
+                        }
+
+                        if (!hasAppTasks && !hasDeliveryTasks) {
+                            item(key = "empty") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp)),
+                                    contentAlignment = Alignment.TopCenter
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.no_tasks_available),
+                                        style = mdRegular.copy(color = Gray500)
+                                    )
+                                }
                             }
                         }
                     }

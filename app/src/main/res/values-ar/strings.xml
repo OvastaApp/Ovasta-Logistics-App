@@ -193,7 +193,7 @@
     <string name="product_quantity">الكمية: %d</string>
     <string name="product_price_format">%.2f ج.م</string>
     <string name="source_label">المصدر: %s</string>
-    <string name="statistics_tracking_hint">قم بتفعيل التتبع لعرض الإحصائيات والأرباح والحوافز.</string>
+    <string name="statistics_tracking_hint">قم بتفعيل التتبع لعرض الإحصائيات واستقبال الطلبات.</string>
     <string name="sender_info">بيانات المرسل</string>
     <string name="receiver_info">بيانات الاستلام</string>
     <string name="accept_order">قبول الطلب</string>

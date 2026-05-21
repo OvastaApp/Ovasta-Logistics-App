@@ -98,7 +98,7 @@ fun PendingDeliveryTaskItem(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.LocalShipping,
+                        painter = painterResource(R.drawable.ic_delivery_fees),
                         contentDescription = null,
                         tint = Gray500,
                         modifier = Modifier.size(16.dp)
@@ -111,7 +111,7 @@ fun PendingDeliveryTaskItem(
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Payments,
+                        painter = painterResource(R.drawable.ic_total_price),
                         contentDescription = null,
                         tint = Gray500,
                         modifier = Modifier.size(16.dp)

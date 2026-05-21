@@ -21,6 +21,6 @@ val homeModule = module {
     single<IHomeServerRemoteDataSource> { HomeServerRemoteDataSource(get()) }
     single<IHomeRepository> { HomeRepository(get(), get(), get()) }
     single { LocationManager(androidContext()) }
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get()) }
     viewModel { AvailableTasksViewModel(get()) }
 }

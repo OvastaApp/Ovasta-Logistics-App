@@ -1,9 +1,23 @@
 package com.ovasta.logisticsapp.presentation.home.presentation
 
+import android.app.Activity
+import android.os.Build
+import android.view.WindowManager
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
@@ -81,7 +95,10 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
 
-        if (viewState.activeAlertTasks.isNotEmpty() && !viewState.bottomSheetMinimized) {
+        if (viewState.activeAlertTasks.isNotEmpty() && !viewState.bottomSheetMinimized && viewState.isTracking) {
+            // Flashing screen overlay (like Uber)
+            ScreenFlashOverlay()
+
             NewDeliveryTaskBottomSheet(
                 tasks = viewState.activeAlertTasks,
                 currency = currency,
@@ -190,5 +207,57 @@ fun TasksContentPreview() {
         ),
         onTasksScreenAction = {},
         onTaskItemAction = {}
+    )
+}
+
+@Composable
+private fun ScreenFlashOverlay() {
+    val context = LocalContext.current
+    val activity = context as? Activity
+
+    // Wake screen and keep it on while alert is active
+    DisposableEffect(Unit) {
+        activity?.window?.addFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            activity?.setTurnScreenOn(true)
+            activity?.setShowWhenLocked(true)
+        } else {
+            @Suppress("DEPRECATION")
+            activity?.window?.addFlags(
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+            )
+        }
+        onDispose {
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                activity?.setTurnScreenOn(false)
+                activity?.setShowWhenLocked(false)
+            } else {
+                @Suppress("DEPRECATION")
+                activity?.window?.clearFlags(
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                )
+            }
+        }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "flash")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "flashAlpha"
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Yellow.copy(alpha = alpha))
     )
 }

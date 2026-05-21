@@ -1,11 +1,13 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,15 +16,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetDefaults
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,14 +64,22 @@ fun NewDeliveryTaskBottomSheet(
     onAccept: (Int) -> Unit,
     onMinimize: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { false }
+    )
+
     ModalBottomSheet(
-        onDismissRequest = { onMinimize() },
+        onDismissRequest = {},
         sheetState = sheetState,
+        properties = ModalBottomSheetDefaults.properties(
+            shouldDismissOnBackPress = false
+        ),
+        dragHandle = null,
         containerColor = Color.White
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header with title and minimize icon
+            // Header with title and close button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,10 +87,25 @@ fun NewDeliveryTaskBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.new_delivery_tasks),
-                    style = mdSemiBold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.new_delivery_tasks),
+                        style = mdSemiBold
+                    )
+                    if (tasks.size == 1) {
+                        Text(
+                            text = " #${tasks.first().orderId}",
+                            style = mdSemiBold.copy(color = Primary)
+                        )
+                    }
+                }
+                IconButton(onClick = { onMinimize() }) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = Gray500
+                    )
+                }
             }
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(tasks, key = { it.orderId }) { task ->
@@ -125,23 +150,6 @@ private fun DeliveryTaskAlertCard(
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Order ID
-            Text(text = "#${task.orderId}", style = mdSemiBold)
-            Spacer(Modifier.height(8.dp))
-
-            // Progress bar countdown
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-                color = Primary,
-                trackColor = Gray500.copy(alpha = 0.2f),
-                strokeCap = StrokeCap.Round
-            )
-            Spacer(Modifier.height(8.dp))
-
             // Direction: origin and destination with vertical line
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -198,8 +206,8 @@ private fun DeliveryTaskAlertCard(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        "${stringResource(R.string.delivery_fees)}: ${task.deliveryPrice} $currency",
-                        style = xsMedium
+                        "${task.deliveryPrice} $currency",
+                        style = smNormal
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -211,8 +219,8 @@ private fun DeliveryTaskAlertCard(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        "${stringResource(R.string.total_price)}: ${task.collectionAmount} $currency",
-                        style = xsMedium
+                        "${task.collectionAmount} $currency",
+                        style = smNormal
                     )
                 }
             }
@@ -224,13 +232,24 @@ private fun DeliveryTaskAlertCard(
                 )
             }
             Spacer(Modifier.height(12.dp))
-            Button(
-                onClick = onAccept,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Primary
-                ),
-                modifier = Modifier.fillMaxWidth()
+            // Accept button with progress drain
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Gray500.copy(alpha = 0.2f))
+                    .clickable { onAccept() }.padding(16.dp),
+                contentAlignment = Alignment.Center
             ) {
+                // Draining progress background
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction = progress)
+                        .align(Alignment.CenterStart)
+                        .background(Primary)
+                )
                 Text(
                     stringResource(R.string.accept_order),
                     style = smMedium.copy(color = Base_white),

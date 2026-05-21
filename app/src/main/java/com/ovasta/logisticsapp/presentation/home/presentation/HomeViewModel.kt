@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
+import com.ovasta.logisticsapp.base.ext.OrderAlarmSound
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
@@ -26,7 +27,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 class HomeViewModel(
     private val context: Context,
     val homeRepository: IHomeRepository,
-    val settingsRepository: ISettingsRepository
+    val settingsRepository: ISettingsRepository,
+    private val orderAlarmSound: OrderAlarmSound
 ) : BaseViewModel() {
     private val _viewState = MutableStateFlow(HomeViewState())
     val viewState = _viewState.asStateFlow()
@@ -61,7 +63,8 @@ class HomeViewModel(
                     .collect { tasks ->
                         setComposeUILoading(false)
                         Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
-                        val previousIds = _viewState.value.waitingDeliveryTasks.map { it.orderId }.toSet()
+                        val previousIds =
+                            _viewState.value.waitingDeliveryTasks.map { it.orderId }.toSet()
                         val newTasks = tasks.filter { it.orderId !in previousIds }
 
                         // Record timestamps for genuinely new tasks
@@ -73,7 +76,8 @@ class HomeViewModel(
                         }
 
                         _viewState.update { state ->
-                            val newActiveAlerts = if (newTasks.isNotEmpty()) {
+                            // Only add to active alerts if tracking is enabled
+                            val newActiveAlerts = if (newTasks.isNotEmpty() && state.isTracking) {
                                 (state.activeAlertTasks + newTasks).distinctBy { it.orderId }
                             } else {
                                 state.activeAlertTasks
@@ -81,9 +85,14 @@ class HomeViewModel(
                             state.copy(
                                 waitingDeliveryTasks = tasks,
                                 activeAlertTasks = newActiveAlerts,
-                                // Re-open bottom sheet when new tasks arrive
-                                bottomSheetMinimized = if (newTasks.isNotEmpty()) false else state.bottomSheetMinimized
+                                // Re-open bottom sheet when new tasks arrive (only if tracking enabled)
+                                bottomSheetMinimized = if (newTasks.isNotEmpty() && state.isTracking) false else state.bottomSheetMinimized
                             )
+                        }
+
+                        // Start alarm sound when new tasks arrive AND tracking is enabled
+                        if (newTasks.isNotEmpty() && _viewState.value.isTracking) {
+                            orderAlarmSound.startAlarm()
                         }
                     }
             } catch (ex: Exception) {
@@ -146,13 +155,18 @@ class HomeViewModel(
 
                 if (expiredIds.isNotEmpty()) {
                     _viewState.update { state ->
-                        val newlyExpired = state.activeAlertTasks.filter { it.orderId in expiredIds }
+                        val newlyExpired =
+                            state.activeAlertTasks.filter { it.orderId in expiredIds }
                         state.copy(
                             activeAlertTasks = state.activeAlertTasks.filter { it.orderId !in expiredIds },
                             expiredWaitingTasks = (state.expiredWaitingTasks + newlyExpired).distinctBy { it.orderId }
                         )
                     }
                     expiredIds.forEach { _taskAlertTimestamps.remove(it) }
+                    // Stop alarm if no more active alerts
+                    if (_viewState.value.activeAlertTasks.isEmpty()) {
+                        orderAlarmSound.stopAlarm()
+                    }
                 }
             }
         }
@@ -246,6 +260,7 @@ class HomeViewModel(
 
             is HomeItemActions.MinimizeBottomSheet -> {
                 _viewState.update { it.copy(bottomSheetMinimized = true) }
+                orderAlarmSound.stopAlarm()
             }
 
             else -> {
@@ -271,6 +286,25 @@ class HomeViewModel(
             try {
                 homeRepository.startLocationTracking(context)
                 updateUiState(_viewState.value.copy(isTracking = true))
+
+                // If there are waiting tasks, add them to active alerts and start alarm
+                val waitingTasks = _viewState.value.waitingDeliveryTasks
+                if (waitingTasks.isNotEmpty()) {
+                    val now = System.currentTimeMillis()
+                    // Reset timestamps - timer starts NOW (30s from when tracking is enabled)
+                    waitingTasks.forEach { task ->
+                        _taskAlertTimestamps[task.orderId] = now
+                    }
+                    // Add to active alerts and open bottom sheet
+                    _viewState.update { state ->
+                        state.copy(
+                            activeAlertTasks = waitingTasks,
+                            bottomSheetMinimized = false
+                        )
+                    }
+                    // Start alarm
+                    orderAlarmSound.startAlarm()
+                }
             } catch (ex: Exception) {
                 updateUiState(_viewState.value.copy(isTracking = false))
                 error.value = ex
@@ -284,6 +318,10 @@ class HomeViewModel(
             try {
                 homeRepository.stopLocationTracking(context)
                 updateUiState(_viewState.value.copy(isTracking = false))
+                // Stop alarm when tracking is disabled
+                orderAlarmSound.stopAlarm()
+                // Clear active alerts
+                _viewState.update { it.copy(activeAlertTasks = emptyList()) }
             } catch (ex: Exception) {
                 updateUiState(_viewState.value.copy(isTracking = true))
                 error.value = ex
@@ -404,6 +442,10 @@ class HomeViewModel(
                         waitingDeliveryTasks = state.waitingDeliveryTasks.filter { it.orderId != orderId }
                     )
                 }
+                // Stop alarm if no more active alerts
+                if (_viewState.value.activeAlertTasks.isEmpty()) {
+                    orderAlarmSound.stopAlarm()
+                }
                 // Refresh assigned orders to get fresh data
                 getAssignedDeliveryOrders()
             }.onFailure {
@@ -432,5 +474,10 @@ class HomeViewModel(
 
     private fun clearToastMessage() {
         _viewState.update { it.copy(showToastMessage = null) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        orderAlarmSound.stopAlarm()
     }
 }
