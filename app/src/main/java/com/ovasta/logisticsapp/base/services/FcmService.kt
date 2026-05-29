@@ -1,8 +1,16 @@
 package com.ovasta.logisticsapp.base.services
 
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.net.Uri
+import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.ovasta.logisticsapp.R
+import com.ovasta.logisticsapp.app.LogisticsApp
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
+import com.ovasta.logisticsapp.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,5 +38,33 @@ class FcmService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
+        showNotification(message)
+    }
+
+    private fun showNotification(message: RemoteMessage) {
+        val title = message.notification?.title ?: message.data["title"] ?: getString(R.string.new_delivery_tasks)
+        val body = message.notification?.body ?: message.data["body"] ?: ""
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val soundUri = Uri.parse("android.resource://${packageName}/${R.raw.new_order_alert}")
+
+        val notification = NotificationCompat.Builder(this, LogisticsApp.DELIVERY_TASK_CHANNEL)
+            .setSmallIcon(R.drawable.logo)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setSound(soundUri)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
 }

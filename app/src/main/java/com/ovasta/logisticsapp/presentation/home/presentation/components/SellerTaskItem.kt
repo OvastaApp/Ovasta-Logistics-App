@@ -82,8 +82,8 @@ fun SellerTaskItem(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = task.fromAddress.ifBlank { stringResource(R.string.sender_info) },
-                        style = smNormal,
-                        maxLines = 1,
+                        style = mdMedium,
+                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
@@ -125,8 +125,8 @@ fun SellerTaskItem(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = task.toAddress.ifBlank { stringResource(R.string.receiver_info) },
-                        style = smNormal,
-                        maxLines = 1,
+                        style = mdMedium,
+                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
