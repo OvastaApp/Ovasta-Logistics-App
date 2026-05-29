@@ -197,6 +197,16 @@
     <string name="sender_info">Sender Info</string>
     <string name="receiver_info">Receiver Info</string>
     <string name="seller_tasks">Seller Tasks</string>
+    <string name="accept_order">Accept Order</string>
+    <string name="new_delivery_tasks">New Delivery Tasks</string>
+    <string name="orders_available_to_take">You have %1$d orders available to take</string>
+    <string name="available_orders">Available Orders</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
     <string name="error">Error</string>
     <string name="ok">OK</string>
+    <string name="confirm_pickup">Confirm Pickup</string>
+    <string name="confirm_delivery">Confirm Delivery</string>
+    <string name="confirm_pickup_message">Are you sure you want to mark this order as picked?</string>
+    <string name="confirm_delivery_message">Are you sure you want to mark this order as delivered?</string>
 </resources>

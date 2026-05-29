@@ -25,6 +25,7 @@ class LocationTrackerService() : Service(), KoinComponent {
         SupervisorJob() + Dispatchers.IO
     )
     private var trackingJob: kotlinx.coroutines.Job? = null
+    private var lastLoggedLocation: android.location.Location? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -77,12 +78,19 @@ class LocationTrackerService() : Service(), KoinComponent {
             locationManager.trackLocation().collect { location ->
                 val latitude = location.latitude
                 val longitude = location.longitude
-                try {
-                    homeRepository.sendLocation(lat = latitude, long = longitude)
-                } catch (e: Exception) {
-                    Log.e("LocationTracker", "Failed to send location", e)
-                }
 
+                val shouldLog = lastLoggedLocation?.let { last ->
+                    location.distanceTo(last) >= 10f
+                } ?: true
+
+                if (shouldLog) {
+                    try {
+                        homeRepository.sendLocation(lat = latitude, long = longitude)
+                        lastLoggedLocation = location
+                    } catch (e: Exception) {
+                        Log.e("LocationTracker", "Failed to send location", e)
+                    }
+                }
 
                 notificationManager.notify(
                     1,

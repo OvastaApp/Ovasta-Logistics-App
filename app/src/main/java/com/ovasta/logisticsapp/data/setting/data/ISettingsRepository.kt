@@ -9,5 +9,8 @@ interface ISettingsRepository {
     suspend fun getUseData(): User?
     suspend fun logout()
     suspend fun clearUserData()
+    suspend fun saveFcmToken(token: String)
+    suspend fun getFcmToken(): String
+    suspend fun updateFcmToken(token: String)
 
 }

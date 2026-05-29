@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
 import com.ovasta.logisticsapp.data.ApiResponse
+import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
@@ -18,7 +19,7 @@ interface IHomeServerRemoteDataSource {
         year: Int,
     ): ApiResponse<PartnerStatistics>
 
-    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps)
+    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
 
-    suspend fun getAssignedDeliveryOrders(): List<DeliveryTask>
+    suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 }

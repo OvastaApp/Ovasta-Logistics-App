@@ -2,6 +2,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 
 import android.content.Context
 import com.ovasta.logisticsapp.data.ApiResponse
+import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
@@ -49,9 +50,9 @@ interface IHomeRepository {
         year: Int,
     ): ApiResponse<PartnerStatistics>
 
-    suspend fun getAssignedDeliveryOrders(): List<DeliveryTask>
+    suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 
-    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps)
+    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
 
 
 }

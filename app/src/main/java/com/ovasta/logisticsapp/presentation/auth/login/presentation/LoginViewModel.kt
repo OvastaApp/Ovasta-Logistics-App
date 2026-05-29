@@ -13,7 +13,9 @@ import com.ovasta.logisticsapp.presentation.auth.login.data.ILoginRepository
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
 import com.ovasta.logisticsapp.presentation.nav.Home
 import kotlinx.coroutines.CoroutineExceptionHandler
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -106,12 +108,18 @@ class LoginViewModel(
 
         viewModelScope.launch(dispatcher + coroutineExceptionHandler) {
             setComposeUILoading(true)
+            val fcmToken = try {
+                FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                null
+            }
             runCatching {
-                loginRepository.login(phone, password, userType.typeId)
+                loginRepository.login(phone, password, userType.typeId, fcmToken)
             }.onSuccess { response ->
                 val user = response.data
                 user.token = response.token
                 settingsRepository.saveUserData(user)
+                settingsRepository.saveFcmToken(fcmToken ?: "")
                 setComposeUILoading(false)
                 emitScreenDirectionEvent(ScreenDirection.Replace(Home))
             }.onFailure {

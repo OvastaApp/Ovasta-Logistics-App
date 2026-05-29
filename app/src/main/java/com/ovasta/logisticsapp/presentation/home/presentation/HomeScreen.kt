@@ -1,9 +1,23 @@
 package com.ovasta.logisticsapp.presentation.home.presentation
 
+import android.app.Activity
+import android.os.Build
+import android.view.WindowManager
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
@@ -11,16 +25,16 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.openWhatsApp
-import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
+import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
+import com.ovasta.logisticsapp.presentation.nav.AvailableTasks
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
-import kotlin.time.Instant
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel) {
@@ -32,14 +46,10 @@ fun HomeScreen(viewModel: HomeViewModel) {
         viewModel = viewModel
     ) {
         LaunchedEffect(Unit) {
-//            viewModel.getSellersTasks()
             viewModel.taskItemActions
                 .filterNotNull()
                 .collectLatest { event ->
                     when (event) {
-                        is HomeItemActions.ShowTaskDetails -> {
-                            viewModel.onTaskItemAction(HomeItemActions.TaskClicked(event.taskId))
-                        }
 
                         is HomeItemActions.OpenDirection -> {
                             context.navigateToLocationClick(event.lat, event.lng)
@@ -51,6 +61,10 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
                         is HomeItemActions.WhatsAppRetailer -> {
                             context.openWhatsApp(event.clientWhatsapp)
+                        }
+
+                        is HomeItemActions.NavigateToAvailableTasks -> {
+                            navigator.push(AvailableTasks)
                         }
 
                         else -> Unit
@@ -82,7 +96,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
 private fun fakeHomeViewState(): HomeViewState {
     return HomeViewState(
-        deliveryTasks = listOf(
+        waitingDeliveryTasks = listOf(
             DeliveryTask(
                 orderId = 1,
                 statusId = 1,
@@ -91,8 +105,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 fromAddress = "Nasr City, Cairo",
                 toAddress = "Maadi, Cairo",
                 receiverMobile = "01198765432",
-                deliveryPrice = 250,
-                collectionAmount = 0,
+                deliveryPrice = 250.0,
+                collectionAmount = 2000.0,
                 note = "Handle with care",
                 createdAt = null,
                 updatedAt = null
@@ -105,8 +119,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 fromAddress = "Maadi, Cairo",
                 toAddress = "Heliopolis, Cairo",
                 receiverMobile = "01012345678",
-                deliveryPrice = 480,
-                collectionAmount = 0,
+                deliveryPrice = 480.0,
+                collectionAmount = 2000.0,
                 note = "Fragile item",
                 createdAt = null,
                 updatedAt = null
@@ -119,8 +133,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 fromAddress = "Nasr City, Cairo",
                 toAddress = "Zamalek, Cairo",
                 receiverMobile = "01198765432",
-                deliveryPrice = 250,
-                collectionAmount = 0,
+                deliveryPrice = 20.0,
+                collectionAmount = 100.0,
                 note = "",
                 createdAt = null,
                 updatedAt = null
@@ -172,5 +186,57 @@ fun TasksContentPreview() {
         ),
         onTasksScreenAction = {},
         onTaskItemAction = {}
+    )
+}
+
+@Composable
+internal fun ScreenFlashOverlay() {
+    val context = LocalContext.current
+    val activity = context as? Activity
+
+    // Wake screen and keep it on while alert is active
+    DisposableEffect(Unit) {
+        activity?.window?.addFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            activity?.setTurnScreenOn(true)
+            activity?.setShowWhenLocked(true)
+        } else {
+            @Suppress("DEPRECATION")
+            activity?.window?.addFlags(
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+            )
+        }
+        onDispose {
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                activity?.setTurnScreenOn(false)
+                activity?.setShowWhenLocked(false)
+            } else {
+                @Suppress("DEPRECATION")
+                activity?.window?.clearFlags(
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                )
+            }
+        }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "flash")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "flashAlpha"
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Yellow.copy(alpha = alpha))
     )
 }

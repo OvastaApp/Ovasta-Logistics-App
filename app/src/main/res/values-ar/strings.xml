@@ -20,7 +20,7 @@
     <string name="unknown_product">منتج غير معروف</string>
     <string name="cart">السلة</string>
     <string name="order_summary">ملخص الطلب</string>
-    <string name="total_price">السعر الإجمالي</string>
+    <string name="total_price">الاجمالي بالتوصيل</string>
     <string name="price_currency">%s ج.م</string>
     <string name="empty_cart">السلة فارغة</string>
     <string name="add_products_to_start">أضف منتجات للبدء</string>
@@ -193,10 +193,19 @@
     <string name="product_quantity">الكمية: %d</string>
     <string name="product_price_format">%.2f ج.م</string>
     <string name="source_label">المصدر: %s</string>
-    <string name="statistics_tracking_hint">قم بتفعيل التتبع لعرض الإحصائيات والأرباح والحوافز.</string>
+    <string name="statistics_tracking_hint">قم بتفعيل التتبع لعرض الإحصائيات واستقبال الطلبات.</string>
     <string name="sender_info">بيانات المرسل</string>
     <string name="receiver_info">بيانات الاستلام</string>
-    <string name="customer_data_hidden">متاح بعد الاستلام</string>
+    <string name="accept_order">قبول الطلب</string>
+    <string name="new_delivery_tasks">طلبات توصيل جديدة</string>
+    <string name="orders_available_to_take">يوجد %1$d طلبات متاحة للاستلام</string>
+    <string name="available_orders">الطلبات المتاحة</string>
+    <string name="from">من</string>
+    <string name="to">إلى</string>
     <string name="error">خطأ</string>
     <string name="ok">موافق</string>
+    <string name="confirm_pickup">تاكيد استلام الطلب من البائع</string>
+    <string name="confirm_delivery">تاكيد تسليم الطلب للعميل</string>
+    <string name="confirm_pickup_message">تاكيد استلام الطلب من البائع؟</string>
+    <string name="confirm_delivery_message">تاكيد تسليم الطلب للعميل؟</string>
 </resources>

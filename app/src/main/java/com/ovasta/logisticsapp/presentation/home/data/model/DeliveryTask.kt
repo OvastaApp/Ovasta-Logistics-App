@@ -11,51 +11,53 @@ import kotlinx.parcelize.Parcelize
 @IgnoreExtraProperties
 @Keep
 data class DeliveryTask(
+
     @get:PropertyName("order_id")
-    @PropertyName("order_id")
-    val orderId: Int = 0,
+    @set:PropertyName("order_id")
+    var orderId: Int = 0,
+
     @get:PropertyName("status_id")
-    @PropertyName("status_id")
-    val statusId: Int? = null,
+    @set:PropertyName("status_id")
+    var statusId: Int? = null,
 
     @get:PropertyName("status_name")
-    @PropertyName("status_name")
-    val statusName: String = "",
+    @set:PropertyName("status_name")
+    var statusName: String = "",
 
     @get:PropertyName("sender_mobile")
-    @PropertyName("sender_mobile")
-    val senderMobile: String = "",
+    @set:PropertyName("sender_mobile")
+    var senderMobile: String = "",
 
     @get:PropertyName("from_address")
-    @PropertyName("from_address")
-    val fromAddress: String = "",
+    @set:PropertyName("from_address")
+    var fromAddress: String = "",
 
     @get:PropertyName("to_address")
-    @PropertyName("to_address")
-    val toAddress: String = "",
+    @set:PropertyName("to_address")
+    var toAddress: String = "",
 
     @get:PropertyName("receiver_mobile")
-    @PropertyName("receiver_mobile")
-    val receiverMobile: String = "",
+    @set:PropertyName("receiver_mobile")
+    var receiverMobile: String = "",
 
     @get:PropertyName("delivery_price")
-    @PropertyName("delivery_price")
-    val deliveryPrice: Int? = null,
+    @set:PropertyName("delivery_price")
+    var deliveryPrice: Double? = null,
 
     @get:PropertyName("collection_amount")
-    @PropertyName("collection_amount")
-    val collectionAmount: Int? = null,
+    @set:PropertyName("collection_amount")
+    var collectionAmount: Double? = null,
 
     @get:PropertyName("note")
-    @PropertyName("note")
-    val note: String = "",
+    @set:PropertyName("note")
+    var note: String = "",
 
     @get:PropertyName("created_at")
-    @PropertyName("created_at")
-    val createdAt: Timestamp? = null,
+    @set:PropertyName("created_at")
+    var createdAt: Timestamp? = null,
 
     @get:PropertyName("updated_at")
-    @PropertyName("updated_at")
-    val updatedAt: Timestamp? = null
+    @set:PropertyName("updated_at")
+    var updatedAt: Timestamp? = null
 
 ) : Parcelable
