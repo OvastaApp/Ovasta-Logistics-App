@@ -98,10 +98,16 @@ fun PendingDeliveryTaskItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
-                        style = lgSemiBold
-                    )
+                    Column {
+                        Text(
+                            text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
+                            style = lgSemiBold
+                        )
+                        Text(
+                            text = stringResource(R.string.delivery_fees),
+                            style = xsMedium.copy(color = Gray500)
+                        )
+                    }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -113,12 +119,18 @@ fun PendingDeliveryTaskItem(
                     Spacer(modifier = Modifier.width(4.dp))
                     val totalPrice = (task.collectionAmount ?: 0.0) + (task.deliveryPrice ?: 0.0)
 
-                    Text(
-                        text = stringResource(
-                            R.string.price_currency,
-                            totalPrice
-                        ), style = lgSemiBold
-                    )
+                    Column {
+                        Text(
+                            text = stringResource(
+                                R.string.price_currency,
+                                totalPrice
+                            ), style = lgSemiBold
+                        )
+                        Text(
+                            text = stringResource(R.string.total_price),
+                            style = xsMedium.copy(color = Gray500)
+                        )
+                    }
                 }
             }
 
