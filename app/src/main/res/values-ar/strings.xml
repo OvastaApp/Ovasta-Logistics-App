@@ -204,8 +204,8 @@
     <string name="to">إلى</string>
     <string name="error">خطأ</string>
     <string name="ok">موافق</string>
-    <string name="confirm_pickup">تم استلام الطلب</string>
-    <string name="confirm_delivery">تم تسليم الطلب للعميل</string>
+    <string name="confirm_pickup">تاكيد استلام الطلب</string>
+    <string name="confirm_delivery">تاكيد وصول الطلب للعميل</string>
     <string name="confirm_pickup_message">هل أنت متأكد أنك تريد تحديد استلام الطلب من البائع؟</string>
     <string name="confirm_delivery_message">هل أنت متأكد أنك تريد تاكيد تسليم الطلب للعميل؟</string>
 </resources>

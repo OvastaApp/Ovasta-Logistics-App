@@ -54,6 +54,15 @@ class LogisticsApp : Application() {
                 description = "New delivery task notifications"
             }
 
+            val backgroundChannel = NotificationChannel(
+                DELIVERY_TASK_BACKGROUND_CHANNEL,
+                "Delivery Tasks (Background)",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                enableVibration(true)
+                description = "Delivery task notifications when app is in background"
+            }
+
             val notificationManager =
                 getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -63,6 +72,7 @@ class LogisticsApp : Application() {
 
             notificationManager.createNotificationChannel(channel)
             notificationManager.createNotificationChannel(orderChannel)
+            notificationManager.createNotificationChannel(backgroundChannel)
         }
 
         checkAndSendFcmToken()
@@ -88,5 +98,6 @@ class LogisticsApp : Application() {
     }
     companion object {
         const val DELIVERY_TASK_CHANNEL = "delivery_task_channel_v2"
+        const val DELIVERY_TASK_BACKGROUND_CHANNEL = "delivery_task_background_channel"
     }
 }
