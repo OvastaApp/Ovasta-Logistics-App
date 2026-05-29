@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,9 +32,16 @@ import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.components.PendingDeliveryTaskItem
 
 @Composable
-fun AvailableTasksScreen(viewModel: AvailableTasksViewModel) {
+fun AvailableTasksScreen(viewModel: AvailableTasksViewModel, onOrderAccepted: () -> Unit = {}) {
     val navigator = LocalNavigator.current
     val tasks by viewModel.tasks.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.popBackEvent.collect {
+            onOrderAccepted()
+            navigator.pop()
+        }
+    }
 
     BaseScreen(viewModel = viewModel) {
         Scaffold(
@@ -72,7 +80,6 @@ fun AvailableTasksScreen(viewModel: AvailableTasksViewModel) {
                     items(tasks, key = { it.orderId }) { task ->
                         PendingDeliveryTaskItem(
                             task = task,
-                            currency = "EGP",
                             onAccept = { viewModel.acceptOrder(task.orderId) }
                         )
                     }
@@ -133,7 +140,6 @@ fun AvailableTasksScreenPreview() {
             items(fakeTasks, key = { it.orderId }) { task ->
                 PendingDeliveryTaskItem(
                     task = task,
-                    currency = "EGP",
                     onAccept = {}
                 )
             }

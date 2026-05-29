@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import android.content.Context
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
+import com.ovasta.logisticsapp.base.ext.ToastEvent
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.nav.Login
 import com.ovasta.logisticsapp.presentation.nav.TaskDetails
@@ -38,7 +39,7 @@ class HomeViewModel(
     private var alertTimerJob: Job? = null
     private val _taskAlertTimestamps = mutableMapOf<Int, Long>()
     val taskAlertTimestamps: Map<Int, Long> get() = _taskAlertTimestamps
-    
+
     // Persist seen task IDs across app restarts
     private val prefs = context.getSharedPreferences("delivery_alerts", Context.MODE_PRIVATE)
     private val _seenTaskIds = prefs.getStringSet("seen_task_ids", emptySet())!!
@@ -63,24 +64,29 @@ class HomeViewModel(
         sellersTasksJob = viewModelScope.launch {
             _viewState.update { it.copy(isAvailableTasksLoading = true) }
             try {
-                homeRepository.listenToNewDeliveryTasks(userId = 234, districtId = 1)
+                homeRepository.listenToNewDeliveryTasks(
+                    userId = settingsRepository.getUseData()?.id ?: 0,
+                    districtId = settingsRepository.getUseData()?.districtId ?: 0
+                )
                     .collect { tasks ->
                         _viewState.update { it.copy(isAvailableTasksLoading = false) }
                         Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
-                        
+
                         // Cleanup stale IDs (tasks no longer in Firebase)
                         val currentTaskIds = tasks.map { it.orderId }.toSet()
                         _seenTaskIds.removeAll { it !in currentTaskIds }
                         persistSeenTaskIds()
-                        
+
                         // Sync queue/current with Firebase reality (remove tasks that disappeared from Firebase)
                         _viewState.update { state ->
-                            val syncedQueue = state.alertQueue.filter { it.orderId in currentTaskIds }
-                            val syncedCurrent = if (state.currentAlertTask?.orderId in currentTaskIds) {
-                                state.currentAlertTask
-                            } else {
-                                null
-                            }
+                            val syncedQueue =
+                                state.alertQueue.filter { it.orderId in currentTaskIds }
+                            val syncedCurrent =
+                                if (state.currentAlertTask?.orderId in currentTaskIds) {
+                                    state.currentAlertTask
+                                } else {
+                                    null
+                                }
                             state.copy(
                                 waitingDeliveryTasks = tasks,
                                 alertQueue = syncedQueue,
@@ -93,8 +99,8 @@ class HomeViewModel(
                             _viewState.value.currentAlertTask?.orderId?.let { add(it) }
                             addAll(_viewState.value.alertQueue.map { it.orderId })
                         }
-                        val newTasks = tasks.filter { 
-                            it.orderId !in _seenTaskIds && it.orderId !in alreadyInPipeline 
+                        val newTasks = tasks.filter {
+                            it.orderId !in _seenTaskIds && it.orderId !in alreadyInPipeline
                         }
 
                         // Queue new tasks only if tracking is enabled
@@ -103,7 +109,8 @@ class HomeViewModel(
                                 if (state.currentAlertTask == null) {
                                     // No task showing → show first one immediately
                                     val firstTask = newTasks.first()
-                                    _taskAlertTimestamps[firstTask.orderId] = System.currentTimeMillis()
+                                    _taskAlertTimestamps[firstTask.orderId] =
+                                        System.currentTimeMillis()
                                     state.copy(
                                         currentAlertTask = firstTask,
                                         alertQueue = state.alertQueue + newTasks.drop(1),
@@ -134,7 +141,10 @@ class HomeViewModel(
         assignedTasksJob = viewModelScope.launch {
             _viewState.update { it.copy(isTasksLoading = true) }
             try {
-                homeRepository.getAssignedOrders(userId = 234, districtId = 1).collect { tasks ->
+                homeRepository.getAssignedOrders(
+                    userId = settingsRepository.getUseData()?.id ?: 0,
+                    districtId = settingsRepository.getUseData()?.districtId ?: 0
+                ).collect { tasks ->
                     _viewState.update { it.copy(isTasksLoading = false, appTasks = tasks) }
                 }
             } catch (ex: Exception) {
@@ -151,7 +161,12 @@ class HomeViewModel(
             kotlin.runCatching {
                 homeRepository.getAssignedDeliveryOrders()
             }.onSuccess {
-                _viewState.update { state -> state.copy(isTasksLoading = false, assignedDeliveryTasks = it) }
+                _viewState.update { state ->
+                    state.copy(
+                        isTasksLoading = false,
+                        assignedDeliveryTasks = it
+                    )
+                }
             }.onFailure {
                 _viewState.update { state -> state.copy(isTasksLoading = false) }
                 updateViewStateWithFail(it)
@@ -162,7 +177,7 @@ class HomeViewModel(
     init {
         getPartnerStatus()
         getPartnerStatistics()
-        getAssignedOrders()
+        //  getAssignedOrders()
         listenToNewDeliveryTasks()
         getAssignedDeliveryOrders()
         startAlertExpiryTimer()
@@ -194,6 +209,8 @@ class HomeViewModel(
             if (nextTask != null) {
                 // Pop from queue, set as current with fresh timestamp
                 _taskAlertTimestamps[nextTask.orderId] = System.currentTimeMillis()
+                // Restart alarm for the next task
+                orderAlarmSound.startAlarm()
                 state.copy(
                     currentAlertTask = nextTask,
                     alertQueue = state.alertQueue.drop(1),
@@ -211,7 +228,8 @@ class HomeViewModel(
     }
 
     private fun persistSeenTaskIds() {
-        prefs.edit().putStringSet("seen_task_ids", _seenTaskIds.map { it.toString() }.toSet()).apply()
+        prefs.edit().putStringSet("seen_task_ids", _seenTaskIds.map { it.toString() }.toSet())
+            .apply()
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -223,7 +241,7 @@ class HomeViewModel(
                 getPartnerStatistics()
                 getPartnerStatus()
                 listenToNewDeliveryTasks()
-                getAssignedOrders()
+//                getAssignedOrders()
                 getAssignedDeliveryOrders()
             }
 
@@ -291,10 +309,6 @@ class HomeViewModel(
                 }
             }
 
-            is HomeItemActions.TaskClicked -> {
-                emitScreenDirectionEvent(ScreenDirection.Push(TaskDetails(taskId = taskItemAction.taskId)))
-            }
-
             is HomeItemActions.DismissContactBottomSheet -> {
                 _showContactSheet.value = null
             }
@@ -346,7 +360,7 @@ class HomeViewModel(
                 // If there are waiting tasks not yet seen, queue them
                 val waitingTasks = _viewState.value.waitingDeliveryTasks
                 val unseenTasks = waitingTasks.filter { it.orderId !in _seenTaskIds }
-                
+
                 if (unseenTasks.isNotEmpty()) {
                     _viewState.update { state ->
                         if (state.currentAlertTask == null) {
@@ -485,6 +499,10 @@ class HomeViewModel(
             }.onSuccess {
                 setComposeUILoading(false)
                 getAssignedDeliveryOrders()
+                emitToastEvent(
+                    ToastEvent.StringToastEvent(it.message)
+                )
+
             }.onFailure {
                 updateViewStateWithFail(it)
             }
@@ -498,25 +516,31 @@ class HomeViewModel(
                 homeRepository.changeOrderStatus(orderId, OrderSteps.Assigned)
             }.onSuccess {
                 setComposeUILoading(false)
+                // Stop alarm sound immediately on accept
+                orderAlarmSound.stopAlarm()
+
                 // Mark as seen and persist
                 _seenTaskIds.add(orderId)
                 persistSeenTaskIds()
-                
+
                 // Remove timestamp
                 _taskAlertTimestamps.remove(orderId)
-                
+
                 // Remove from waiting list
                 _viewState.update { state ->
                     state.copy(
                         waitingDeliveryTasks = state.waitingDeliveryTasks.filter { it.orderId != orderId }
                     )
                 }
-                
-                // Pop next task from queue
+
+                // Pop next task from queue (will restart alarm if more tasks pending)
                 popNextTaskFromQueue()
-                
+
                 // Refresh assigned orders to get fresh data
                 getAssignedDeliveryOrders()
+                emitToastEvent(
+                    ToastEvent.StringToastEvent(it.message)
+                )
             }.onFailure {
                 updateViewStateWithFail(it)
             }

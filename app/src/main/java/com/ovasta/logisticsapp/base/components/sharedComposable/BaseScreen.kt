@@ -20,6 +20,7 @@ import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.ScreenDirectionEventHandler
+import com.ovasta.logisticsapp.base.ext.ToastEventHandler
 import com.ovasta.logisticsapp.data.RemoteConstants
 
 @Composable
@@ -32,6 +33,7 @@ fun BaseScreen(
     )
 
     val logoutListener = LocalActivity.current as? LogoutListener
+    ToastEventHandler(viewModel)
 
     /** Handling Base Exception **/
     val exceptionState by viewModel.composeUIExceptionEvent.collectAsState(null)

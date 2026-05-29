@@ -11,22 +11,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.*
+import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
-import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 
 @Composable
 fun SellerTaskItem(
-    task: DeliveryTask,
-    currency: String,
+    task: AssignedDeliveryTask,
     onCallSender: (String) -> Unit,
     onCallReceiver: (String) -> Unit,
-    onClick: () -> Unit
+    onStatusChangeClick: ((Int, OrderSteps) -> Unit)? = null
 ) {
     val statusColor = when (OrderSteps.fromStatusId(task.statusId ?: 0)) {
         OrderSteps.Pending -> StatusPending
@@ -43,7 +43,6 @@ fun SellerTaskItem(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Base_white),
-        onClick = onClick
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header: Order ID + Status
@@ -64,98 +63,92 @@ fun SellerTaskItem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Sender Info Section
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SellerBackground, RoundedCornerShape(8.dp))
-                    .padding(12.dp)
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.sender_info),
-                        style = xsMedium.copy(color = SellerLabel)
+            // Origin and Destination with points and connecting line
+            val isPicked = OrderSteps.fromStatusId(task.statusId ?: 0) == OrderSteps.Picked
+            val originDotColor = if (isPicked) Gray500 else Primary
+            val destinationDotColor = if (isPicked) Primary else Gray500
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Origin (Sender)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(originDotColor)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = task.fromAddress.ifBlank { stringResource(R.string.sender_info) },
+                        style = smNormal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
                     if (task.senderMobile.isNotBlank()) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Phone, contentDescription = null, tint = SellerText, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = task.senderMobile, style = smNormal.copy(color = SellerText))
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    if (task.fromAddress.isNotBlank()) {
-                        Row(verticalAlignment = Alignment.Top) {
-                            Icon(Icons.Default.Home, contentDescription = null, tint = SellerText, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = task.fromAddress,
-                                style = smNormal.copy(color = SellerText),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
+                        IconButton(
+                            onClick = { onCallSender(task.senderMobile) },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Call,
+                                contentDescription = "Call Sender",
+                                tint = Base_white,
+                                modifier = Modifier
+                                    .background(SellerAction, RoundedCornerShape(20.dp))
+                                    .padding(8.dp)
                             )
                         }
                     }
                 }
-                if (task.senderMobile.isNotBlank()) {
-                    IconButton(onClick = { onCallSender(task.senderMobile) }, modifier = Modifier.size(40.dp)) {
-                        Icon(
-                            Icons.Default.Call, contentDescription = "Call Sender", tint = Base_white,
-                            modifier = Modifier.background(SellerAction, RoundedCornerShape(20.dp)).padding(8.dp)
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Receiver Info Section
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(CustomerBackground, RoundedCornerShape(8.dp))
-                    .padding(12.dp)
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.receiver_info),
-                        style = xsMedium.copy(color = CustomerLabel)
+                // Connecting vertical line
+                Box(
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .width(2.dp)
+                        .height(32.dp)
+                        .background(Gray500.copy(alpha = 0.4f))
+                )
+                // Destination (Receiver)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(destinationDotColor)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    if (task.receiverMobile.isNotBlank()) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Phone, contentDescription = null, tint = CustomerText, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = task.receiverMobile, style = smNormal.copy(color = CustomerText))
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    if (task.toAddress.isNotBlank()) {
-                        Row(verticalAlignment = Alignment.Top) {
-                            Icon(Icons.Default.Home, contentDescription = null, tint = CustomerText, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = task.toAddress,
-                                style = smNormal.copy(color = CustomerText),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = task.toAddress.ifBlank { stringResource(R.string.receiver_info) },
+                        style = smNormal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    val isValidPhone = task.receiverMobile.length >= 10 &&
+                            task.receiverMobile.all { it.isDigit() || it == '+' }
+                    if (task.receiverMobile.isNotBlank() && isValidPhone) {
+                        IconButton(
+                            onClick = { onCallReceiver(task.receiverMobile) },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Call,
+                                contentDescription = "Call Receiver",
+                                tint = Base_white,
+                                modifier = Modifier
+                                    .background(
+                                        CustomerAction,
+                                        RoundedCornerShape(20.dp)
+                                    )
+                                    .padding(8.dp)
                             )
                         }
-                    }
-                }
-
-                if (task.receiverMobile.isNotBlank()) {
-                    IconButton(onClick = { onCallReceiver(task.receiverMobile) }, modifier = Modifier.size(40.dp)) {
-                        Icon(
-                            Icons.Default.Call, contentDescription = "Call Receiver", tint = Base_white,
-                            modifier = Modifier.background(CustomerAction, RoundedCornerShape(20.dp)).padding(8.dp)
-                        )
                     }
                 }
             }
@@ -171,11 +164,19 @@ fun SellerTaskItem(
             ) {
                 Column {
                     Text(text = stringResource(R.string.delivery_fees), style = xsMedium)
-                    Text(text = "${task.deliveryPrice ?: 0} $currency", style = smMedium)
+                    Text(
+                        text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
+                        style = lgSemiBold
+                    )
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = stringResource(R.string.total_price), style = xsMedium)
-                    Text(text = "${task.collectionAmount ?: 0} $currency", style = smSemiBold)
+                    Text(
+                        text = stringResource(
+                            R.string.price_currency,
+                            task.collectionAmount ?: 0.0
+                        ), style = lgSemiBold
+                    )
                 }
             }
 
@@ -183,6 +184,38 @@ fun SellerTaskItem(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = stringResource(R.string.notes), style = xsMedium)
                 Text(text = task.note, style = smNormal)
+            }
+
+            // Button for Pick / Deliver
+            val currentStep = OrderSteps.fromStatusId(task.statusId ?: 0)
+            val nextStep = when (currentStep) {
+                is OrderSteps.Assigned -> OrderSteps.Picked
+                is OrderSteps.Picked -> OrderSteps.Delivered
+                else -> null
+            }
+
+            if (nextStep != null && onStatusChangeClick != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                val buttonColor = when (nextStep) {
+                    is OrderSteps.Picked -> StatusPicked
+                    is OrderSteps.Delivered -> StatusDelivered
+                    else -> Primary
+                }
+                Button(
+                    onClick = { onStatusChangeClick(task.orderId, nextStep) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+                ) {
+                    Text(
+                        text = when (nextStep) {
+                            is OrderSteps.Picked -> stringResource(R.string.confirm_pickup)
+                            is OrderSteps.Delivered -> stringResource(R.string.confirm_delivery)
+                            else -> ""
+                        },
+                        color = Base_white
+                    )
+                }
             }
         }
     }
@@ -192,7 +225,7 @@ fun SellerTaskItem(
 @Composable
 fun SellerTaskItemPreview() {
     SellerTaskItem(
-        task = DeliveryTask(
+        task = AssignedDeliveryTask(
             orderId = 101,
             statusId = 3,
             statusName = "Assigned",
@@ -204,9 +237,7 @@ fun SellerTaskItemPreview() {
             collectionAmount = 350,
             note = "Ring the bell twice"
         ),
-        currency = "EGP",
         onCallSender = {},
         onCallReceiver = {},
-        onClick = {}
     )
 }

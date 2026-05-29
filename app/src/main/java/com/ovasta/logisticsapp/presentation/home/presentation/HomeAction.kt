@@ -10,7 +10,6 @@ sealed interface HomeItemActions {
     data class ShowOtherTaskDialog(val taskId: Int, val retailerId: Int) : HomeItemActions
     data object ShowCompletedTaskDialog : HomeItemActions
     data class OpenContactBottomSheet(val homeTask: HomeTask) : HomeItemActions
-    data class TaskClicked(val taskId: Int) : HomeItemActions
     data class CallRetailer(val clientPhone: String) : HomeItemActions
     data class WhatsAppRetailer(val clientWhatsapp: String) : HomeItemActions
     data object DismissContactBottomSheet : HomeItemActions

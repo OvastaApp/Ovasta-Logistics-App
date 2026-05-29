@@ -46,6 +46,8 @@ import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.White
+import com.ovasta.logisticsapp.base.lgSemiBold
+import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.mdSemiBold
 import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.base.smNormal
@@ -199,8 +201,8 @@ private fun DeliveryTaskAlertCard(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        "${task.deliveryPrice} $currency",
-                        style = smNormal
+                        text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
+                        style = lgSemiBold
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -212,8 +214,10 @@ private fun DeliveryTaskAlertCard(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        "${task.collectionAmount} $currency",
-                        style = smNormal
+                        text = stringResource(
+                            R.string.price_currency,
+                            task.collectionAmount ?: 0.0
+                        ), style = lgSemiBold
                     )
                 }
             }

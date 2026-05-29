@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -27,6 +28,9 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.NavigationAction
 import com.ovasta.logisticsapp.base.mdMedium
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import com.ovasta.logisticsapp.base.Primary500
+import com.ovasta.logisticsapp.base.StatusDelivered
+import com.ovasta.logisticsapp.base.StatusPicked
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import kotlin.text.ifEmpty
@@ -40,11 +44,9 @@ fun TaskCard(
     onDirectionClick: (Double, Double) -> Unit,
     onContactClick: (String) -> Unit,
     onWhatsAppClick: (String) -> Unit,
-    onClick: () -> Unit,
     onStatusChangeClick: ((orderId: Int, OrderSteps) -> Unit)? = null,
 ) {
     Card(
-        onClick = onClick,
         shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
         colors = CardDefaults.cardColors(containerColor = Base_white),
         border = BorderStroke(
@@ -181,6 +183,5 @@ fun PreviewTaskCard() {
         onDirectionClick = { _, _ -> },
         onContactClick = { _ -> },
         onWhatsAppClick = { _ -> },
-        onClick = {}
     )
 }

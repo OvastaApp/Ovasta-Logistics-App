@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.exception.ComposeUIException
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
+import com.ovasta.logisticsapp.base.ext.ToastEvent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,6 +24,8 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     protected val error = SingleLiveEvent<Throwable>()
     protected val loading = MutableLiveData<Boolean>()
 
+    private val _toastEvent = MutableSharedFlow<ToastEvent?>()
+    val toastEvent = _toastEvent.asSharedFlow()
 
     private val _contextEvent = MutableSharedFlow<ContextEvent?>()
     val contextEvent = _contextEvent.asSharedFlow()
@@ -65,6 +68,9 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                 }
             )
         }
+    }
+    fun emitToastEvent(toastEvent: ToastEvent) {
+        viewModelScope.launch { _toastEvent.emit(toastEvent) }
     }
 
 }

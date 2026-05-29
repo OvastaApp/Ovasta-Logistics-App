@@ -6,6 +6,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -75,7 +76,12 @@ fun AppNavHost(modifier: Modifier = Modifier) {
 
                             is AvailableTasks -> NavEntry(key) {
                                 val viewModel: AvailableTasksViewModel = koinViewModel()
-                                AvailableTasksScreen(viewModel)
+                                AvailableTasksScreen(
+                                    viewModel = viewModel,
+                                    onOrderAccepted = {
+                                        homeViewModel?.getAssignedDeliveryOrders()
+                                    }
+                                )
                             }
 
                             is TaskDetails -> NavEntry(key) {

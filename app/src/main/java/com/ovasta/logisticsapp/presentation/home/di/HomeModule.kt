@@ -22,5 +22,5 @@ val homeModule = module {
     single<IHomeRepository> { HomeRepository(get(), get(), get()) }
     single { LocationManager(androidContext()) }
     viewModel { HomeViewModel(get(), get(), get(), get()) }
-    viewModel { AvailableTasksViewModel(get()) }
+    viewModel { AvailableTasksViewModel(get(), get()) }
 }

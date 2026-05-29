@@ -21,7 +21,6 @@ import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 @Composable
 fun PendingDeliveryTaskItem(
     task: DeliveryTask,
-    currency: String,
     onAccept: () -> Unit
 ) {
     Card(
@@ -100,8 +99,8 @@ fun PendingDeliveryTaskItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${task.deliveryPrice ?: 0} $currency",
-                        style = smNormal
+                        text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
+                        style = lgSemiBold
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -113,8 +112,10 @@ fun PendingDeliveryTaskItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${task.collectionAmount ?: 0} $currency",
-                        style = smNormal
+                        text = stringResource(
+                            R.string.price_currency,
+                            task.collectionAmount ?: 0.0
+                        ), style = lgSemiBold
                     )
                 }
             }
@@ -167,7 +168,6 @@ fun PendingDeliveryTaskItemPreview() {
             collectionAmount = 350,
             note = "Ring the bell twice"
         ),
-        currency = "EGP",
         onAccept = {}
     )
 }

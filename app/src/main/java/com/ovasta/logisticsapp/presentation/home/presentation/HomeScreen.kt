@@ -46,14 +46,10 @@ fun HomeScreen(viewModel: HomeViewModel) {
         viewModel = viewModel
     ) {
         LaunchedEffect(Unit) {
-//            viewModel.getSellersTasks()
             viewModel.taskItemActions
                 .filterNotNull()
                 .collectLatest { event ->
                     when (event) {
-                        is HomeItemActions.ShowTaskDetails -> {
-                            viewModel.onTaskItemAction(HomeItemActions.TaskClicked(event.taskId))
-                        }
 
                         is HomeItemActions.OpenDirection -> {
                             context.navigateToLocationClick(event.lat, event.lng)

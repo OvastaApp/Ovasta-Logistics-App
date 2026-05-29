@@ -75,8 +75,7 @@ fun TasksContent(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            topBar = {
+            contentWindowInsets = WindowInsets(0, 0, 0, 0), topBar = {
                 CenteredTextAppBar(
                     title = stringResource(R.string.home, Modifier.testTag("title")),
                     showBackButton = false,
@@ -90,24 +89,19 @@ fun TasksContent(
                                 tint = Color.Black
                             )
                         }
-                    }
-                )
-            }
-        ) { padding ->
+                    })
+            }) { padding ->
             val listState = rememberLazyListState()
 
             PullToRefreshBox(
-                state = pullToRefreshState,
-                isRefreshing = isRefreshing,
-                onRefresh = {
+                state = pullToRefreshState, isRefreshing = isRefreshing, onRefresh = {
                     coroutineScope.launch {
                         isRefreshing = true
                         onTasksScreenAction(HomeScreenActions.RefreshTasks)
                         delay(1000)
                         isRefreshing = false
                     }
-                },
-                modifier = Modifier
+                }, modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .background(Gray100)
@@ -125,8 +119,7 @@ fun TasksContent(
                         Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
                         TrackingToggleCard(
                             isTracking = viewState.isTracking,
-                            onToggle = { onTasksScreenAction(HomeScreenActions.ToggleTracking) }
-                        )
+                            onToggle = { onTasksScreenAction(HomeScreenActions.ToggleTracking) })
                     }
 
                     // Partner statistics
@@ -141,12 +134,10 @@ fun TasksContent(
                                     onMonthYearChanged = { month, year ->
                                         onTasksScreenAction(
                                             HomeScreenActions.OnMonthYearFilterChanged(
-                                                month,
-                                                year
+                                                month, year
                                             )
                                         )
-                                    }
-                                )
+                                    })
                             }
                         }
                     } else if (!viewState.isTracking) {
@@ -160,8 +151,8 @@ fun TasksContent(
                     if (viewState.isTracking) {
                         // Summary card for available orders (all waiting tasks from Firebase)
                         val availableCount = viewState.waitingDeliveryTasks.size
-                        val shouldShowSummary = viewState.bottomSheetMinimized || 
-                                              (viewState.currentAlertTask == null && availableCount > 0)
+                        val shouldShowSummary =
+                            viewState.bottomSheetMinimized || (viewState.currentAlertTask == null && availableCount > 0)
 
                         if (viewState.isAvailableTasksLoading) {
                             item(key = "available_orders_shimmer") {
@@ -173,8 +164,7 @@ fun TasksContent(
                                 Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                                 AvailableOrdersSummaryCard(
                                     count = availableCount,
-                                    onClick = { onTaskItemAction(HomeItemActions.NavigateToAvailableTasks) }
-                                )
+                                    onClick = { onTaskItemAction(HomeItemActions.NavigateToAvailableTasks) })
                             }
                         }
 
@@ -204,7 +194,11 @@ fun TasksContent(
                                     currency = currency,
                                     startedTaskId = startedTaskId,
                                     onTaskDetailsClick = { taskId, retailerId ->
-                                        onTaskItemAction(HomeItemActions.ShowTaskDetails(taskId, retailerId))
+                                        onTaskItemAction(
+                                            HomeItemActions.ShowTaskDetails(
+                                                taskId, retailerId
+                                            )
+                                        )
                                     },
                                     onDirectionClick = { lat, lng ->
                                         onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
@@ -215,30 +209,23 @@ fun TasksContent(
                                     onWhatsAppClick = { whatsapp ->
                                         onTaskItemAction(HomeItemActions.WhatsAppRetailer(whatsapp))
                                     },
-                                    onClick = {
-                                        onTaskItemAction(HomeItemActions.TaskClicked(task.taskId))
-                                    },
+
                                     onStatusChangeClick = { orderId, status ->
                                         confirmDialogState = Pair(orderId, status)
-                                    }
-                                )
+                                    })
                             }
 
                             // Assigned delivery tasks
-                            items(viewState.assignedDeliveryTasks, key = { "delivery_${it.orderId}" }) { task ->
-                                SellerTaskItem(
-                                    task = task,
-                                    currency = currency,
-                                    onCallSender = { phone ->
-                                        onTaskItemAction(HomeItemActions.CallRetailer(phone))
-                                    },
-                                    onCallReceiver = { phone ->
-                                        onTaskItemAction(HomeItemActions.CallRetailer(phone))
-                                    },
-                                    onClick = {
-                                        onTaskItemAction(HomeItemActions.TaskClicked(task.orderId))
-                                    }
-                                )
+                            items(
+                                viewState.assignedDeliveryTasks,
+                                key = { "delivery_${it.orderId}" }) { task ->
+                                SellerTaskItem(task = task, onCallSender = { phone ->
+                                    onTaskItemAction(HomeItemActions.CallRetailer(phone))
+                                }, onCallReceiver = { phone ->
+                                    onTaskItemAction(HomeItemActions.CallRetailer(phone))
+                                }, onStatusChangeClick = { orderId, status ->
+                                    confirmDialogState = Pair(orderId, status)
+                                })
                             }
                         }
 
@@ -272,8 +259,7 @@ fun TasksContent(
                         bottom = dimensionResource(com.intuit.sdp.R.dimen._60sdp),
                         start = dimensionResource(com.intuit.sdp.R.dimen._60sdp),
                         end = dimensionResource(com.intuit.sdp.R.dimen._60sdp)
-                    ),
-                contentAlignment = Alignment.Center
+                    ), contentAlignment = Alignment.Center
             ) {
                 if (toastText != null) {
                     ToastMsg(text = toastText)
@@ -281,14 +267,10 @@ fun TasksContent(
             }
         }
         confirmDialogState?.let { (orderId, status) ->
-            ConfirmStatusDialog(
-                status = status,
-                onConfirm = {
-                    onTaskItemAction(HomeItemActions.ChangeOrderStatus(orderId, status))
-                    confirmDialogState = null
-                },
-                onDismiss = { confirmDialogState = null }
-            )
+            ConfirmStatusDialog(status = status, onConfirm = {
+                onTaskItemAction(HomeItemActions.ChangeOrderStatus(orderId, status))
+                confirmDialogState = null
+            }, onDismiss = { confirmDialogState = null })
         }
     }
 }
@@ -298,29 +280,26 @@ fun TasksContent(
 fun TasksContentPreview() {
     TasksContent(
         viewState = HomeViewState(
-            waitingDeliveryTasks = listOf(
-                DeliveryTask(
-                    orderId = 3,
-                    statusId = 2,
-                    statusName = "issued",
-                    senderMobile = "01012345678",
-                    fromAddress = "Nasr City, Cairo",
-                    toAddress = "Zamalek, Cairo",
-                    receiverMobile = "01198765432",
-                    deliveryPrice = 250,
-                    collectionAmount = 0,
-                    note = "",
-                    createdAt = null,
-                    updatedAt = null
-                ),
+        waitingDeliveryTasks = listOf(
+            DeliveryTask(
+                orderId = 3,
+                statusId = 2,
+                statusName = "issued",
+                senderMobile = "01012345678",
+                fromAddress = "Nasr City, Cairo",
+                toAddress = "Zamalek, Cairo",
+                receiverMobile = "01198765432",
+                deliveryPrice = 250,
+                collectionAmount = 0,
+                note = "",
+                createdAt = null,
+                updatedAt = null
             ),
-            isTracking = false,
-            showToastMessage = null
-        ),
+        ), isTracking = false, showToastMessage = null
+    ),
         currency = "EGP",
         startedTaskId = -1,
         partnerStatistics = null,
         onTasksScreenAction = {},
-        onTaskItemAction = {}
-    )
+        onTaskItemAction = {})
 }

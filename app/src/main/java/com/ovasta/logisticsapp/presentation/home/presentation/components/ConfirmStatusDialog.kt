@@ -1,11 +1,10 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.ovasta.logisticsapp.R
+import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 
 @Composable
@@ -25,19 +24,14 @@ fun ConfirmStatusDialog(
         else -> ""
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = title) },
-        text = { Text(text = message) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.dismiss))
-            }
-        }
+    BaseDialog(
+        icon = painterResource(R.drawable.ic_delivery_truck),
+        title = title,
+        message = message,
+        primaryButtonText = stringResource(R.string.confirm),
+        secondaryButtonText = stringResource(R.string.dismiss),
+        onPrimaryClick = onConfirm,
+        onSecondaryClick = onDismiss,
+        onDismiss = onDismiss
     )
 }

@@ -2,6 +2,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AcceptOrderRequest
+import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
@@ -26,14 +27,14 @@ interface HomeApi {
     ): ApiResponse<PartnerStatistics>
 
     @GET("delivery-orders")
-    suspend fun getDeliveryOrders(): ApiResponse<List<DeliveryTask>>
+    suspend fun getDeliveryOrders(): ApiResponse<List<AssignedDeliveryTask>>
 
-    @GET("delivery-orders/{id}/accept")
-    suspend fun acceptDeliveryOrder(@Path("id") orderId: Int)
+    @POST("delivery-orders/{id}/accept")
+    suspend fun acceptDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
 
     @POST("delivery-orders/{id}/pick")
-    suspend fun pickDeliveryOrder(@Path("id") orderId: Int)
+    suspend fun pickDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
 
     @POST("delivery-orders/{id}/deliver")
-    suspend fun deliverDeliveryOrder(@Path("id") orderId: Int)
+    suspend fun deliverDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
 }
