@@ -4,8 +4,8 @@ class LoginRepository(
     private val loginRemoteDataSource: ILoginRemoteDataSource,
 ) : ILoginRepository {
 
-    override suspend fun login(phone: String, password: String, userType: Int) =
-        loginRemoteDataSource.login(phone, password, userType)
+    override suspend fun login(phone: String, password: String, userType: Int, fcmToken: String?) =
+        loginRemoteDataSource.login(phone, password, userType, fcmToken)
 
     override suspend fun authenticateWithFirebase(
         firebaseAuthToken: String,

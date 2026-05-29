@@ -6,5 +6,5 @@ import com.maxab.basemodule.core.setting.model.RemoteConfigModel
 
 interface ISettingsRemoteDataSource {
     suspend fun logout()
-
+    suspend fun updateFcmToken(token: String)
 }

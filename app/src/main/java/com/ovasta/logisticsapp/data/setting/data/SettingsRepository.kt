@@ -20,4 +20,17 @@ class SettingsRepository(
     override suspend fun clearUserData() {
         settingsLocalDataSource.clearUserData()
     }
+
+    override suspend fun saveFcmToken(token: String) {
+        settingsLocalDataSource.saveFcmToken(token)
+    }
+
+    override suspend fun getFcmToken(): String {
+        return settingsLocalDataSource.getFcmToken()
+    }
+
+    override suspend fun updateFcmToken(token: String) {
+        settingsRemoteDataSource.updateFcmToken(token)
+        settingsLocalDataSource.saveFcmToken(token)
+    }
 }

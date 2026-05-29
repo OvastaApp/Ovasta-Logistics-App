@@ -31,4 +31,14 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
             )
         }
     }
+
+    override suspend fun saveFcmToken(token: String) {
+        dataStore.updateData {
+            it.copy(fcmToken = token)
+        }
+    }
+
+    override suspend fun getFcmToken(): String {
+        return dataStore.data.first().fcmToken
+    }
 }

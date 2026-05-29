@@ -7,4 +7,6 @@ interface ISettingsLocalDataSource {
     suspend fun getUseData(): User?
     suspend fun clearUserData()
     suspend fun saveUserData(user: User)
+    suspend fun saveFcmToken(token: String)
+    suspend fun getFcmToken(): String
 }
