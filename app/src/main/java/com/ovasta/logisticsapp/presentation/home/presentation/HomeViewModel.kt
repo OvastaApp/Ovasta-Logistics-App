@@ -40,6 +40,11 @@ class HomeViewModel(
     private val _taskAlertTimestamps = mutableMapOf<Int, Long>()
     val taskAlertTimestamps: Map<Int, Long> get() = _taskAlertTimestamps
 
+    // Foreground-aware timer: only count down while app is in foreground
+    private val _elapsedAlertTime = mutableMapOf<Int, Long>() // accumulated ms per task
+    private var _lastResumeTime: Long = System.currentTimeMillis()
+    private var _isAppInForeground: Boolean = true
+
     // Persist seen task IDs across app restarts
     private val prefs = context.getSharedPreferences("delivery_alerts", Context.MODE_PRIVATE)
     private val _seenTaskIds = prefs.getStringSet("seen_task_ids", emptySet())!!
@@ -111,6 +116,8 @@ class HomeViewModel(
                                     val firstTask = newTasks.first()
                                     _taskAlertTimestamps[firstTask.orderId] =
                                         System.currentTimeMillis()
+                                    _elapsedAlertTime[firstTask.orderId] = 0L
+                                    _lastResumeTime = System.currentTimeMillis()
                                     state.copy(
                                         currentAlertTask = firstTask,
                                         alertQueue = state.alertQueue + newTasks.drop(1),
@@ -188,14 +195,21 @@ class HomeViewModel(
         alertTimerJob = viewModelScope.launch {
             while (true) {
                 delay(500)
+                if (!_isAppInForeground) continue
                 val currentTask = _viewState.value.currentAlertTask
                 if (currentTask != null) {
-                    val timestamp = _taskAlertTimestamps[currentTask.orderId]
-                    if (timestamp != null && System.currentTimeMillis() - timestamp >= 30_000) {
+                    val accumulated = _elapsedAlertTime[currentTask.orderId] ?: 0L
+                    val sinceLastResume = System.currentTimeMillis() - _lastResumeTime
+                    val totalElapsed = accumulated + sinceLastResume
+                    // Update taskAlertTimestamps for UI progress bar (store effective start time)
+                    _taskAlertTimestamps[currentTask.orderId] =
+                        System.currentTimeMillis() - totalElapsed
+                    if (totalElapsed >= 30_000) {
                         // Current task expired → mark as seen and pop next from queue
                         _seenTaskIds.add(currentTask.orderId)
                         persistSeenTaskIds()
                         _taskAlertTimestamps.remove(currentTask.orderId)
+                        _elapsedAlertTime.remove(currentTask.orderId)
                         popNextTaskFromQueue()
                     }
                 }
@@ -207,7 +221,9 @@ class HomeViewModel(
         _viewState.update { state ->
             val nextTask = state.alertQueue.firstOrNull()
             if (nextTask != null) {
-                // Pop from queue, set as current with fresh timestamp
+                // Pop from queue, set as current with fresh timer
+                _elapsedAlertTime[nextTask.orderId] = 0L
+                _lastResumeTime = System.currentTimeMillis()
                 _taskAlertTimestamps[nextTask.orderId] = System.currentTimeMillis()
                 // Restart alarm for the next task
                 orderAlarmSound.startAlarm()
@@ -230,6 +246,22 @@ class HomeViewModel(
     private fun persistSeenTaskIds() {
         prefs.edit().putStringSet("seen_task_ids", _seenTaskIds.map { it.toString() }.toSet())
             .apply()
+    }
+
+    fun onAppForeground() {
+        _isAppInForeground = true
+        _lastResumeTime = System.currentTimeMillis()
+    }
+
+    fun onAppBackground() {
+        _isAppInForeground = false
+        // Accumulate elapsed time for the current task before going to background
+        val currentTask = _viewState.value.currentAlertTask
+        if (currentTask != null && _elapsedAlertTime.containsKey(currentTask.orderId)) {
+            val now = System.currentTimeMillis()
+            _elapsedAlertTime[currentTask.orderId] =
+                (_elapsedAlertTime[currentTask.orderId] ?: 0L) + (now - _lastResumeTime)
+        }
     }
 
     fun onTasksScreenAction(tasksScreenAction: HomeScreenActions) {
@@ -327,10 +359,10 @@ class HomeViewModel(
                     _seenTaskIds.add(orderId)
                     persistSeenTaskIds()
                     _taskAlertTimestamps.remove(orderId)
+                    _elapsedAlertTime.remove(orderId)
                 }
-                // Clear current task (it's been marked as seen) — keep queue intact
-                _viewState.update { it.copy(currentAlertTask = null, bottomSheetMinimized = true) }
-                orderAlarmSound.stopAlarm()
+                // Pop next task from queue (shows next order immediately, or clears if empty)
+                popNextTaskFromQueue()
             }
 
             else -> {
@@ -367,6 +399,8 @@ class HomeViewModel(
                             // Show first task immediately
                             val firstTask = unseenTasks.first()
                             _taskAlertTimestamps[firstTask.orderId] = System.currentTimeMillis()
+                            _elapsedAlertTime[firstTask.orderId] = 0L
+                            _lastResumeTime = System.currentTimeMillis()
                             state.copy(
                                 currentAlertTask = firstTask,
                                 alertQueue = state.alertQueue + unseenTasks.drop(1),
@@ -525,6 +559,7 @@ class HomeViewModel(
 
                 // Remove timestamp
                 _taskAlertTimestamps.remove(orderId)
+                _elapsedAlertTime.remove(orderId)
 
                 // Remove from waiting list
                 _viewState.update { state ->

@@ -289,8 +289,8 @@ fun TasksContentPreview() {
                 fromAddress = "Nasr City, Cairo",
                 toAddress = "Zamalek, Cairo",
                 receiverMobile = "01198765432",
-                deliveryPrice = 250,
-                collectionAmount = 0,
+                deliveryPrice = 250.0,
+                collectionAmount = 101.00,
                 note = "",
                 createdAt = null,
                 updatedAt = null

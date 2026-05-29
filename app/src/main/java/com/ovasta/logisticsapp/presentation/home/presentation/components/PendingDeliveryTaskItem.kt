@@ -111,10 +111,12 @@ fun PendingDeliveryTaskItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
+                    val totalPrice = (task.collectionAmount ?: 0.0) + (task.deliveryPrice ?: 0.0)
+
                     Text(
                         text = stringResource(
                             R.string.price_currency,
-                            task.collectionAmount ?: 0.0
+                            totalPrice
                         ), style = lgSemiBold
                     )
                 }
@@ -164,8 +166,8 @@ fun PendingDeliveryTaskItemPreview() {
             fromAddress = "15 El-Tahrir St, Downtown, Cairo",
             toAddress = "Nasr City, Cairo",
             receiverMobile = "01198765432",
-            deliveryPrice = 25,
-            collectionAmount = 350,
+            deliveryPrice = 25.0,
+            collectionAmount = 3050.0,
             note = "Ring the bell twice"
         ),
         onAccept = {}

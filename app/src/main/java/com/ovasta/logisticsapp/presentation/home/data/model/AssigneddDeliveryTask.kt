@@ -34,10 +34,10 @@ data class AssignedDeliveryTask(
     var receiverMobile: String = "",
 
     @SerializedName("delivery_price")
-    var deliveryPrice: Int? = null,
+    var deliveryPrice: Double? = null,
 
     @SerializedName("collection_amount")
-    var collectionAmount: Int? = null,
+    var collectionAmount: Double? = null,
 
     @SerializedName("note")
     var note: String = "",

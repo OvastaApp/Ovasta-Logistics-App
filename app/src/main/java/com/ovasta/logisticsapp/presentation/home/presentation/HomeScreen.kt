@@ -105,8 +105,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 fromAddress = "Nasr City, Cairo",
                 toAddress = "Maadi, Cairo",
                 receiverMobile = "01198765432",
-                deliveryPrice = 250,
-                collectionAmount = 0,
+                deliveryPrice = 250.0,
+                collectionAmount = 2000.0,
                 note = "Handle with care",
                 createdAt = null,
                 updatedAt = null
@@ -119,8 +119,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 fromAddress = "Maadi, Cairo",
                 toAddress = "Heliopolis, Cairo",
                 receiverMobile = "01012345678",
-                deliveryPrice = 480,
-                collectionAmount = 0,
+                deliveryPrice = 480.0,
+                collectionAmount = 2000.0,
                 note = "Fragile item",
                 createdAt = null,
                 updatedAt = null
@@ -133,8 +133,8 @@ private fun fakeHomeViewState(): HomeViewState {
                 fromAddress = "Nasr City, Cairo",
                 toAddress = "Zamalek, Cairo",
                 receiverMobile = "01198765432",
-                deliveryPrice = 250,
-                collectionAmount = 0,
+                deliveryPrice = 20.0,
+                collectionAmount = 100.0,
                 note = "",
                 createdAt = null,
                 updatedAt = null

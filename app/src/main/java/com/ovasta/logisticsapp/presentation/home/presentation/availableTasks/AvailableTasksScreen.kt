@@ -101,8 +101,8 @@ fun AvailableTasksScreenPreview() {
             fromAddress = "Nasr City, Cairo",
             toAddress = "Maadi, Cairo",
             receiverMobile = "01198765432",
-            deliveryPrice = 250,
-            collectionAmount = 500,
+            deliveryPrice = 250.0,
+            collectionAmount = 5000.0,
             note = "Handle with care"
         ),
         DeliveryTask(
@@ -113,8 +113,8 @@ fun AvailableTasksScreenPreview() {
             fromAddress = "Heliopolis, Cairo",
             toAddress = "Zamalek, Cairo",
             receiverMobile = "01012345678",
-            deliveryPrice = 350,
-            collectionAmount = 800,
+            deliveryPrice = 350.0,
+            collectionAmount = 800.0,
             note = ""
         )
     )

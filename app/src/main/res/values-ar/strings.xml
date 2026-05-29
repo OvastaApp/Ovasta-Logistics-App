@@ -20,7 +20,7 @@
     <string name="unknown_product">منتج غير معروف</string>
     <string name="cart">السلة</string>
     <string name="order_summary">ملخص الطلب</string>
-    <string name="total_price">السعر الإجمالي</string>
+    <string name="total_price">الاجمالي بالتوصيل</string>
     <string name="price_currency">%s ج.م</string>
     <string name="empty_cart">السلة فارغة</string>
     <string name="add_products_to_start">أضف منتجات للبدء</string>
@@ -204,8 +204,8 @@
     <string name="to">إلى</string>
     <string name="error">خطأ</string>
     <string name="ok">موافق</string>
-    <string name="confirm_pickup">تاكيد استلام الطلب</string>
-    <string name="confirm_delivery">تاكيد وصول الطلب للعميل</string>
-    <string name="confirm_pickup_message">هل أنت متأكد أنك تريد تحديد استلام الطلب من البائع؟</string>
-    <string name="confirm_delivery_message">هل أنت متأكد أنك تريد تاكيد تسليم الطلب للعميل؟</string>
+    <string name="confirm_pickup">تاكيد استلام الطلب من البائع</string>
+    <string name="confirm_delivery">تاكيد تسليم الطلب للعميل</string>
+    <string name="confirm_pickup_message">تاكيد استلام الطلب من البائع؟</string>
+    <string name="confirm_delivery_message">تاكيد تسليم الطلب للعميل؟</string>
 </resources>

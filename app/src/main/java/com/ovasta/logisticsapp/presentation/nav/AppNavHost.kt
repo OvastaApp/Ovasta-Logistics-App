@@ -13,6 +13,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
@@ -48,6 +50,16 @@ fun AppNavHost(modifier: Modifier = Modifier) {
     val homeViewModel: HomeViewModel? = if (backStack.any { it is Home }) {
         koinViewModel<HomeViewModel>()
     } else null
+
+    // Observe app foreground/background to pause/resume the alert countdown timer
+    if (homeViewModel != null) {
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+            homeViewModel.onAppForeground()
+        }
+        LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+            homeViewModel.onAppBackground()
+        }
+    }
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
         Scaffold(bottomBar = {}) { paddingValues ->

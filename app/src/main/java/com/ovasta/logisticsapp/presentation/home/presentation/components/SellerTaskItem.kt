@@ -171,10 +171,12 @@ fun SellerTaskItem(
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = stringResource(R.string.total_price), style = xsMedium)
+                    val totalPrice =
+                        (task.collectionAmount ?: 0.0).plus((task.deliveryPrice ?: 0.0))
                     Text(
                         text = stringResource(
                             R.string.price_currency,
-                            task.collectionAmount ?: 0.0
+                            totalPrice
                         ), style = lgSemiBold
                     )
                 }
@@ -233,8 +235,8 @@ fun SellerTaskItemPreview() {
             fromAddress = "15 El-Tahrir St, Downtown, Cairo",
             toAddress = "Nasr City, Cairo",
             receiverMobile = "01198765432",
-            deliveryPrice = 25,
-            collectionAmount = 350,
+            deliveryPrice = 25.0,
+            collectionAmount = 350.0,
             note = "Ring the bell twice"
         ),
         onCallSender = {},

@@ -105,7 +105,7 @@ fun NewDeliveryTaskBottomSheet(
                     )
                 }
             }
-            
+
             val startTime = taskAlertTimestamps[task.orderId] ?: System.currentTimeMillis()
             DeliveryTaskAlertCard(
                 task = task,
@@ -213,10 +213,11 @@ private fun DeliveryTaskAlertCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
+                    val totalPrice = (task.collectionAmount ?: 0.0) + (task.deliveryPrice ?: 0.0)
                     Text(
                         text = stringResource(
                             R.string.price_currency,
-                            task.collectionAmount ?: 0.0
+                            totalPrice
                         ), style = lgSemiBold
                     )
                 }
@@ -272,8 +273,8 @@ fun PreviewDeliveryTaskBottomSheet() {
             fromAddress = "Nasr City, Cairo",
             toAddress = "Maadi, Cairo",
             receiverMobile = "01198765432",
-            deliveryPrice = 250,
-            collectionAmount = 0,
+            deliveryPrice = 50.0,
+            collectionAmount = 250.0,
             note = "Handle with care",
             createdAt = null,
             updatedAt = null

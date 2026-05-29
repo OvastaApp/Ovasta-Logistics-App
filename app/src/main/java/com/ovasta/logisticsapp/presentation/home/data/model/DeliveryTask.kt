@@ -42,11 +42,11 @@ data class DeliveryTask(
 
     @get:PropertyName("delivery_price")
     @set:PropertyName("delivery_price")
-    var deliveryPrice: Int? = null,
+    var deliveryPrice: Double? = null,
 
     @get:PropertyName("collection_amount")
     @set:PropertyName("collection_amount")
-    var collectionAmount: Int? = null,
+    var collectionAmount: Double? = null,
 
     @get:PropertyName("note")
     @set:PropertyName("note")
