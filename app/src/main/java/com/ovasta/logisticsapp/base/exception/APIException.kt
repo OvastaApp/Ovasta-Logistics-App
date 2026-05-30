@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import java.io.IOException
 
 class APIException(
-    @Expose var code: Int?,
+    @SerializedName("code") @Expose var code: Int?,
     @SerializedName("msg", alternate = ["message"]) val errorMessage: String,
     @SerializedName("data") val data: Any? = null
 ) : IOException()

@@ -1,21 +1,22 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ---- Debugging ----
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ---- Navigation 3 route classes ----
+# These are used as type-safe keys in the backstack
+-keep class com.ovasta.logisticsapp.presentation.nav.Splash { *; }
+-keep class com.ovasta.logisticsapp.presentation.nav.Login { *; }
+-keep class com.ovasta.logisticsapp.presentation.nav.Home { *; }
+-keep class com.ovasta.logisticsapp.presentation.nav.AvailableTasks { *; }
+-keep class com.ovasta.logisticsapp.presentation.nav.TaskDetails { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ---- Gson: keep @SerializedName fields (Gson 2.11+ handles this, but explicit for safety) ----
+# APIException extends IOException and is deserialized via Gson
+-keep class com.ovasta.logisticsapp.base.exception.APIException { <fields>; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ---- kotlinx.serialization ----
+-keepattributes *Annotation*, InnerClasses
+-keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
+-keepclasseswithmembers class com.ovasta.logisticsapp.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}

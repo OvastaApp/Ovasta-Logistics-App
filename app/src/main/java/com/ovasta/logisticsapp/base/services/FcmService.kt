@@ -40,11 +40,7 @@ class FcmService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        val isAppInForeground = ProcessLifecycleOwner.get().lifecycle.currentState
-            .isAtLeast(Lifecycle.State.RESUMED)
-        if (!isAppInForeground) {
-            showNotification(message)
-        }
+        showNotification(message)
     }
 
     private fun showNotification(message: RemoteMessage) {
