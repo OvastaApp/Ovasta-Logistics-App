@@ -33,4 +33,12 @@ class SettingsRepository(
         settingsRemoteDataSource.updateFcmToken(token)
         settingsLocalDataSource.saveFcmToken(token)
     }
+
+    override suspend fun isLocationConsentShown(): Boolean {
+        return settingsLocalDataSource.isLocationConsentShown()
+    }
+
+    override suspend fun setLocationConsentShown(shown: Boolean) {
+        settingsLocalDataSource.setLocationConsentShown(shown)
+    }
 }

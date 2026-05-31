@@ -30,4 +30,6 @@ sealed interface HomeScreenActions {
     data class ChangeLogoutDialogStatus(val isVisible: Boolean) : HomeScreenActions
     object OnLogoutClicked : HomeScreenActions
     data class OnMonthYearFilterChanged(val month: Int, val year: Int) : HomeScreenActions
+    object AcceptLocationConsent : HomeScreenActions
+    object DismissLocationConsent : HomeScreenActions
 }

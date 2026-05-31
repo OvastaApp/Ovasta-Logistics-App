@@ -209,4 +209,10 @@
     <string name="confirm_delivery">Confirm Delivery</string>
     <string name="confirm_pickup_message">Are you sure you want to mark this order as picked?</string>
     <string name="confirm_delivery_message">Are you sure you want to mark this order as delivered?</string>
+
+    <!-- Location consent dialog -->
+    <string name="location_consent_title">Allow OvaStar to access your location</string>
+    <string name="location_consent_message">OvaStar collects location data to enable live shipment tracking, driver route updates, delivery status monitoring, and operational logistics support — even when the app is closed or not in use.\n\nBackground location access is required so dispatchers and customers can receive accurate real-time delivery updates.\n\nYour location data is only used for logistics and delivery operations.\n\nBy continuing, you agree to allow OvaStar to access location data in the background.</string>
+    <string name="location_consent_ok">OK</string>
+    <string name="location_consent_not_now">Not Now</string>
 </resources>

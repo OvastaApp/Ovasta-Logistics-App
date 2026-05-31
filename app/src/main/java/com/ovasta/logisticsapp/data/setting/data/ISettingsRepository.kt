@@ -12,5 +12,7 @@ interface ISettingsRepository {
     suspend fun saveFcmToken(token: String)
     suspend fun getFcmToken(): String
     suspend fun updateFcmToken(token: String)
+    suspend fun isLocationConsentShown(): Boolean
+    suspend fun setLocationConsentShown(shown: Boolean)
 
 }

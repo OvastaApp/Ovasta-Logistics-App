@@ -26,6 +26,7 @@ data class SessionPreferences(
     val deviceId: String = "",
     val isTracking: Boolean = false,
     val fcmToken: String = "",
+    val locationConsentShown: Boolean = false,
 )
 
 object SessionPreferencesSerializer : Serializer<SessionPreferences> {

@@ -9,4 +9,6 @@ interface ISettingsLocalDataSource {
     suspend fun saveUserData(user: User)
     suspend fun saveFcmToken(token: String)
     suspend fun getFcmToken(): String
+    suspend fun isLocationConsentShown(): Boolean
+    suspend fun setLocationConsentShown(shown: Boolean)
 }

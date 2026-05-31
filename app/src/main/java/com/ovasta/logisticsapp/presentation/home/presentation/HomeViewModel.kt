@@ -278,7 +278,31 @@ class HomeViewModel(
             }
 
             HomeScreenActions.ToggleTracking -> {
-                changePartnerStatus(!viewState.value.isTracking)
+                if (!viewState.value.isTracking) {
+                    // Enabling tracking — check if consent was shown before
+                    viewModelScope.launch {
+                        val consentShown = settingsRepository.isLocationConsentShown()
+                        if (consentShown) {
+                            changePartnerStatus(true)
+                        } else {
+                            _viewState.update { it.copy(isLocationConsentDialogVisible = true) }
+                        }
+                    }
+                } else {
+                    changePartnerStatus(false)
+                }
+            }
+
+            HomeScreenActions.AcceptLocationConsent -> {
+                viewModelScope.launch {
+                    settingsRepository.setLocationConsentShown(true)
+                    _viewState.update { it.copy(isLocationConsentDialogVisible = false) }
+                    changePartnerStatus(true)
+                }
+            }
+
+            HomeScreenActions.DismissLocationConsent -> {
+                _viewState.update { it.copy(isLocationConsentDialogVisible = false) }
             }
 
             is HomeScreenActions.ChangeLogoutDialogStatus -> {

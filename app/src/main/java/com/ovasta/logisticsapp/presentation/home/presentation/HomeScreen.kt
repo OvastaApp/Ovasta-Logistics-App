@@ -32,6 +32,10 @@ import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
+import com.ovasta.logisticsapp.R
+import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
@@ -106,6 +110,20 @@ fun HomeScreen(viewModel: HomeViewModel) {
             }, onDismiss = {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
+
+        if (viewState.isLocationConsentDialogVisible) {
+            BaseDialog(
+                icon = painterResource(R.drawable.ic_location),
+                title = stringResource(R.string.location_consent_title),
+                message = stringResource(R.string.location_consent_message),
+                primaryButtonText = stringResource(R.string.location_consent_ok),
+                secondaryButtonText = stringResource(R.string.location_consent_not_now),
+                onPrimaryClick = { viewModel.onTasksScreenAction(HomeScreenActions.AcceptLocationConsent) },
+                onSecondaryClick = { viewModel.onTasksScreenAction(HomeScreenActions.DismissLocationConsent) },
+                onDismiss = { viewModel.onTasksScreenAction(HomeScreenActions.DismissLocationConsent) },
+                dismissOnClickOutside = false
+            )
+        }
 
     }
 }

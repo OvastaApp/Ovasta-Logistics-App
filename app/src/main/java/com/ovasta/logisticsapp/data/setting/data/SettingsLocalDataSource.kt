@@ -41,4 +41,12 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
     override suspend fun getFcmToken(): String {
         return dataStore.data.first().fcmToken
     }
+
+    override suspend fun isLocationConsentShown(): Boolean {
+        return dataStore.data.first().locationConsentShown
+    }
+
+    override suspend fun setLocationConsentShown(shown: Boolean) {
+        dataStore.updateData { it.copy(locationConsentShown = shown) }
+    }
 }

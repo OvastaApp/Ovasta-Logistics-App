@@ -208,4 +208,10 @@
     <string name="confirm_delivery">تاكيد تسليم الطلب للعميل</string>
     <string name="confirm_pickup_message">تاكيد استلام الطلب من البائع؟</string>
     <string name="confirm_delivery_message">تاكيد تسليم الطلب للعميل؟</string>
+
+    <!-- Location consent dialog -->
+    <string name="location_consent_title">السماح لـ OvaStar بالوصول إلى موقعك</string>
+    <string name="location_consent_message">يجمع OvaStar بيانات الموقع لتتبع الشحنات وتحديثات السائق وحالة التوصيل، حتى عند إغلاق التطبيق أو عدم استخدامه.\n\nيُطلب الوصول إلى الموقع في الخلفية لتوفير تحديثات دقيقة وفورية للمشرفين والعملاء.\n\nتُستخدم بيانات الموقع فقط لأغراض التوصيل والخدمات اللوجستية.\n\nبالمتابعة، فإنك توافق على منح OvaStar إذن الوصول إلى الموقع في الخلفية.</string>
+    <string name="location_consent_ok">موافق</string>
+    <string name="location_consent_not_now">ليس الآن</string>
 </resources>
