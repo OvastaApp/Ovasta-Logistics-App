@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.base.di
 
 import android.app.Application
+import com.ovasta.logisticsapp.base.crashlyticsInfo.di.crashlyticsInfoModule
 import com.ovasta.logisticsapp.base.local.di.resourcesModule
 import com.ovasta.logisticsapp.data.setting.di.settingModule
 import com.ovasta.logisticsapp.presentation.auth.login.di.loginModule
@@ -26,8 +27,8 @@ fun startKoin(application: Application) {
                 splashModule,
                 loginModule,
                 homeModule,
-                taskDetailsModule
-//                cartModule,
+                taskDetailsModule,
+                crashlyticsInfoModule,
 //                invoiceModule,
 //                historyModule
             )

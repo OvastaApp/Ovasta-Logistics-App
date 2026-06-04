@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.datastore.core.DataStore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ovasta.logisticsapp.R
+import com.ovasta.logisticsapp.base.crashlyticsInfo.CrashlyticsUserInfoUseCase
 import com.ovasta.logisticsapp.base.di.startKoin
 import com.ovasta.logisticsapp.base.interceptor.SessionHeaderCache
 import com.ovasta.logisticsapp.base.services.LocationTrackerService
@@ -30,6 +31,9 @@ class LogisticsApp : Application() {
         CoroutineScope(Dispatchers.IO).launch {
             SessionHeaderCache.initialize(sessionDataStore)
         }
+
+        // Set user info for Crashlytics once per session
+        setUserInfoForCrashlytics()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -76,6 +80,19 @@ class LogisticsApp : Application() {
         }
 
         checkAndSendFcmToken()
+    }
+
+    private fun setUserInfoForCrashlytics() {
+        val crashlyticsUserInfoUseCase: CrashlyticsUserInfoUseCase by inject()
+        val settingsRepository: ISettingsRepository by inject()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val user = settingsRepository.getUseData()
+                crashlyticsUserInfoUseCase(user)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun checkAndSendFcmToken() {

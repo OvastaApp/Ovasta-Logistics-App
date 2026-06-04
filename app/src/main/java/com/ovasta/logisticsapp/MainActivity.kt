@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
-import com.ovasta.logisticsapp.base.services.LocationManager
 import com.ovasta.logisticsapp.presentation.nav.AppNavHost
 import com.ovasta.logisticsapp.ui.theme.OvastaLogisticsAppTheme
 

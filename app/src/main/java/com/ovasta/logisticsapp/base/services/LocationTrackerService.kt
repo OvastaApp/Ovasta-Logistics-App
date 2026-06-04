@@ -35,7 +35,8 @@ class LocationTrackerService() : Service(), KoinComponent {
     override fun onStartCommand(
         intent: Intent?, flags: Int, startId: Int
     ): Int {
-
+        // For Android 12+ (API 31+), we must call startForeground() immediately
+        // when the service is started, before any other operations
         when (intent?.action) {
             Action.START.name -> start()
             Action.STOP.name -> stop()
@@ -49,6 +50,18 @@ class LocationTrackerService() : Service(), KoinComponent {
     }
 
     private fun start() {
+        // Create and show notification FIRST (before any other operations)
+        // Android 12+ requires startForeground() to be called within 5 seconds
+        val notification = NotificationCompat
+            .Builder(this, LOCATION_CHANNEL)
+            .setSmallIcon(R.drawable.logo)
+            .setContentTitle("Location Tracker")
+            .setContentText("Initializing location tracking...")
+            .setStyle(NotificationCompat.BigTextStyle())
+            .build()
+
+        startForeground(NOTIFICATION_ID, notification)
+
         // Don't start tracking if location services are disabled
         val androidLocationManager = getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
         if (!androidLocationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) &&
@@ -65,14 +78,6 @@ class LocationTrackerService() : Service(), KoinComponent {
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val notification = NotificationCompat
-            .Builder(this, LOCATION_CHANNEL)
-            .setSmallIcon(R.drawable.logo)
-            .setContentTitle("Location Tracker")
-            .setStyle(NotificationCompat.BigTextStyle())
-
-        startForeground(1, notification.build())
 
         trackingJob = scope.launch {
             locationManager.trackLocation().collect { location ->
@@ -92,14 +97,16 @@ class LocationTrackerService() : Service(), KoinComponent {
                     }
                 }
 
-                notificationManager.notify(
-                    1,
-                    notification.setContentText(
-                        "Location: $latitude / $longitude"
-                    )
-                        .build()
-                )
+                // Update notification with current location
+                val updatedNotification = NotificationCompat
+                    .Builder(this@LocationTrackerService, LOCATION_CHANNEL)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle("Location Tracker")
+                    .setContentText("Location: $latitude / $longitude")
+                    .setStyle(NotificationCompat.BigTextStyle())
+                    .build()
 
+                notificationManager.notify(NOTIFICATION_ID, updatedNotification)
             }
         }
 
@@ -121,5 +128,6 @@ class LocationTrackerService() : Service(), KoinComponent {
 
     companion object {
         const val LOCATION_CHANNEL = "location_channel"
+        private const val NOTIFICATION_ID = 1
     }
 }
