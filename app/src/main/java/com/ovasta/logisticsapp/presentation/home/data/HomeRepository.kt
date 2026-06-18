@@ -42,12 +42,15 @@ class HomeRepository(
             } catch (ex: Exception) {
                 // Handle Android 12+ ForegroundServiceStartNotAllowedException
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ex is ForegroundServiceStartNotAllowedException) {
-                    Log.e("LocationTrackingRepository", 
-                        "Cannot start foreground service - app must be in foreground state", ex)
+                    ex is ForegroundServiceStartNotAllowedException
+                ) {
+                    Log.e(
+                        "LocationTrackingRepository",
+                        "Cannot start foreground service - app must be in foreground state", ex
+                    )
                     throw IllegalStateException(
                         "Location tracking can only be started when the app is visible. " +
-                        "Please ensure the app is in the foreground and try again.", 
+                                "Please ensure the app is in the foreground and try again.",
                         ex
                     )
                 }
@@ -98,5 +101,12 @@ class HomeRepository(
 
     override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps) =
         homeServerRemoteDataSource.changeOrderStatus(orderId, status)
+
+    override suspend fun createDeliveryOrder(deliveryFees: Double) {
+        homeServerRemoteDataSource.createDeliveryOrder(deliveryFees)
+    }
+
+    override suspend fun updateDeliveryOrderFees(orderId: Int, deliveryFees: Double) =
+        homeServerRemoteDataSource.updateDeliveryOrderFees(orderId, deliveryFees)
 
 }

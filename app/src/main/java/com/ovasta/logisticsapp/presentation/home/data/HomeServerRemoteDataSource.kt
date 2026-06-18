@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
+import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
 
 class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemoteDataSource {
 
@@ -19,7 +20,7 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
     ) = homeApi.getPartnerStatistics(month, year)
 
     override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit> {
-       return when (status) {
+        return when (status) {
             is OrderSteps.Assigned -> homeApi.acceptDeliveryOrder(orderId)
             is OrderSteps.Picked -> homeApi.pickDeliveryOrder(orderId)
             else -> homeApi.deliverDeliveryOrder(orderId)
@@ -27,4 +28,13 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
     }
 
     override suspend fun getAssignedDeliveryOrders() = homeApi.getDeliveryOrders().data
+    override suspend fun createDeliveryOrder(deliveryFees: Double) {
+        val request = UpdateFeesRequest(deliveryFees)
+        homeApi.createDeliveryOrder(request)
+    }
+
+    override suspend fun updateDeliveryOrderFees(orderId: Int, deliveryFees: Double) {
+        val request = UpdateFeesRequest(deliveryFees)
+        homeApi.updateDeliveryOrderFees(orderId, request)
+    }
 }

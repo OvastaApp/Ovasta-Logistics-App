@@ -628,6 +628,41 @@ class HomeViewModel(
         _viewState.update { it.copy(showToastMessage = null) }
     }
 
+    private fun createDeliveryOrder(fees: Double) {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.createDeliveryOrder(
+                    deliveryFees = fees
+                )
+            }.onSuccess {
+                setComposeUILoading(false)
+                getAssignedDeliveryOrders()
+            }.onFailure {
+                setComposeUILoading(false)
+                emitComposeUIExceptionEvent(it.toComposeUIException())
+            }
+        }
+    }
+
+    private fun updateDeliveryFees(orderId: Int, fees: Double) {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.updateDeliveryOrderFees(
+                    orderId = orderId, deliveryFees = fees
+                )
+            }.onSuccess {
+                setComposeUILoading(false)
+                getAssignedDeliveryOrders()
+            }.onFailure {
+                setComposeUILoading(false)
+                emitComposeUIExceptionEvent(it.toComposeUIException())
+            }
+        }
+    }
+
+
     override fun onCleared() {
         super.onCleared()
         orderAlarmSound.stopAlarm()

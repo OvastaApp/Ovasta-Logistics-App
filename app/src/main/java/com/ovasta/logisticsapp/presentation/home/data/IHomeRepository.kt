@@ -8,6 +8,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
+import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
 import kotlinx.coroutines.flow.Flow
 
 interface IHomeRepository {
@@ -53,6 +54,8 @@ interface IHomeRepository {
     suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 
     suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
+    suspend fun createDeliveryOrder(deliveryFees: Double)
 
+    suspend fun updateDeliveryOrderFees(orderId: Int, deliveryFees: Double)
 
 }

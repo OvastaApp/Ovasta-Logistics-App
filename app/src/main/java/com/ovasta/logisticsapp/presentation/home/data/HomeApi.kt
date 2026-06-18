@@ -7,6 +7,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
+import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -37,4 +38,13 @@ interface HomeApi {
 
     @POST("delivery-orders/{id}/deliver")
     suspend fun deliverDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
+
+    @POST("delivery-orders/create_delivery_order")
+    suspend fun createDeliveryOrder(@Body updateFeesRequest: UpdateFeesRequest)
+
+    @POST("delivery-orders/{id}/update_fees_price")
+    suspend fun updateDeliveryOrderFees(
+        @Path("id") orderId: Int,
+        @Body updateFeesRequest: UpdateFeesRequest
+    )
 }
