@@ -215,4 +215,16 @@
     <string name="location_consent_message">OvaStar collects location data to enable live shipment tracking, driver route updates, delivery status monitoring, and operational logistics support — even when the app is closed or not in use.\n\nBackground location access is required so dispatchers and customers can receive accurate real-time delivery updates.\n\nYour location data is only used for logistics and delivery operations.\n\nBy continuing, you agree to allow OvaStar to access location data in the background.</string>
     <string name="location_consent_ok">OK</string>
     <string name="location_consent_not_now">Not Now</string>
+
+    <!-- Update delivery fees -->
+    <string name="edit_delivery_fees">Edit delivery fees</string>
+    <string name="update_delivery_fees_title">Update delivery fees</string>
+    <string name="update_delivery_fees_message">You are about to change the delivery fees for order #%1$d starting from %2$s.</string>
+    <string name="delivery_fees_hint">Delivery fees</string>
+
+    <!-- Create delivery order -->
+    <string name="create_delivery_order">Create delivery order</string>
+    <string name="create_delivery_order_title">New delivery order</string>
+    <string name="create_delivery_order_message">Enter the delivery fees for this order.</string>
+    <string name="cancel">Cancel</string>
 </resources>

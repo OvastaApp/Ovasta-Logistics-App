@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,7 +27,8 @@ fun SellerTaskItem(
     task: AssignedDeliveryTask,
     onCallSender: (String) -> Unit,
     onCallReceiver: (String) -> Unit,
-    onStatusChangeClick: ((Int, OrderSteps) -> Unit)? = null
+    onStatusChangeClick: ((Int, OrderSteps) -> Unit)? = null,
+    onEditFeesClick: ((AssignedDeliveryTask) -> Unit)? = null
 ) {
     val statusColor = when (OrderSteps.fromStatusId(task.statusId ?: 0)) {
         OrderSteps.Pending -> StatusPending
@@ -52,13 +54,29 @@ fun SellerTaskItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "#${task.orderId}", style = mdSemiBold)
-                Text(
-                    text = task.statusName,
-                    style = xsMedium.copy(color = statusColor),
-                    modifier = Modifier
-                        .background(statusColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = task.statusName,
+                        style = xsMedium.copy(color = statusColor),
+                        modifier = Modifier
+                            .background(statusColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                    // Editing fees is only allowed on unassigned (Pending) delivery orders
+                    val isPending = OrderSteps.fromStatusId(task.statusId ?: 0) == OrderSteps.Pending
+                    if (isPending && onEditFeesClick != null) {
+                        IconButton(
+                            onClick = { onEditFeesClick(task) },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_edit_task),
+                                contentDescription = stringResource(R.string.edit_delivery_fees),
+                                tint = Primary
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

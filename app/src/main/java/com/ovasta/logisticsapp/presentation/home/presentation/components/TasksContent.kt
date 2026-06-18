@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -31,12 +32,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ovasta.logisticsapp.R
+import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray500
+import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.components.sharedComposable.ToastMsg
 import com.ovasta.logisticsapp.base.mdRegular
+import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
@@ -63,6 +67,8 @@ fun TasksContent(
     val pullToRefreshState = rememberPullToRefreshState()
     val coroutineScope = rememberCoroutineScope()
     var confirmDialogState by remember { mutableStateOf<Pair<Int, OrderSteps>?>(null) }
+    var editFeesState by remember { mutableStateOf<AssignedDeliveryTask?>(null) }
+    var showCreateOrderDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewState.showToastMessage) {
         if (viewState.showToastMessage != null) {
@@ -90,6 +96,18 @@ fun TasksContent(
                             )
                         }
                     })
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { showCreateOrderDialog = true },
+                    containerColor = Primary,
+                    contentColor = Base_white
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = stringResource(R.string.create_delivery_order)
+                    )
+                }
             }) { padding ->
             val listState = rememberLazyListState()
 
@@ -225,6 +243,8 @@ fun TasksContent(
                                     onTaskItemAction(HomeItemActions.CallRetailer(phone))
                                 }, onStatusChangeClick = { orderId, status ->
                                     confirmDialogState = Pair(orderId, status)
+                                }, onEditFeesClick = { editTask ->
+                                    editFeesState = editTask
                                 })
                             }
                         }
@@ -271,6 +291,39 @@ fun TasksContent(
                 onTaskItemAction(HomeItemActions.ChangeOrderStatus(orderId, status))
                 confirmDialogState = null
             }, onDismiss = { confirmDialogState = null })
+        }
+
+        editFeesState?.let { task ->
+            DeliveryFeesDialog(
+                title = stringResource(R.string.update_delivery_fees_title),
+                message = stringResource(
+                    R.string.update_delivery_fees_message,
+                    task.orderId,
+                    task.fromAddress.ifBlank { stringResource(R.string.sender_info) }
+                ),
+                maxValue = 9999.0,
+                confirmText = stringResource(R.string.confirm),
+                initialValue = task.deliveryPrice,
+                onConfirm = { fees ->
+                    onTaskItemAction(HomeItemActions.UpdateDeliveryFees(task.orderId, fees))
+                    editFeesState = null
+                },
+                onDismiss = { editFeesState = null }
+            )
+        }
+
+        if (showCreateOrderDialog) {
+            DeliveryFeesDialog(
+                title = stringResource(R.string.create_delivery_order_title),
+                message = stringResource(R.string.create_delivery_order_message),
+                maxValue = 1000.0,
+                confirmText = stringResource(R.string.confirm),
+                onConfirm = { fees ->
+                    onTasksScreenAction(HomeScreenActions.CreateDeliveryOrder(fees))
+                    showCreateOrderDialog = false
+                },
+                onDismiss = { showCreateOrderDialog = false }
+            )
         }
     }
 }

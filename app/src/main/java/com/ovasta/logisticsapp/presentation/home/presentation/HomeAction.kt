@@ -17,6 +17,7 @@ sealed interface HomeItemActions {
     data class ChangeOrderStatus(val orderId: Int, val status: OrderSteps) : HomeItemActions
     data object MinimizeBottomSheet : HomeItemActions
     data object NavigateToAvailableTasks : HomeItemActions
+    data class UpdateDeliveryFees(val orderId: Int, val fees: Double) : HomeItemActions
 }
 
 sealed interface HomeScreenActions {
@@ -32,4 +33,5 @@ sealed interface HomeScreenActions {
     data class OnMonthYearFilterChanged(val month: Int, val year: Int) : HomeScreenActions
     object AcceptLocationConsent : HomeScreenActions
     object DismissLocationConsent : HomeScreenActions
+    data class CreateDeliveryOrder(val fees: Double) : HomeScreenActions
 }

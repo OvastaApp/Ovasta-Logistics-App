@@ -313,6 +313,10 @@ class HomeViewModel(
                 logout()
             }
 
+            is HomeScreenActions.CreateDeliveryOrder -> {
+                createDeliveryOrder(tasksScreenAction.fees)
+            }
+
             is HomeScreenActions.OnMonthYearFilterChanged -> {
                 _viewState.update {
                     it.copy(
@@ -375,6 +379,10 @@ class HomeViewModel(
 
             is HomeItemActions.ChangeOrderStatus -> {
                 changeDeliveryOrderStatus(taskItemAction.orderId, taskItemAction.status)
+            }
+
+            is HomeItemActions.UpdateDeliveryFees -> {
+                updateDeliveryFees(taskItemAction.orderId, taskItemAction.fees)
             }
 
             is HomeItemActions.MinimizeBottomSheet -> {
