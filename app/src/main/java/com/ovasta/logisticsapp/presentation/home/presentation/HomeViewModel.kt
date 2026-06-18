@@ -16,8 +16,6 @@ import android.content.Context
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.ext.ToastEvent
-
-.import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.nav.Login
 import com.ovasta.logisticsapp.presentation.nav.TaskDetails
@@ -167,57 +165,22 @@ class HomeViewModel(
     fun getAssignedDeliveryOrders() {
         viewModelScope.launch {
             _viewState.update { it.copy(isTasksLoading = true) }
-
-            val dummyTasks = listOf(
-                AssignedDeliveryTask(
-                    orderId = 1001,
-                    statusId = 1,
-                    statusName = "Assigned",
-                    senderMobile = "01012345678",
-                    fromAddress = "Nasr City, Cairo",
-                    toAddress = "Maadi, Cairo",
-                    receiverMobile = "01098765432",
-                    deliveryPrice = 50.0,
-                    collectionAmount = 300.0,
-                    note = "Handle with care",
-                    createdAt = "2026-06-18 10:00:00"
-                ),
-                AssignedDeliveryTask(
-                    orderId = 1002,
-                    statusId = 1,
-                    statusName = "Assigned",
-                    senderMobile = "01112345678",
-                    fromAddress = "Dokki, Giza",
-                    toAddress = "Mohandessin, Giza",
-                    receiverMobile = "01198765432",
-                    deliveryPrice = 40.0,
-                    collectionAmount = 150.0,
-                    note = "Call before arrival",
-                    createdAt = "2026-06-18 11:30:00"
-                ),
-                AssignedDeliveryTask(
-                    orderId = 1003,
-                    statusId = 1,
-                    statusName = "Assigned",
-                    senderMobile = "01212345678",
-                    fromAddress = "Heliopolis, Cairo",
-                    toAddress = "New Cairo",
-                    receiverMobile = "01298765432",
-                    deliveryPrice = 65.0,
-                    collectionAmount = 500.0,
-                    note = "",
-                    createdAt = "2026-06-18 12:15:00"
-                )
-            )
-
-            _viewState.update {
-                it.copy(
-                    isTasksLoading = false,
-                    assignedDeliveryTasks = dummyTasks
-                )
+            kotlin.runCatching {
+                homeRepository.getAssignedDeliveryOrders()
+            }.onSuccess {
+                _viewState.update { state ->
+                    state.copy(
+                        isTasksLoading = false,
+                        assignedDeliveryTasks = it
+                    )
+                }
+            }.onFailure {
+                _viewState.update { state -> state.copy(isTasksLoading = false) }
+                updateViewStateWithFail(it)
             }
         }
     }
+
     init {
         getPartnerStatus()
         getPartnerStatistics()
