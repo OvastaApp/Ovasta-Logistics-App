@@ -1,16 +1,22 @@
 package com.ovasta.logisticsapp
 
 import android.Manifest
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
+import com.ovasta.logisticsapp.base.local.LocaleHelper
 import com.ovasta.logisticsapp.presentation.nav.AppNavHost
 import com.ovasta.logisticsapp.ui.theme.OvastaLogisticsAppTheme
 
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.applyDefaultLocale(newBase))
+    }
 
     private val permissions = arrayOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,

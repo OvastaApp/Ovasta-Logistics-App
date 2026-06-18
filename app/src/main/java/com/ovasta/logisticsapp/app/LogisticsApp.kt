@@ -13,6 +13,7 @@ import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.crashlyticsInfo.CrashlyticsUserInfoUseCase
 import com.ovasta.logisticsapp.base.di.startKoin
 import com.ovasta.logisticsapp.base.interceptor.SessionHeaderCache
+import com.ovasta.logisticsapp.base.local.LocaleHelper
 import com.ovasta.logisticsapp.base.services.LocationTrackerService
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.data.setting.data.datastore.SessionPreferences
@@ -24,6 +25,11 @@ import org.koin.android.ext.android.inject
 import kotlin.getValue
 
 class LogisticsApp : Application() {
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(LocaleHelper.applyDefaultLocale(base))
+    }
+
     override fun onCreate() {
         super.onCreate()
         startKoin(this@LogisticsApp)
