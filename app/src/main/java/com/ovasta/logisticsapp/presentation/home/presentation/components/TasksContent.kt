@@ -266,7 +266,8 @@ fun TasksContent(
                         }
                     }
 
-                    item { Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp))) }
+                    // Extra bottom space so the FAB doesn't overlap the last item
+                    item { Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._80sdp))) }
                 }
             }
         }
