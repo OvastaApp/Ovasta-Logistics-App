@@ -102,8 +102,18 @@ class HomeRepository(
     override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps) =
         homeServerRemoteDataSource.changeOrderStatus(orderId, status)
 
-    override suspend fun createDeliveryOrder(deliveryFees: Double) {
-        homeServerRemoteDataSource.createDeliveryOrder(deliveryFees)
+    override suspend fun createDeliveryOrder(
+        deliveryPrice: Double,
+        receiverMobile: String?,
+        toAddress: String?,
+        note: String?,
+    ) {
+        homeServerRemoteDataSource.createDeliveryOrder(
+            deliveryPrice = deliveryPrice,
+            receiverMobile = receiverMobile,
+            toAddress = toAddress,
+            note = note,
+        )
     }
 
     override suspend fun updateDeliveryOrderFees(orderId: Int, deliveryFees: Double) =

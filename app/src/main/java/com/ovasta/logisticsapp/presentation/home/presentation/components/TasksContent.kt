@@ -98,15 +98,17 @@ fun TasksContent(
                     })
             },
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { showCreateOrderDialog = true },
-                    containerColor = Primary,
-                    contentColor = Base_white
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_add),
-                        contentDescription = stringResource(R.string.create_delivery_order)
-                    )
+                if (viewState.isTracking) {
+                    FloatingActionButton(
+                        onClick = { showCreateOrderDialog = true },
+                        containerColor = Primary,
+                        contentColor = Base_white
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_add),
+                            contentDescription = stringResource(R.string.create_delivery_order)
+                        )
+                    }
                 }
             }) { padding ->
             val listState = rememberLazyListState()
@@ -314,13 +316,16 @@ fun TasksContent(
         }
 
         if (showCreateOrderDialog) {
-            DeliveryFeesDialog(
-                title = stringResource(R.string.create_delivery_order_title),
-                message = stringResource(R.string.create_delivery_order_message),
-                maxValue = 1000.0,
-                confirmText = stringResource(R.string.confirm),
-                onConfirm = { fees ->
-                    onTasksScreenAction(HomeScreenActions.CreateDeliveryOrder(fees))
+            CreateDeliveryOrderBottomSheet(
+                onConfirm = { deliveryPrice, receiverMobile, toAddress, note ->
+                    onTasksScreenAction(
+                        HomeScreenActions.CreateDeliveryOrder(
+                            deliveryPrice = deliveryPrice,
+                            receiverMobile = receiverMobile,
+                            toAddress = toAddress,
+                            note = note,
+                        )
+                    )
                     showCreateOrderDialog = false
                 },
                 onDismiss = { showCreateOrderDialog = false }

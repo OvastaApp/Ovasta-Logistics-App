@@ -2,6 +2,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
+import com.ovasta.logisticsapp.presentation.home.data.model.CreateDeliveryOrderRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
 
@@ -28,13 +29,28 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
     }
 
     override suspend fun getAssignedDeliveryOrders() = homeApi.getDeliveryOrders().data
-    override suspend fun createDeliveryOrder(deliveryFees: Double) {
-        val request = UpdateFeesRequest(deliveryFees)
+    override suspend fun createDeliveryOrder(
+        deliveryPrice: Double,
+        receiverMobile: String?,
+        toAddress: String?,
+        note: String?,
+    ) {
+        val request = CreateDeliveryOrderRequest(
+            deliveryPrice = deliveryPrice,
+            receiverMobile = receiverMobile?.takeIf { it.isNotBlank() },
+            toAddress = toAddress?.takeIf { it.isNotBlank() },
+            note = note?.takeIf { it.isNotBlank() },
+        )
         homeApi.createDeliveryOrder(request)
     }
 
     override suspend fun updateDeliveryOrderFees(orderId: Int, deliveryFees: Double) {
-        val request = UpdateFeesRequest(deliveryFees)
+        val price = if (deliveryFees % 1.0 == 0.0) {
+            deliveryFees.toLong().toString()
+        } else {
+            deliveryFees.toString()
+        }
+        val request = UpdateFeesRequest(deliveryPrice = price)
         homeApi.updateDeliveryOrderFees(orderId, request)
     }
 }

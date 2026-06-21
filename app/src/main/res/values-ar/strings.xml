@@ -225,5 +225,14 @@
     <string name="create_delivery_order">إنشاء طلب توصيل</string>
     <string name="create_delivery_order_title">طلب توصيل جديد</string>
     <string name="create_delivery_order_message">أدخل رسوم التوصيل لهذا الطلب.</string>
+    <string name="create_delivery_order_subtitle">أدخل تفاصيل الطلب.</string>
+    <string name="delivery_price_hint">سعر التوصيل</string>
+    <string name="receiver_mobile_hint">رقم هاتف المستلم (اختياري)</string>
+    <string name="receiver_mobile_error">يجب أن يتكون رقم الهاتف من 11 رقمًا</string>
+    <string name="to_address_hint">عنوان التوصيل (اختياري)</string>
+    <string name="note_hint">ملاحظة (اختياري)</string>
+    <string name="create">إنشاء</string>
+    <string name="order_created_successfully">تم إنشاء الطلب بنجاح</string>
+    <string name="delivery_fees_updated_successfully">تم تحديث رسوم التوصيل بنجاح</string>
     <string name="cancel">إلغاء</string>
 </resources>

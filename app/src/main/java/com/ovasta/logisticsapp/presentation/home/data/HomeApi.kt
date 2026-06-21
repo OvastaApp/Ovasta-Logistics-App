@@ -1,15 +1,15 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
 import com.ovasta.logisticsapp.data.ApiResponse
-import com.ovasta.logisticsapp.presentation.home.data.model.AcceptOrderRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
-import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
+import com.ovasta.logisticsapp.presentation.home.data.model.CreateDeliveryOrderRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -39,10 +39,10 @@ interface HomeApi {
     @POST("delivery-orders/{id}/deliver")
     suspend fun deliverDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
 
-    @POST("delivery-orders/create_delivery_order")
-    suspend fun createDeliveryOrder(@Body updateFeesRequest: UpdateFeesRequest)
+    @POST("delivery-orders")
+    suspend fun createDeliveryOrder(@Body createDeliveryOrderRequest: CreateDeliveryOrderRequest)
 
-    @POST("delivery-orders/{id}/update_fees_price")
+    @PATCH("delivery-orders/{id}/delivery-fee")
     suspend fun updateDeliveryOrderFees(
         @Path("id") orderId: Int,
         @Body updateFeesRequest: UpdateFeesRequest

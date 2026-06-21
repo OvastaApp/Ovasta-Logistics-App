@@ -54,7 +54,12 @@ interface IHomeRepository {
     suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 
     suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
-    suspend fun createDeliveryOrder(deliveryFees: Double)
+    suspend fun createDeliveryOrder(
+        deliveryPrice: Double,
+        receiverMobile: String?,
+        toAddress: String?,
+        note: String?,
+    )
 
     suspend fun updateDeliveryOrderFees(orderId: Int, deliveryFees: Double)
 

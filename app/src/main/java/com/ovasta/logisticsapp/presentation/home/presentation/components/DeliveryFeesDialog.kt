@@ -61,7 +61,10 @@ fun DeliveryFeesDialog(
     }
 
     val parsed = text.toDoubleOrNull()
-    val isValid = parsed != null && parsed in 0.0..maxValue
+    val isInRange = parsed != null && parsed in 0.0..maxValue
+    // When editing an existing value, require the fees to actually change before enabling confirm.
+    val hasChanged = initialValue == null || parsed != initialValue
+    val isValid = isInRange && hasChanged
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(

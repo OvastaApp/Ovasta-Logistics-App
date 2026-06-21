@@ -314,7 +314,12 @@ class HomeViewModel(
             }
 
             is HomeScreenActions.CreateDeliveryOrder -> {
-                createDeliveryOrder(tasksScreenAction.fees)
+                createDeliveryOrder(
+                    deliveryPrice = tasksScreenAction.deliveryPrice,
+                    receiverMobile = tasksScreenAction.receiverMobile,
+                    toAddress = tasksScreenAction.toAddress,
+                    note = tasksScreenAction.note,
+                )
             }
 
             is HomeScreenActions.OnMonthYearFilterChanged -> {
@@ -636,15 +641,24 @@ class HomeViewModel(
         _viewState.update { it.copy(showToastMessage = null) }
     }
 
-    private fun createDeliveryOrder(fees: Double) {
+    private fun createDeliveryOrder(
+        deliveryPrice: Double,
+        receiverMobile: String?,
+        toAddress: String?,
+        note: String?,
+    ) {
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
                 homeRepository.createDeliveryOrder(
-                    deliveryFees = fees
+                    deliveryPrice = deliveryPrice,
+                    receiverMobile = receiverMobile,
+                    toAddress = toAddress,
+                    note = note,
                 )
             }.onSuccess {
                 setComposeUILoading(false)
+                updateUiState(_viewState.value.copy(showToastMessage = R.string.order_created_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
                 setComposeUILoading(false)
@@ -662,6 +676,7 @@ class HomeViewModel(
                 )
             }.onSuccess {
                 setComposeUILoading(false)
+                updateUiState(_viewState.value.copy(showToastMessage = R.string.delivery_fees_updated_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
                 setComposeUILoading(false)

@@ -226,5 +226,14 @@
     <string name="create_delivery_order">Create delivery order</string>
     <string name="create_delivery_order_title">New delivery order</string>
     <string name="create_delivery_order_message">Enter the delivery fees for this order.</string>
+    <string name="create_delivery_order_subtitle">Enter the order details.</string>
+    <string name="delivery_price_hint">Delivery price</string>
+    <string name="receiver_mobile_hint">Receiver mobile (optional)</string>
+    <string name="receiver_mobile_error">Mobile number must be 11 digits</string>
+    <string name="to_address_hint">Delivery address (optional)</string>
+    <string name="note_hint">Note (optional)</string>
+    <string name="create">Create</string>
+    <string name="order_created_successfully">Order created successfully</string>
+    <string name="delivery_fees_updated_successfully">Delivery fees updated successfully</string>
     <string name="cancel">Cancel</string>
 </resources>

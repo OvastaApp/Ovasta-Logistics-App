@@ -62,9 +62,8 @@ fun SellerTaskItem(
                             .background(statusColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                    // Editing fees is only allowed on unassigned (Pending) delivery orders
-                    val isPending = OrderSteps.fromStatusId(task.statusId ?: 0) == OrderSteps.Pending
-                    if (isPending && onEditFeesClick != null) {
+                    // Editing fees is allowed on every order returned by getAssignedDeliveryOrders
+                    if (onEditFeesClick != null) {
                         IconButton(
                             onClick = { onEditFeesClick(task) },
                             modifier = Modifier.size(32.dp)
