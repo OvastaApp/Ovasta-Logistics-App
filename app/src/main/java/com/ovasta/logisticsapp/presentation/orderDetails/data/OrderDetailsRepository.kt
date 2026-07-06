@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
+import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import kotlinx.coroutines.flow.Flow
 
@@ -10,4 +11,10 @@ class OrderDetailsRepository(
         districtId: Int,
         taskId: Int
     ): Flow<HomeTask> = taskDetailsRemoteDataSource.listenToOrderChanges(districtId, taskId)
+
+    override suspend fun updateProducts(
+        districtId: Int,
+        taskId: Int,
+        products: List<FirebaseProduct>
+    ) = taskDetailsRemoteDataSource.updateProducts(districtId, taskId, products)
 }

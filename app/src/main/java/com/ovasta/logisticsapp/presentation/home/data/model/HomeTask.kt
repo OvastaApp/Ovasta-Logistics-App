@@ -86,6 +86,10 @@ data class FirebaseProduct(
     @PropertyName("main_sys_id")
     val mainSysId: Int? = null,
 
+    @get:PropertyName("product_id")
+    @PropertyName("product_id")
+    val productId: Int? = null,
+
     @get:PropertyName("name")
     @PropertyName("name")
     val name: String? = null,
@@ -94,12 +98,16 @@ data class FirebaseProduct(
     @PropertyName("quantity")
     val quantity: Int? = null,
 
+    @get:PropertyName("picked_quantity")
+    @PropertyName("picked_quantity")
+    val pickedQuantity: Int? = null,
+
     @get:PropertyName("source")
     @PropertyName("source")
     val source: String? = null,
 
-    @get:PropertyName("image_url")
-    @PropertyName("source")
+    @get:PropertyName("image")
+    @PropertyName("image")
     val imageUrl: String? = null,
 
     @get:PropertyName("total_price")

@@ -8,6 +8,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import java.time.LocalDate
 
 data class HomeViewState(
+    val userName: String = "",
     val appTasks: List<HomeTask> = emptyList(),
     val waitingDeliveryTasks: List<DeliveryTask> = emptyList(),
     val assignedDeliveryTasks: List<AssignedDeliveryTask> = emptyList(),

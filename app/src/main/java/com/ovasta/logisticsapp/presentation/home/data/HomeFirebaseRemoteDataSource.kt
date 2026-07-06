@@ -5,11 +5,12 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
-import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_COURIER_ID_NAME
+import com.ovasta.logisticsapp.base.UserType
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DELIVERY_ORDERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
+import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_PICKERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,11 +40,20 @@ class HomeFirebaseRemoteDataSource(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getAssignedOrders(userId: Int, districtId: Int): Flow<List<HomeTask>> =
+    override suspend fun getAssignedOrders(
+        userId: Int,
+        userType: Int,
+        districtId: Int
+    ): Flow<List<HomeTask>> =
         callbackFlow {
             val listenerRegistration =
                 db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
-                    .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME).document(userId.toString())
+                    .collection(
+                        if (userType == UserType.COURIER.typeId)
+                            FIRESTORE_ROOT_ONLINE_DRIVERS_NAME
+                        else
+                            FIRESTORE_ROOT_PICKERS_NAME
+                    ).document(userId.toString())
                     .collection(FIRESTORE_ROOT_ORDERS_NAME).addSnapshotListener { value, error ->
                         if (error != null) {
                             Log.e("assignedOrders", "Error fetching orders", error)

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface IHomeFirebaseRemoteDataSource {
     suspend fun getAssignedOrders(
         userId: Int,
+        userType: Int,
         districtId: Int
     ): Flow<List<HomeTask>>
 
