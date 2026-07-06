@@ -15,7 +15,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -43,34 +48,43 @@ import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
+import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
 
 /**
- * Bottom sheet that lets the user edit a product's unit price and/or quantity.
+ * Bottom sheet that lets the user edit a product's unit price, quantity and/or source.
  *
- * Both fields are pre-filled with the product's current values. Save is enabled only when both
- * inputs are valid (non-empty, within bounds) and at least one of them has actually changed.
+ * Fields are pre-filled with the product's current values. The source dropdown loads its options
+ * lazily via [onLoadSources] the first time it is expanded. Save is enabled only when the inputs
+ * are valid (non-empty, within bounds) and at least one value has actually changed.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProductBottomSheet(
     product: FirebaseProduct,
-    onSave: (newPrice: Int, newQuantity: Int) -> Unit,
+    availableSources: List<ProductSource>,
+    isSourcesLoading: Boolean,
+    onLoadSources: () -> Unit,
+    onSave: (newPrice: Int, newQuantity: Int, newSource: String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val initialPrice = product.itemPrice ?: 0
     val initialQuantity = product.quantity ?: 0
+    val initialSource = product.source.orEmpty()
 
     var priceText by remember { mutableStateOf(initialPrice.toString()) }
     var quantityText by remember { mutableStateOf(initialQuantity.toString()) }
+    var selectedSource by remember { mutableStateOf(initialSource) }
 
     val parsedPrice = priceText.toIntOrNull()
     val parsedQuantity = quantityText.toIntOrNull()
 
     val isPriceValid = parsedPrice != null && parsedPrice in 0..MAX_PRICE
     val isQuantityValid = parsedQuantity != null && parsedQuantity in 1..MAX_QUANTITY
-    val hasChanged = parsedPrice != initialPrice || parsedQuantity != initialQuantity
+    val hasChanged = parsedPrice != initialPrice ||
+        parsedQuantity != initialQuantity ||
+        selectedSource != initialSource
     val isValid = isPriceValid && isQuantityValid && hasChanged
 
     ModalBottomSheet(
@@ -129,6 +143,82 @@ fun EditProductBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+
+            // Source dropdown — options are fetched from the API the first time it is opened.
+            var sourceExpanded by remember { mutableStateOf(false) }
+            var sourcesRequested by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = sourceExpanded,
+                onExpandedChange = { expanded ->
+                    sourceExpanded = expanded
+                    if (expanded && !sourcesRequested) {
+                        sourcesRequested = true
+                        onLoadSources()
+                    }
+                }
+            ) {
+                OutlinedTextField(
+                    value = selectedSource,
+                    onValueChange = {},
+                    readOnly = true,
+                    textStyle = mdMedium,
+                    label = { Text(stringResource(R.string.source), style = xsMedium) },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                )
+                ExposedDropdownMenu(
+                    expanded = sourceExpanded,
+                    onDismissRequest = { sourceExpanded = false }
+                ) {
+                    when {
+                        isSourcesLoading -> DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._14sdp)),
+                                        strokeWidth = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
+                                        color = Primary
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.loading_sources),
+                                        style = smNormal.copy(color = Gray500),
+                                        modifier = Modifier.padding(
+                                            start = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                                        )
+                                    )
+                                }
+                            },
+                            onClick = {}
+                        )
+
+                        availableSources.isEmpty() -> DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.no_sources_available),
+                                    style = smNormal.copy(color = Gray500)
+                                )
+                            },
+                            onClick = { sourceExpanded = false }
+                        )
+
+                        else -> availableSources.forEach { source ->
+                            DropdownMenuItem(
+                                text = { Text(text = source.name.orEmpty(), style = mdMedium) },
+                                onClick = {
+                                    selectedSource = source.name.orEmpty()
+                                    sourceExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
 
             Row(
@@ -153,7 +243,7 @@ fun EditProductBottomSheet(
                     onClick = {
                         val price = parsedPrice ?: return@Button
                         val quantity = parsedQuantity ?: return@Button
-                        onSave(price, quantity)
+                        onSave(price, quantity, selectedSource.takeIf { it.isNotBlank() })
                     },
                     shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
                     colors = ButtonDefaults.buttonColors(
@@ -189,7 +279,10 @@ private fun isValidIntInput(input: String): Boolean {
 private fun EditProductBottomSheetPreview() {
     EditProductBottomSheet(
         product = FirebaseProduct(name = "Product 1", itemPrice = 100, quantity = 2),
-        onSave = { _, _ -> },
+        availableSources = listOf(ProductSource(id = 1, name = "زيت وسمنه")),
+        isSourcesLoading = false,
+        onLoadSources = {},
+        onSave = { _, _, _ -> },
         onDismiss = {}
     )
 }

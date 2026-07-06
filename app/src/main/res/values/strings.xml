@@ -199,6 +199,16 @@
     <string name="filter_not_picked">Not picked</string>
     <string name="filter_partially_picked">Missing quantity</string>
     <string name="no_products_match_filter">No products match this filter</string>
+    <string name="change_status_locked_hint">Pick or delete all products first to change the order status</string>
+    <string name="confirm_change_status_message">The order will be marked as on the way to the client. Continue?</string>
+    <string name="order_status_updated_successfully">Order status updated successfully</string>
+    <string name="loading_sources">Loading sources…</string>
+    <string name="no_sources_available">No sources available</string>
+    <string name="deliver_order">Deliver order</string>
+    <string name="received_amount">Received amount</string>
+    <string name="received_less_than_total">Received amount can\'t be less than the order total</string>
+    <string name="confirm_collect_money">Confirm collection</string>
+    <string name="order_delivered_successfully">Order delivered successfully</string>
     <string name="edit_product">Edit product</string>
     <string name="mark_picked">Mark picked</string>
     <string name="pick_product">Pick product</string>

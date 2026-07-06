@@ -2,6 +2,7 @@ package com.ovasta.logisticsapp.presentation.orderDetails.presentation
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -76,8 +78,10 @@ import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.EditProductBottomSheet
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.PickProductBottomSheet
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.ReceiveAmountBottomSheet
 
 @Composable
 fun DropOfOrderDetailsScreen(
@@ -92,11 +96,20 @@ fun DropOfOrderDetailsScreen(
     var pickingProductIndex by remember { mutableStateOf<Int?>(null) }
     // Index of the product pending delete confirmation (null = dialog closed).
     var deletingProductIndex by remember { mutableStateOf<Int?>(null) }
+    // Whether the change-status confirmation dialog is showing.
+    var showChangeStatusDialog by remember { mutableStateOf(false) }
+    // Whether the receive-amount (deliver order) sheet is showing.
+    var showReceiveAmountSheet by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true, onBack = { navigator.pop() })
 
     LaunchedEffect(Unit) {
         viewModel.getTaskDetails(taskId = taskId)
+    }
+
+    // Once the money is collected and the order marked delivered, leave the details screen.
+    LaunchedEffect(viewState.isOrderDelivered) {
+        if (viewState.isOrderDelivered) navigator.pop()
     }
 
     BaseScreen(viewModel = viewModel) {
@@ -106,17 +119,43 @@ fun DropOfOrderDetailsScreen(
             onProductClick = { index -> editingProductIndex = index },
             onPickClick = { index -> pickingProductIndex = index },
             onDeleteClick = { index -> deletingProductIndex = index },
-            // Status changes are intentionally deferred for now (see request).
-            onChangeStatusClick = { /* TODO: wire order status change */ }
+            onChangeStatusClick = { showChangeStatusDialog = true },
+            onDeliverClick = { showReceiveAmountSheet = true }
         )
+
+        if (showReceiveAmountSheet) {
+            ReceiveAmountBottomSheet(
+                totalAmount = viewState.task.totalPrice.toDouble(),
+                onConfirm = { receivedAmount ->
+                    viewModel.deliverOrder(receivedAmount)
+                    showReceiveAmountSheet = false
+                },
+                onDismiss = { showReceiveAmountSheet = false }
+            )
+        }
+
+        if (showChangeStatusDialog) {
+            ConfirmDialog(
+                title = stringResource(R.string.change_order_status),
+                message = stringResource(R.string.confirm_change_status_message),
+                onPrimaryClick = {
+                    viewModel.changeOrderStatusToOnTheWay()
+                    showChangeStatusDialog = false
+                },
+                onDismiss = { showChangeStatusDialog = false }
+            )
+        }
 
         editingProductIndex?.let { index ->
             val product = viewState.task.products.getOrNull(index)
             if (product != null) {
                 EditProductBottomSheet(
                     product = product,
-                    onSave = { newPrice, newQuantity ->
-                        viewModel.updateProduct(index, newPrice, newQuantity)
+                    availableSources = viewState.availableSources,
+                    isSourcesLoading = viewState.isSourcesLoading,
+                    onLoadSources = { viewModel.loadProductSources(product) },
+                    onSave = { newPrice, newQuantity, newSource ->
+                        viewModel.updateProduct(index, newPrice, newQuantity, newSource)
                         editingProductIndex = null
                     },
                     onDismiss = { editingProductIndex = null }
@@ -175,6 +214,7 @@ private enum class ProductPickFilter(@StringRes val labelRes: Int) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun OrderDetailsContent(
     viewState: TaskDetailsViewState,
@@ -183,9 +223,22 @@ private fun OrderDetailsContent(
     onPickClick: (Int) -> Unit,
     onDeleteClick: (Int) -> Unit,
     onChangeStatusClick: () -> Unit,
+    onDeliverClick: () -> Unit,
 ) {
     val task = viewState.task
     var selectedFilter by rememberSaveable { mutableStateOf(ProductPickFilter.ALL) }
+    val listState = rememberLazyListState()
+
+    // List item index of the sticky filter row (0 = order header, 1 = section title).
+    val filterHeaderIndex = 2
+    // Changing the filter can shrink the list below the current scroll offset, which would make
+    // the pinned filter row drift down from the top edge. Snap it back so the filters stay stuck
+    // and the newly filtered products start right underneath.
+    LaunchedEffect(selectedFilter) {
+        if (listState.firstVisibleItemIndex >= filterHeaderIndex) {
+            listState.scrollToItem(filterHeaderIndex)
+        }
+    }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -204,6 +257,7 @@ private fun OrderDetailsContent(
                 .background(Gray100)
         ) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(
                     horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
@@ -218,10 +272,14 @@ private fun OrderDetailsContent(
                 if (task.products.isEmpty()) {
                     item { EmptyProductsCard() }
                 } else {
-                    item {
+                    // Pinned to the top edge while the products scroll underneath.
+                    stickyHeader(key = "product_filters") {
                         ProductFilterRow(
                             selected = selectedFilter,
-                            onSelect = { selectedFilter = it }
+                            onSelect = { selectedFilter = it },
+                            modifier = Modifier
+                                .background(Gray100)
+                                .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
                         )
                     }
 
@@ -258,32 +316,66 @@ private fun OrderDetailsContent(
                 }
             }
 
-            // Bottom action bar (status change deferred for now).
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Base_white)
-            ) {
-                HorizontalDivider(
-                    thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
-                    color = Gray200
-                )
-                Button(
+            // Bottom action bar. Which action it offers depends on where the order is in its
+            // lifecycle:
+            //  - Assigned: "change order status" (to on-the-way), locked until the user has acted
+            //    on every remaining product — picked fully/partially (pickedQuantity set) or
+            //    deleted it (removed from the list).
+            //  - On the way (Picked): "deliver order" — opens the receive-amount sheet.
+            //  - Delivered / Canceled: no action.
+            val currentStep = OrderSteps.fromStatusId(task.statusId)
+            val isOnTheWay = currentStep == OrderSteps.Picked
+            val isFinished = currentStep == OrderSteps.Delivered || currentStep == OrderSteps.Canceled
+            val canChangeStatus = task.products.isNotEmpty() &&
+                task.products.all { it.pickedQuantity != null }
+            if (!isFinished) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
-                    onClick = onChangeStatusClick,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                    contentPadding = PaddingValues(
-                        vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
-                    )
+                        .background(Base_white)
                 ) {
-                    Text(
-                        text = stringResource(R.string.change_order_status),
-                        style = mdMedium.copy(color = Base_white)
+                    HorizontalDivider(
+                        thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                        color = Gray200
                     )
+                    if (!isOnTheWay && !canChangeStatus) {
+                        Text(
+                            text = stringResource(R.string.change_status_locked_hint),
+                            style = xsMedium.copy(color = Gray500),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    top = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
+                                    start = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
+                                    end = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                                )
+                        )
+                    }
+                    val buttonEnabled = isOnTheWay || canChangeStatus
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
+                        onClick = if (isOnTheWay) onDeliverClick else onChangeStatusClick,
+                        enabled = buttonEnabled,
+                        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Primary,
+                            disabledContainerColor = Gray200
+                        ),
+                        contentPadding = PaddingValues(
+                            vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
+                            horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (isOnTheWay) R.string.deliver_order else R.string.change_order_status
+                            ),
+                            style = mdMedium.copy(color = if (buttonEnabled) Base_white else Gray500)
+                        )
+                    }
                 }
             }
         }
@@ -378,8 +470,46 @@ private fun CategoryHeader(source: String?, count: Int) {
     }
 }
 
+/** Selectable pick-status filter pills shown above the products list. */
 @Composable
-private fun EmptyProductsCard() {
+private fun ProductFilterRow(
+    selected: ProductPickFilter,
+    onSelect: (ProductPickFilter) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._6sdp))
+    ) {
+        ProductPickFilter.entries.forEach { filter ->
+            val isSelected = filter == selected
+            val shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+            Text(
+                text = stringResource(filter.labelRes),
+                style = xsMedium.copy(color = if (isSelected) Base_white else Gray600),
+                maxLines = 1,
+                modifier = Modifier
+                    .clip(shape)
+                    .background(if (isSelected) Primary else Base_white, shape)
+                    .border(
+                        width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                        color = if (isSelected) Primary else Gray200,
+                        shape = shape
+                    )
+                    .clickable { onSelect(filter) }
+                    .padding(
+                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
+                        vertical = dimensionResource(com.intuit.sdp.R.dimen._6sdp)
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyProductsCard(@StringRes messageRes: Int = R.string.no_products_available) {
     Column(
         modifier = Modifier
             .cardSurface()
@@ -394,7 +524,7 @@ private fun EmptyProductsCard() {
         )
         Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
         Text(
-            text = stringResource(R.string.no_products_available),
+            text = stringResource(messageRes),
             style = smNormal.copy(color = Gray500),
             textAlign = TextAlign.Center
         )
@@ -743,6 +873,7 @@ private fun OrderDetailsContentPreview() {
         onProductClick = {},
         onPickClick = {},
         onDeleteClick = {},
-        onChangeStatusClick = {}
+        onChangeStatusClick = {},
+        onDeliverClick = {}
     )
 }

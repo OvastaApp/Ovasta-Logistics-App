@@ -199,6 +199,16 @@
     <string name="filter_not_picked">لم يتم الاستلام</string>
     <string name="filter_partially_picked">كمية ناقصة</string>
     <string name="no_products_match_filter">لا توجد منتجات مطابقة لهذا الفلتر</string>
+    <string name="change_status_locked_hint">قم باستلام أو حذف جميع المنتجات أولاً لتغيير حالة الطلب</string>
+    <string name="confirm_change_status_message">سيتم تغيير حالة الطلب إلى في الطريق إلى العميل. هل تريد المتابعة؟</string>
+    <string name="order_status_updated_successfully">تم تحديث حالة الطلب بنجاح</string>
+    <string name="loading_sources">جاري تحميل المصادر…</string>
+    <string name="no_sources_available">لا توجد مصادر متاحة</string>
+    <string name="deliver_order">تسليم الطلب</string>
+    <string name="received_amount">المبلغ المستلم</string>
+    <string name="received_less_than_total">لا يمكن أن يكون المبلغ المستلم أقل من إجمالي الطلب</string>
+    <string name="confirm_collect_money">تأكيد استلام المبلغ</string>
+    <string name="order_delivered_successfully">تم تسليم الطلب بنجاح</string>
     <string name="edit_product">تعديل المنتج</string>
     <string name="mark_picked">تحديد كمستلم</string>
     <string name="pick_product">استلام المنتج</string>

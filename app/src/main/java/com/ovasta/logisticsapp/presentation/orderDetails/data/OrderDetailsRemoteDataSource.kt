@@ -1,12 +1,14 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_PRODUCTS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +16,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class OrderDetailsRemoteDataSource(
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore,
+    private val api: OrderDetailsApi,
 ) : IOrderDetailsRemoteDataSource {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -86,6 +89,7 @@ class OrderDetailsRemoteDataSource(
                     "item_price" to product.itemPrice,
                     "quantity" to product.quantity,
                     "picked_quantity" to product.pickedQuantity,
+                    "source" to product.source,
                     "total_price" to product.totalPrice,
                     "updated_at" to product.updatedAt,
                 )
@@ -93,4 +97,25 @@ class OrderDetailsRemoteDataSource(
         }
         batch.commit().await()
     }
+
+    override suspend fun updateOrderStatus(
+        districtId: Int,
+        taskId: Int,
+        statusId: Int,
+        statusName: String,
+        receivedAmount: Double?
+    ) {
+        val fields = buildMap {
+            put("status_id", statusId)
+            put("status_name", statusName)
+            put("updated_at", FieldValue.serverTimestamp())
+            receivedAmount?.let { put("received_amount", it) }
+        }
+        db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
+            .collection(FIRESTORE_ROOT_ORDERS_NAME).document(taskId.toString())
+            .update(fields).await()
+    }
+
+    override suspend fun getProductSources(productId: Int): List<ProductSource> =
+        api.getProductSources(productId).data.orEmpty()
 }
