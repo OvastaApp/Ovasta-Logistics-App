@@ -190,7 +190,7 @@ class HomeViewModel(
     init {
         getPartnerStatus()
         getPartnerStatistics()
-        getAssignedOrders()
+//        getAssignedOrders()
         listenToNewDeliveryTasks()
         getAssignedDeliveryOrders()
         startAlertExpiryTimer()
@@ -365,7 +365,7 @@ class HomeViewModel(
                 getPartnerStatistics()
                 getPartnerStatus()
                 listenToNewDeliveryTasks()
-                getAssignedOrders()
+            //    getAssignedOrders()
                 getAssignedDeliveryOrders()
             }
 
