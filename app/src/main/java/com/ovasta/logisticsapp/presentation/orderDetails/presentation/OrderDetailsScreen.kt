@@ -75,7 +75,9 @@ import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.mdSemiBold
 import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.base.smNormal
+import com.ovasta.logisticsapp.base.smSemiBold
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.presentation.home.presentation.components.StatusTag
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
@@ -265,7 +267,7 @@ private fun OrderDetailsContent(
                 ),
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
             ) {
-                item { OrderHeader(task = task, currency = viewState.currency) }
+                item { OrderHeader(task = task) }
 
                 item { ProductsSectionHeader(count = task.products.size) }
 
@@ -305,7 +307,6 @@ private fun OrderDetailsContent(
                             items(entries, key = { it.index }) { entry ->
                                 ProductCard(
                                     product = entry.value,
-                                    currency = viewState.currency,
                                     onClick = { onProductClick(entry.index) },
                                     onPickClick = { onPickClick(entry.index) },
                                     onDeleteClick = { onDeleteClick(entry.index) }
@@ -448,7 +449,7 @@ private fun CategoryHeader(source: String?, count: Int) {
         Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
         Text(
             text = source ?: stringResource(R.string.other_products),
-            style = smMedium.copy(color = Gray800),
+            style = smSemiBold.copy(color = Gray800),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false)
@@ -532,7 +533,7 @@ private fun EmptyProductsCard(@StringRes messageRes: Int = R.string.no_products_
 }
 
 @Composable
-private fun OrderHeader(task: HomeTask, currency: String) {
+private fun OrderHeader(task: HomeTask) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -547,19 +548,8 @@ private fun OrderHeader(task: HomeTask, currency: String) {
         ) {
             Text(text = "#${task.taskId}", style = mdSemiBold)
             if (task.statusName.isNotBlank()) {
-                Text(
-                    text = task.statusName,
-                    style = xsMedium.copy(color = Primary),
-                    modifier = Modifier
-                        .background(
-                            Primary.copy(alpha = 0.1f),
-                            RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
-                        )
-                        .padding(
-                            horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
-                            vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp)
-                        )
-                )
+                // Same status badge used on the home task cards, for a consistent look.
+                StatusTag(statusId = task.statusId, statusName = task.statusName)
             }
         }
 
@@ -689,7 +679,6 @@ private fun HeaderInfoRow(icon: Int, label: String) {
 @Composable
 private fun ProductCard(
     product: FirebaseProduct,
-    currency: String,
     onClick: () -> Unit,
     onPickClick: () -> Unit,
     onDeleteClick: () -> Unit,
