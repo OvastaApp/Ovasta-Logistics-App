@@ -43,7 +43,7 @@ interface IHomeRepository {
 
     suspend fun sendLocation(lat: Double, long: Double)
 
-    suspend fun changePartnerStatus(isOnline: Boolean)
+    suspend fun changePartnerStatus(isOnline: Boolean, lat: Double? = null, long: Double? = null)
 
     suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
 

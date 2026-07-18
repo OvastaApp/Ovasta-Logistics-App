@@ -88,8 +88,8 @@ class HomeRepository(
         }
     }
 
-    override suspend fun changePartnerStatus(isOnline: Boolean) =
-        homeServerRemoteDataSource.changePartnerStatus(isOnline = isOnline)
+    override suspend fun changePartnerStatus(isOnline: Boolean, lat: Double?, long: Double?) =
+        homeServerRemoteDataSource.changePartnerStatus(isOnline = isOnline, lat = lat, long = long)
 
     override suspend fun getPartnerStatus() = homeServerRemoteDataSource.getPartnerStatus()
 

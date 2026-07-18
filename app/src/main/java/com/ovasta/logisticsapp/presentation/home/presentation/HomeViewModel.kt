@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.ext.OrderAlarmSound
+import com.ovasta.logisticsapp.base.services.LocationManager
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
@@ -30,7 +31,8 @@ class HomeViewModel(
     private val context: Context,
     val homeRepository: IHomeRepository,
     val settingsRepository: ISettingsRepository,
-    private val orderAlarmSound: OrderAlarmSound
+    private val orderAlarmSound: OrderAlarmSound,
+    private val locationManager: LocationManager
 ) : BaseViewModel() {
     private val _viewState = MutableStateFlow(HomeViewState())
     val viewState = _viewState.asStateFlow()
@@ -625,7 +627,12 @@ class HomeViewModel(
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
-                homeRepository.changePartnerStatus(isOnline = isOnline)
+                val location = if (isOnline) locationManager.getCurrentLocation() else null
+                homeRepository.changePartnerStatus(
+                    isOnline = isOnline,
+                    lat = location?.latitude,
+                    long = location?.longitude
+                )
             }.onSuccess {
                 setComposeUILoading(false)
                 toggleTracking(shouldBeTracking = isOnline)

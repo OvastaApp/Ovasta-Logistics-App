@@ -8,8 +8,8 @@ import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
 
 class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemoteDataSource {
 
-    override suspend fun changePartnerStatus(isOnline: Boolean) {
-        val changeStatusRequest = ChangeStatusRequest(isOnline = isOnline)
+    override suspend fun changePartnerStatus(isOnline: Boolean, lat: Double?, long: Double?) {
+        val changeStatusRequest = ChangeStatusRequest(isOnline = isOnline, lat = lat, long = long)
         homeApi.changePartnerStatus(changeStatusRequest)
     }
 
