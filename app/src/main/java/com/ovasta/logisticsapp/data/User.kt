@@ -16,4 +16,3 @@ class User(
     @SerializedName("available") var available: Boolean?,
    var token: String?,
 )
-

@@ -83,7 +83,7 @@ fun TasksContent(
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0), topBar = {
                 CenteredTextAppBar(
-                    title = stringResource(R.string.home, Modifier.testTag("title")),
+                    title = viewState.userName.ifBlank { stringResource(R.string.home) },
                     showBackButton = false,
                     actions = {
                         IconButton(onClick = {

@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,6 +57,7 @@ fun TaskCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+            .clickable { onTaskDetailsClick(homeTask.taskId, 0) }
             .testTag("taskCard_${homeTask.taskId}")
     ) {
         Column(

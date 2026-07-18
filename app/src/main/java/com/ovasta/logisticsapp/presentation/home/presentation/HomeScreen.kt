@@ -40,6 +40,7 @@ import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutD
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
 import com.ovasta.logisticsapp.presentation.nav.AvailableTasks
+import com.ovasta.logisticsapp.presentation.nav.TaskDetails
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -85,6 +86,10 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
                         is HomeItemActions.NavigateToAvailableTasks -> {
                             navigator.push(AvailableTasks)
+                        }
+
+                        is HomeItemActions.ShowTaskDetails -> {
+                            navigator.push(TaskDetails(event.taskId))
                         }
 
                         else -> Unit

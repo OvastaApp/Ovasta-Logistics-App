@@ -18,8 +18,10 @@ class HomeRepository(
     val settingsRepository: ISettingsRepository
 ) : IHomeRepository {
     override suspend fun getAssignedOrders(
-        userId: Int, districtId: Int
-    ) = homeFirebaseRemoteDataSource.getAssignedOrders(userId, districtId)
+        userId: Int,
+        userType: Int,
+        districtId: Int
+    ) = homeFirebaseRemoteDataSource.getAssignedOrders(userId, userType, districtId)
 
     override suspend fun listenToNewDeliveryTasks(
         userId: Int,

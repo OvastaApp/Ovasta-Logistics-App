@@ -16,7 +16,8 @@ sealed class OrderSteps {
                 3 -> Picked
                 4 -> Delivered
                 5 -> Canceled
-                else -> throw kotlin.IllegalArgumentException("Unknown statusId: $statusId")
+                // Fall back to Pending for missing/unknown status ids to avoid crashing the UI.
+                else -> Pending
             }
         }
 

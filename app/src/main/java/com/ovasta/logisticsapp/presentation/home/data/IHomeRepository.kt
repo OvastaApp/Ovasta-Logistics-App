@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 interface IHomeRepository {
     suspend fun getAssignedOrders(
         userId: Int,
+        userType: Int,
         districtId: Int
     ): Flow<List<HomeTask>>
 

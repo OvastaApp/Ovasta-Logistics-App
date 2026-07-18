@@ -8,6 +8,7 @@ import com.ovasta.logisticsapp.base.ext.OrderAlarmSound
 import com.ovasta.logisticsapp.base.services.LocationManager
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
+import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -150,11 +151,16 @@ class HomeViewModel(
         assignedTasksJob = viewModelScope.launch {
             _viewState.update { it.copy(isTasksLoading = true) }
             try {
+                val currentUserData = settingsRepository.getUseData()
+                Log.d("HomeViewModel", "Fetching assigned orders for userId=${currentUserData?.deliveryId}, userType=${currentUserData?.userTypeId}, districtId=${settingsRepository.getUseData()?.districtId}")
                 homeRepository.getAssignedOrders(
-                    userId = settingsRepository.getUseData()?.id ?: 0,
+                    userId = currentUserData?.deliveryId ?: 0,
+                    userType = currentUserData?.userTypeId ?: 0,
                     districtId = settingsRepository.getUseData()?.districtId ?: 0
                 ).collect { tasks ->
-                    _viewState.update { it.copy(isTasksLoading = false, appTasks = tasks) }
+                    _viewState.update {
+                        it.copy(isTasksLoading = false, appTasks = tasks)
+                    }
                 }
             } catch (ex: Exception) {
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
@@ -186,10 +192,96 @@ class HomeViewModel(
     init {
         getPartnerStatus()
         getPartnerStatistics()
-        //  getAssignedOrders()
+//        getAssignedOrders()
         listenToNewDeliveryTasks()
         getAssignedDeliveryOrders()
         startAlertExpiryTimer()
+        loadUserName()
+    }
+
+    private fun loadUserName() {
+        viewModelScope.launch {
+            val name = settingsRepository.getUseData()?.name.orEmpty()
+            _viewState.update { it.copy(userName = name) }
+        }
+    }
+
+    // TODO: TEST ONLY — remove before release. Dummy app orders to test order details.
+    private fun dummyAppTasks(): List<HomeTask> {
+        return listOf(
+            HomeTask(
+                taskId = 90001,
+                clientLat = 30.0444,
+                clientLang = 31.2357,
+                customerName = "Ahmed Hassan",
+                customerAddress = "12 Tahrir Street, Downtown, Cairo",
+                clientPhone = "+201001234567",
+                clientWhatsapp = "+201001234567",
+                deliveryFees = 25f,
+                totalPrice = 320f,
+                itemsCount = 20,
+                statusId = 1,
+                statusName = "Assigned",
+                products = listOf(
+                    FirebaseProduct(
+                        name = "Coca-Cola 1L",
+                        quantity = 2,
+                        itemPrice = 30,
+                        totalPrice = 60.0,
+                        source = "catalog",
+                        imageUrl = "https://picsum.photos/seed/cola/200"
+                    ),
+                    FirebaseProduct(
+                        name = "Lay's Chips Large",
+                        quantity = 4,
+                        itemPrice = 20,
+                        totalPrice = 80.0,
+                        source = "catalog",
+                        imageUrl = "https://picsum.photos/seed/chips/200"
+                    ),
+                    FirebaseProduct(
+                        name = "Galaxy Chocolate",
+                        quantity = 6,
+                        itemPrice = 30,
+                        totalPrice = 180.0,
+                        source = "catalog",
+                        imageUrl = "https://picsum.photos/seed/choco/200"
+                    )
+                )
+            ),
+            HomeTask(
+                taskId = 90002,
+                clientLat = 31.2001,
+                clientLang = 29.9187,
+                customerName = "Mona Saleh",
+                customerAddress = "45 Corniche Road, Sidi Gaber, Alexandria",
+                clientPhone = "+201112223334",
+                clientWhatsapp = "+201112223334",
+                deliveryFees = 30f,
+                totalPrice = 150f,
+                itemsCount = 2,
+                statusId = 2,
+                statusName = "On The Way",
+                products = listOf(
+                    FirebaseProduct(
+                        name = "Nescafe Gold 200g",
+                        quantity = 1,
+                        itemPrice = 120,
+                        totalPrice = 120.0,
+                        source = "catalog",
+                        imageUrl = "https://picsum.photos/seed/coffee/200"
+                    ),
+                    FirebaseProduct(
+                        name = "Juhayna Milk 1L",
+                        quantity = 2,
+                        itemPrice = 15,
+                        totalPrice = 30.0,
+                        source = "catalog",
+                        imageUrl = "https://picsum.photos/seed/milk/200"
+                    )
+                )
+            )
+        )
     }
 
     private fun startAlertExpiryTimer() {
@@ -275,7 +367,7 @@ class HomeViewModel(
                 getPartnerStatistics()
                 getPartnerStatus()
                 listenToNewDeliveryTasks()
-//                getAssignedOrders()
+            //    getAssignedOrders()
                 getAssignedDeliveryOrders()
             }
 
