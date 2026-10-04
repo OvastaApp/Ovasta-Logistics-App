@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
+import com.ovasta.logisticsapp.base.constants.LocalConstants
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Primary
@@ -229,10 +230,9 @@ fun TasksContent(
                                     onWhatsAppClick = { whatsapp ->
                                         onTaskItemAction(HomeItemActions.WhatsAppRetailer(whatsapp))
                                     },
-
-                                    onStatusChangeClick = { orderId, status ->
-                                        confirmDialogState = Pair(orderId, status)
-                                    })
+                                    onStatusChangeClick = if (LocalConstants.ORDER_ACTIONS_ENABLED) {
+                                        { orderId, status -> confirmDialogState = Pair(orderId, status) }
+                                    } else null)
                             }
 
                             // Assigned delivery tasks

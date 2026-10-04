@@ -65,6 +65,7 @@ import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.StatusDelivered
 import com.ovasta.logisticsapp.base.StatusPending
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
+import com.ovasta.logisticsapp.base.constants.LocalConstants
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
@@ -226,6 +227,7 @@ private fun OrderDetailsContent(
     onDeleteClick: (Int) -> Unit,
     onChangeStatusClick: () -> Unit,
     onDeliverClick: () -> Unit,
+    actionsEnabled: Boolean = LocalConstants.ORDER_ACTIONS_ENABLED,
 ) {
     val task = viewState.task
     var selectedFilter by rememberSaveable { mutableStateOf(ProductPickFilter.ALL) }
@@ -275,14 +277,17 @@ private fun OrderDetailsContent(
                     item { EmptyProductsCard() }
                 } else {
                     // Pinned to the top edge while the products scroll underneath.
-                    stickyHeader(key = "product_filters") {
-                        ProductFilterRow(
-                            selected = selectedFilter,
-                            onSelect = { selectedFilter = it },
-                            modifier = Modifier
-                                .background(Gray100)
-                                .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
-                        )
+                    // Hidden in the view-only release, so the list always shows ALL products.
+                    if (actionsEnabled) {
+                        stickyHeader(key = "product_filters") {
+                            ProductFilterRow(
+                                selected = selectedFilter,
+                                onSelect = { selectedFilter = it },
+                                modifier = Modifier
+                                    .background(Gray100)
+                                    .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                            )
+                        }
                     }
 
                     // Keep each product's original index so edit / delete / pick actions still
@@ -307,6 +312,7 @@ private fun OrderDetailsContent(
                             items(entries, key = { it.index }) { entry ->
                                 ProductCard(
                                     product = entry.value,
+                                    showActions = actionsEnabled,
                                     onClick = { onProductClick(entry.index) },
                                     onPickClick = { onPickClick(entry.index) },
                                     onDeleteClick = { onDeleteClick(entry.index) }
@@ -324,12 +330,13 @@ private fun OrderDetailsContent(
             //    deleted it (removed from the list).
             //  - On the way (Picked): "deliver order" — opens the receive-amount sheet.
             //  - Delivered / Canceled: no action.
+            // Hidden entirely while order actions are disabled (view-only release).
             val currentStep = OrderSteps.fromStatusId(task.statusId)
             val isOnTheWay = currentStep == OrderSteps.Picked
             val isFinished = currentStep == OrderSteps.Delivered || currentStep == OrderSteps.Canceled
             val canChangeStatus = task.products.isNotEmpty() &&
                 task.products.all { it.pickedQuantity != null }
-            if (!isFinished) {
+            if (actionsEnabled && !isFinished) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -679,6 +686,7 @@ private fun HeaderInfoRow(icon: Int, label: String) {
 @Composable
 private fun ProductCard(
     product: FirebaseProduct,
+    showActions: Boolean,
     onClick: () -> Unit,
     onPickClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -734,7 +742,7 @@ private fun ProductCard(
 
             // Edit / delete affordances, with the picked-status badge stacked beneath them.
             Column(horizontalAlignment = Alignment.End) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showActions) Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = onClick,
                         modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._32sdp))
@@ -791,7 +799,7 @@ private fun ProductCard(
                 )
             }
 
-            OutlinedButton(
+            if (showActions) OutlinedButton(
                 onClick = onPickClick,
                 shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
                 contentPadding = PaddingValues(
