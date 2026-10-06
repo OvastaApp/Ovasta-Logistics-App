@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -706,10 +707,15 @@ private fun ProductCard(
                 modifier = Modifier
                     .size(dimensionResource(com.intuit.sdp.R.dimen._56sdp))
                     .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-                    .background(Gray100),
+                    .background(Gray100)
+                    // Zoom into the product so it fills the thumbnail; clip above keeps it in bounds.
+                    .graphicsLayer {
+                        scaleX = 1.4f
+                        scaleY = 1.4f
+                    },
                 painter = rememberAsyncImagePainter(product.imageUrl.orDefault()),
                 contentDescription = product.name,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
             )
 
             Column(
