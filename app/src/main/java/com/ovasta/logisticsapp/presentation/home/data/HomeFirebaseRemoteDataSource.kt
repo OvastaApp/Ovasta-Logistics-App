@@ -83,7 +83,7 @@ class HomeFirebaseRemoteDataSource(
         }
 
         val ordersCollection =
-            db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(1.toString())
+            db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
                 .collection(FIRESTORE_ROOT_ORDERS_NAME)
 
 
