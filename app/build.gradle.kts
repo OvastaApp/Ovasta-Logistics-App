@@ -139,6 +139,8 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.auth)
     implementation(libs.coil.kt.coil.compose)
+    // Reads photo rotation so uploaded images are re-encoded upright
+    implementation(libs.androidx.exifinterface)
     implementation(libs.security.crypto)
 
     implementation(libs.play.services.location)

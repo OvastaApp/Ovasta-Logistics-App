@@ -55,7 +55,8 @@ import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSourc
  * Bottom sheet that lets the user edit a product's unit price, quantity and/or source.
  *
  * Fields are pre-filled with the product's current values. The source dropdown loads its options
- * lazily via [onLoadSources] the first time it is expanded. Save is enabled only when the inputs
+ * lazily via [onLoadSources] the first time it is expanded, and is hidden when [showSource] is
+ * false (edits that can only change price and quantity). Save is enabled only when the inputs
  * are valid (non-empty, within bounds) and at least one value has actually changed.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +68,7 @@ fun EditProductBottomSheet(
     onLoadSources: () -> Unit,
     onSave: (newPrice: Int, newQuantity: Int, newSource: String?) -> Unit,
     onDismiss: () -> Unit,
+    showSource: Boolean = true,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -144,77 +146,79 @@ fun EditProductBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
             // Source dropdown — options are fetched from the API the first time it is opened.
-            var sourceExpanded by remember { mutableStateOf(false) }
-            var sourcesRequested by remember { mutableStateOf(false) }
-            ExposedDropdownMenuBox(
-                expanded = sourceExpanded,
-                onExpandedChange = { expanded ->
-                    sourceExpanded = expanded
-                    if (expanded && !sourcesRequested) {
-                        sourcesRequested = true
-                        onLoadSources()
-                    }
-                }
-            ) {
-                OutlinedTextField(
-                    value = selectedSource,
-                    onValueChange = {},
-                    readOnly = true,
-                    textStyle = mdMedium,
-                    label = { Text(stringResource(R.string.source), style = xsMedium) },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                )
-                ExposedDropdownMenu(
+            if (showSource) {
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+
+                var sourceExpanded by remember { mutableStateOf(false) }
+                var sourcesRequested by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
                     expanded = sourceExpanded,
-                    onDismissRequest = { sourceExpanded = false }
+                    onExpandedChange = { expanded ->
+                        sourceExpanded = expanded
+                        if (expanded && !sourcesRequested) {
+                            sourcesRequested = true
+                            onLoadSources()
+                        }
+                    }
                 ) {
-                    when {
-                        isSourcesLoading -> DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._14sdp)),
-                                        strokeWidth = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
-                                        color = Primary
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.loading_sources),
-                                        style = smNormal.copy(color = Gray500),
-                                        modifier = Modifier.padding(
-                                            start = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                    OutlinedTextField(
+                        value = selectedSource,
+                        onValueChange = {},
+                        readOnly = true,
+                        textStyle = mdMedium,
+                        label = { Text(stringResource(R.string.source), style = xsMedium) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = sourceExpanded,
+                        onDismissRequest = { sourceExpanded = false }
+                    ) {
+                        when {
+                            isSourcesLoading -> DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._14sdp)),
+                                            strokeWidth = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
+                                            color = Primary
                                         )
-                                    )
-                                }
-                            },
-                            onClick = {}
-                        )
-
-                        availableSources.isEmpty() -> DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.no_sources_available),
-                                    style = smNormal.copy(color = Gray500)
-                                )
-                            },
-                            onClick = { sourceExpanded = false }
-                        )
-
-                        else -> availableSources.forEach { source ->
-                            DropdownMenuItem(
-                                text = { Text(text = source.name.orEmpty(), style = mdMedium) },
-                                onClick = {
-                                    selectedSource = source.name.orEmpty()
-                                    sourceExpanded = false
-                                }
+                                        Text(
+                                            text = stringResource(R.string.loading_sources),
+                                            style = smNormal.copy(color = Gray500),
+                                            modifier = Modifier.padding(
+                                                start = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                                            )
+                                        )
+                                    }
+                                },
+                                onClick = {}
                             )
+
+                            availableSources.isEmpty() -> DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.no_sources_available),
+                                        style = smNormal.copy(color = Gray500)
+                                    )
+                                },
+                                onClick = { sourceExpanded = false }
+                            )
+
+                            else -> availableSources.forEach { source ->
+                                DropdownMenuItem(
+                                    text = { Text(text = source.name.orEmpty(), style = mdMedium) },
+                                    onClick = {
+                                        selectedSource = source.name.orEmpty()
+                                        sourceExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }

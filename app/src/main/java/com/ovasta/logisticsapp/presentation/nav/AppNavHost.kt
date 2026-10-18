@@ -10,11 +10,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
@@ -46,10 +49,22 @@ fun AppNavHost(modifier: Modifier = Modifier) {
     val backStack = remember { mutableStateListOf<Any>(Splash) }
     val navigator = remember { Navigator(backStack) }
     
-    // HomeViewModel at nav-level — alive once Home is reached (not on Splash/Login)
-    val homeViewModel: HomeViewModel? = if (backStack.any { it is Home }) {
-        koinViewModel<HomeViewModel>()
+    // HomeViewModel at nav-level — alive once Home is reached (not on Splash/Login).
+    // It and the other logged-in screens' ViewModels live in the session store, not the
+    // Activity's, so logging out destroys them.
+    val sessionStoreOwner: SessionViewModelStoreOwner = viewModel()
+    val isLoggedIn = backStack.any { it is Home }
+    val homeViewModel: HomeViewModel? = if (isLoggedIn) {
+        koinViewModel<HomeViewModel>(viewModelStoreOwner = sessionStoreOwner)
     } else null
+
+    // On logout (Home leaves the back stack) clear the session, so the next account gets a fresh
+    // HomeViewModel instead of the previous one's name, Firebase listeners and tracking state
+    var wasLoggedIn by remember { mutableStateOf(false) }
+    LaunchedEffect(isLoggedIn) {
+        if (wasLoggedIn && !isLoggedIn) sessionStoreOwner.clearSession()
+        wasLoggedIn = isLoggedIn
+    }
 
     // Observe app foreground/background to pause/resume the alert countdown timer
     if (homeViewModel != null) {
@@ -87,7 +102,8 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                             }
 
                             is AvailableTasks -> NavEntry(key) {
-                                val viewModel: AvailableTasksViewModel = koinViewModel()
+                                val viewModel: AvailableTasksViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
                                 AvailableTasksScreen(
                                     viewModel = viewModel,
                                     onOrderAccepted = {
@@ -97,7 +113,8 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                             }
 
                             is TaskDetails -> NavEntry(key) {
-                                val viewModel: TaskDetailsViewModel = koinViewModel()
+                                val viewModel: TaskDetailsViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
                                 DropOfOrderDetailsScreen(
                                     viewModel = viewModel,
                                     taskId = key.taskId,

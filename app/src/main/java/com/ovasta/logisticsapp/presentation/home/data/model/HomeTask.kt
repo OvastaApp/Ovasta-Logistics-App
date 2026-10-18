@@ -64,7 +64,17 @@ data class HomeTask(
 
     @get:PropertyName("updated_at")
     @PropertyName("updated_at")
-    val updatedAt: Timestamp? = null
+    val updatedAt: Timestamp? = null,
+
+    // Filled from the agent's assigned-order doc (online_drivers/{id}/orders/{orderId})
+    @get:PropertyName("assigned_at")
+    @PropertyName("assigned_at")
+    val assignedAt: Timestamp? = null,
+
+    /** Set by the backend once an edit request is approved: the agent may now edit the order. */
+    @get:PropertyName("is_editable")
+    @PropertyName("is_editable")
+    val isEditable: Boolean = false
 ) : Parcelable
 
 

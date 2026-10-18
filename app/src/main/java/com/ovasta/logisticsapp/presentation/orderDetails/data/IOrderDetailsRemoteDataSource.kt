@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
+import android.net.Uri
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
@@ -37,4 +38,25 @@ interface IOrderDetailsRemoteDataSource {
 
     /** Fetches the sources the given product can be assigned to. */
     suspend fun getProductSources(productId: Int): List<ProductSource>
+
+    /** Marks the order delivered on the backend with the cash collected from the client. */
+    suspend fun deliverSalesOrder(orderId: Int, collectedAmount: Double)
+
+    /** Changes one product's quantity / unit price on an editable order via the backend. */
+    suspend fun updateSalesOrderProduct(
+        orderId: Int,
+        catalogProduct: Boolean,
+        productId: Int,
+        quantity: Int,
+        price: Int
+    )
+
+    /** Removes one product from an editable order via the backend. */
+    suspend fun deleteSalesOrderProduct(orderId: Int, catalogProduct: Boolean, productId: Int)
+
+    /** Asks for the order to be made editable, uploading [image] with the request. */
+    suspend fun requestOrderEdit(orderId: Int, image: Uri)
+
+    /** Uploads [image] (e.g. the receipt) to the order. */
+    suspend fun uploadOrderImage(orderId: Int, image: Uri)
 }

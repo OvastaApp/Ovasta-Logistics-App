@@ -206,7 +206,6 @@
     <string name="no_sources_available">No sources available</string>
     <string name="deliver_order">Deliver order</string>
     <string name="received_amount">Received amount</string>
-    <string name="received_less_than_total">Received amount can\'t be less than the order total</string>
     <string name="confirm_collect_money">Confirm collection</string>
     <string name="order_delivered_successfully">Order delivered successfully</string>
     <string name="edit_product">Edit product</string>
@@ -245,7 +244,7 @@
 
     <!-- Location consent dialog -->
     <string name="location_consent_title">Allow OvaStar to access your location</string>
-    <string name="location_consent_message">OvaStar collects location data to enable live shipment tracking, driver route updates, delivery status monitoring, and operational logistics support — even when the app is closed or not in use.\n\nBackground location access is required so dispatchers and customers can receive accurate real-time delivery updates.\n\nYour location data is only used for logistics and delivery operations.\n\nBy continuing, you agree to allow OvaStar to access location data in the background.</string>
+    <string name="location_consent_message">OvaStar collects location data to enable shipment tracking and delivery updates, even when the app is closed or not in use.\n\nThis data is only used for delivery operations.</string>
     <string name="location_consent_ok">OK</string>
     <string name="location_consent_not_now">Not Now</string>
 
@@ -269,4 +268,15 @@
     <string name="order_created_successfully">Order created successfully</string>
     <string name="delivery_fees_updated_successfully">Delivery fees updated successfully</string>
     <string name="cancel">Cancel</string>
+    <string name="order_minutes_with_you">%s min</string>
+    <string name="item_total_price">Total price</string>
+    <string name="edit">Edit</string>
+    <string name="edit_order">Edit order</string>
+    <string name="request_edit">Request edit</string>
+    <string name="upload_receipt">Upload receipt</string>
+    <string name="add_image">Add image</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="edit_request_sent">Edit request sent</string>
+    <string name="receipt_uploaded">Receipt uploaded</string>
 </resources>

@@ -1,23 +1,35 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.ovasta.logisticsapp.base.ext.compressImageToJpeg
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_PRODUCTS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.orderDetails.data.model.DeleteSalesOrderProductRequest
+import com.ovasta.logisticsapp.presentation.orderDetails.data.model.DeliverSalesOrderRequest
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
+import com.ovasta.logisticsapp.presentation.orderDetails.data.model.UpdateSalesOrderProductRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class OrderDetailsRemoteDataSource(
     private val db: FirebaseFirestore,
     private val api: OrderDetailsApi,
+    private val context: Context,
 ) : IOrderDetailsRemoteDataSource {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -118,4 +130,50 @@ class OrderDetailsRemoteDataSource(
 
     override suspend fun getProductSources(productId: Int): List<ProductSource> =
         api.getProductSources(productId).data.orEmpty()
+
+    override suspend fun deliverSalesOrder(orderId: Int, collectedAmount: Double) {
+        api.deliverSalesOrder(orderId, DeliverSalesOrderRequest(collectedAmount))
+    }
+
+    override suspend fun updateSalesOrderProduct(
+        orderId: Int,
+        catalogProduct: Boolean,
+        productId: Int,
+        quantity: Int,
+        price: Int
+    ) {
+        api.updateSalesOrderProduct(
+            orderId,
+            UpdateSalesOrderProductRequest(
+                catalogProduct = catalogProduct,
+                product = UpdateSalesOrderProductRequest.ProductUpdate(productId, quantity, price)
+            )
+        )
+    }
+
+    override suspend fun deleteSalesOrderProduct(
+        orderId: Int,
+        catalogProduct: Boolean,
+        productId: Int
+    ) {
+        api.deleteSalesOrderProduct(orderId, DeleteSalesOrderProductRequest(catalogProduct, productId))
+    }
+
+    override suspend fun requestOrderEdit(orderId: Int, image: Uri) {
+        api.requestOrderEdit(orderId, image.toImagePart())
+    }
+
+    override suspend fun uploadOrderImage(orderId: Int, image: Uri) {
+        api.uploadOrderImage(orderId, image.toImagePart())
+    }
+
+    /** Compresses the image off the main thread into the multipart `image` field. */
+    private suspend fun Uri.toImagePart(): MultipartBody.Part {
+        val bytes = withContext(Dispatchers.IO) { context.compressImageToJpeg(this@toImagePart) }
+        return MultipartBody.Part.createFormData(
+            "image",
+            "image.jpg",
+            bytes.toRequestBody("image/jpeg".toMediaType())
+        )
+    }
 }

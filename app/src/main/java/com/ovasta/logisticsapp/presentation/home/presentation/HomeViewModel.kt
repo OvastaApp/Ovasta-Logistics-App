@@ -549,9 +549,10 @@ class HomeViewModel(
                     orderAlarmSound.startAlarm()
                 }
             } catch (ex: Exception) {
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
                 updateUiState(_viewState.value.copy(isTracking = false))
-                error.value = ex
                 Log.e("HomeViewModel", "Failed to start tracking", ex)
+                updateViewStateWithFail(ex)
             }
         }
     }
@@ -566,9 +567,10 @@ class HomeViewModel(
                 // Clear current task and queue
                 _viewState.update { it.copy(currentAlertTask = null, alertQueue = emptyList()) }
             } catch (ex: Exception) {
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
                 updateUiState(_viewState.value.copy(isTracking = true))
-                error.value = ex
                 Log.e("HomeViewModel", "Failed to stop tracking", ex)
+                updateViewStateWithFail(ex)
             }
         }
     }
@@ -613,8 +615,7 @@ class HomeViewModel(
                     toggleTracking(shouldBeTracking = isOnline)
                 }
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -637,8 +638,7 @@ class HomeViewModel(
                 setComposeUILoading(false)
                 toggleTracking(shouldBeTracking = isOnline)
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -655,8 +655,7 @@ class HomeViewModel(
                 setComposeUILoading(false)
                 updateUiState(viewState.value.copy(partnerStatistics = response.data))
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -760,8 +759,7 @@ class HomeViewModel(
                 updateUiState(_viewState.value.copy(showToastMessage = R.string.order_created_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -778,8 +776,7 @@ class HomeViewModel(
                 updateUiState(_viewState.value.copy(showToastMessage = R.string.delivery_fees_updated_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
