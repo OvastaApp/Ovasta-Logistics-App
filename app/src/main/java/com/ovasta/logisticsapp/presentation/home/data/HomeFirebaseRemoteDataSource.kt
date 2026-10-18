@@ -103,8 +103,10 @@ class HomeFirebaseRemoteDataSource(
                         return@addSnapshotListener
                     }
                     snapshot?.toObject(HomeTask::class.java)?.let { task ->
-                        tasksMap[orderId] =
-                            task.copy(assignedAt = assignedAtByOrderId[orderId] ?: task.assignedAt)
+                        tasksMap[orderId] = task.copy(
+                            assignedAt = assignedAtByOrderId[orderId] ?: task.assignedAt,
+                            isReceived = snapshot.get("received_at") != null
+                        )
                         trySend(tasksMap.values.toList())
                     }
                 }

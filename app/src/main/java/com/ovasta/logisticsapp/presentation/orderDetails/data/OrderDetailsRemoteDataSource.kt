@@ -139,8 +139,8 @@ class OrderDetailsRemoteDataSource(
         orderId: Int,
         catalogProduct: Boolean,
         productId: Int,
-        quantity: Int,
-        price: Int
+        quantity: Double,
+        price: Double
     ) {
         api.updateSalesOrderProduct(
             orderId,

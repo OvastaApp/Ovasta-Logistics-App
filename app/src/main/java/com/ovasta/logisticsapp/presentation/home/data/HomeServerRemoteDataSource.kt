@@ -29,6 +29,9 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
     }
 
     override suspend fun getAssignedDeliveryOrders() = homeApi.getDeliveryOrders().data
+    override suspend fun startSalesOrder(orderId: Int) {
+        homeApi.startSalesOrder(orderId)
+    }
     override suspend fun createDeliveryOrder(
         deliveryPrice: Double,
         receiverMobile: String?,

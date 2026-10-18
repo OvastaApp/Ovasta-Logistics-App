@@ -101,6 +101,9 @@ class HomeRepository(
     override suspend fun getAssignedDeliveryOrders() =
         homeServerRemoteDataSource.getAssignedDeliveryOrders()
 
+    override suspend fun startSalesOrder(orderId: Int) =
+        homeServerRemoteDataSource.startSalesOrder(orderId)
+
     override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps) =
         homeServerRemoteDataSource.changeOrderStatus(orderId, status)
 

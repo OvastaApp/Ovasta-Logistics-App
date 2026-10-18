@@ -7,10 +7,11 @@ data class UpdateSalesOrderProductRequest(
     @SerializedName("catalog_product") val catalogProduct: Boolean,
     @SerializedName("product") val product: ProductUpdate,
 ) {
+    /** [quantity] and [price] can be fractional, e.g. 0.25 kg at 20.25. */
     data class ProductUpdate(
         @SerializedName("id") val id: Int,
-        @SerializedName("quantity") val quantity: Int,
-        @SerializedName("price") val price: Int,
+        @SerializedName("quantity") val quantity: Double,
+        @SerializedName("price") val price: Double,
     )
 }
 

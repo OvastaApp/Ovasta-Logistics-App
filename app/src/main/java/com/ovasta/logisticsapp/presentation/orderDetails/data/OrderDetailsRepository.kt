@@ -40,8 +40,8 @@ class OrderDetailsRepository(
         orderId: Int,
         catalogProduct: Boolean,
         productId: Int,
-        quantity: Int,
-        price: Int
+        quantity: Double,
+        price: Double
     ) = taskDetailsRemoteDataSource.updateSalesOrderProduct(
         orderId, catalogProduct, productId, quantity, price
     )

@@ -18,6 +18,8 @@ sealed interface HomeItemActions {
     data object MinimizeBottomSheet : HomeItemActions
     data object NavigateToAvailableTasks : HomeItemActions
     data class UpdateDeliveryFees(val orderId: Int, val fees: Double) : HomeItemActions
+    data class StartOrder(val orderId: Int) : HomeItemActions
+    data object DismissStartOrder : HomeItemActions
 }
 
 sealed interface HomeScreenActions {

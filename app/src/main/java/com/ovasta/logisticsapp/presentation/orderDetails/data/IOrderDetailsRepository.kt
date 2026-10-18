@@ -34,8 +34,8 @@ interface IOrderDetailsRepository {
         orderId: Int,
         catalogProduct: Boolean,
         productId: Int,
-        quantity: Int,
-        price: Int
+        quantity: Double,
+        price: Double
     )
 
     suspend fun deleteSalesOrderProduct(orderId: Int, catalogProduct: Boolean, productId: Int)

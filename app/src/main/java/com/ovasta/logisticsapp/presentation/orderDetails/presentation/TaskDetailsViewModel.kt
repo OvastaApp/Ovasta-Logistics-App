@@ -33,7 +33,14 @@ class TaskDetailsViewModel(
         // This ViewModel is reused for every order in the session, so drop the previous order's
         // state (including isOrderDelivered, which would otherwise close the screen right away)
         _viewState.value = TaskDetailsViewState()
+        listenToOrder()
+    }
 
+    /**
+     * (Re)starts the live listener on the current order. Calling it again re-reads the order
+     * while keeping what is already on screen, e.g. after the backend changed it.
+     */
+    private fun listenToOrder() {
         assignedTasksJob?.cancel()
         assignedTasksJob = viewModelScope.launch {
             setComposeUILoading(true)
@@ -65,18 +72,23 @@ class TaskDetailsViewModel(
      * @param newQuantity the new quantity; when null the existing quantity is kept.
      * @param newSource the new source name; when null the existing source is kept.
      */
-    fun updateProduct(index: Int, newPrice: Int?, newQuantity: Int?, newSource: String? = null) {
+    fun updateProduct(
+        index: Int,
+        newPrice: Double?,
+        newQuantity: Double?,
+        newSource: String? = null
+    ) {
         viewModelScope.launch {
             val products = _viewState.value.task.products.toMutableList()
             val product = products.getOrNull(index) ?: return@launch
 
-            val price = newPrice ?: product.itemPrice ?: 0
-            val quantity = newQuantity ?: product.quantity ?: 0
+            val price = newPrice ?: product.itemPrice ?: 0.0
+            val quantity = newQuantity ?: product.quantity ?: 0.0
 
             products[index] = product.copy(
                 itemPrice = price,
                 quantity = quantity,
-                totalPrice = price.toDouble() * quantity,
+                totalPrice = price * quantity,
                 source = newSource ?: product.source
             )
 
@@ -150,7 +162,7 @@ class TaskDetailsViewModel(
      * network, then persisted to the product's `picked_quantity` field in Firestore so the
      * action survives restarts and later snapshot emissions.
      */
-    fun markProductPicked(index: Int, foundQuantity: Int) {
+    fun markProductPicked(index: Int, foundQuantity: Double) {
         _viewState.update { state ->
             val products = state.task.products.toMutableList()
             val product = products.getOrNull(index) ?: return@update state
@@ -258,6 +270,8 @@ class TaskDetailsViewModel(
                 .onSuccess {
                     setComposeUILoading(false)
                     emitToastEvent(ToastEvent.ResourceToastEvent(successMessage))
+                    // The backend may have changed the order (e.g. is_edit_allowed): re-read it
+                    listenToOrder()
                 }.onFailure {
                     updateViewStateWithFail(it)
                 }

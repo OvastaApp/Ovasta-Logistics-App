@@ -34,6 +34,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
+import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
@@ -115,6 +116,21 @@ fun HomeScreen(viewModel: HomeViewModel) {
             }, onDismiss = {
                 viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
             })
+
+        viewState.orderToStart?.let { order ->
+            ConfirmDialog(
+                title = stringResource(R.string.view_order_details_title),
+                message = stringResource(
+                    R.string.view_order_details_message,
+                    // Customer name, or the order number when the order has none
+                    order.customerName?.takeIf { it.isNotBlank() } ?: "#${order.taskId}"
+                ),
+                onPrimaryClick = {
+                    viewModel.onTaskItemAction(HomeItemActions.StartOrder(order.taskId))
+                },
+                onDismiss = { viewModel.onTaskItemAction(HomeItemActions.DismissStartOrder) }
+            )
+        }
 
         if (viewState.isLocationConsentDialogVisible) {
             BaseDialog(

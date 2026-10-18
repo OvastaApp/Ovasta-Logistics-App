@@ -47,8 +47,8 @@ interface IOrderDetailsRemoteDataSource {
         orderId: Int,
         catalogProduct: Boolean,
         productId: Int,
-        quantity: Int,
-        price: Int
+        quantity: Double,
+        price: Double
     )
 
     /** Removes one product from an editable order via the backend. */

@@ -40,6 +40,8 @@ import com.ovasta.logisticsapp.base.Gray900
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.StatusDelivered
 import com.ovasta.logisticsapp.base.StatusPending
+import com.ovasta.logisticsapp.base.ext.formatDecimal
+import com.ovasta.logisticsapp.base.ext.isValidDecimalInput
 import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
@@ -57,18 +59,18 @@ import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 @Composable
 fun PickProductBottomSheet(
     product: FirebaseProduct,
-    onConfirm: (foundQuantity: Int) -> Unit,
+    onConfirm: (foundQuantity: Double) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val requiredQuantity = product.quantity ?: 0
+    val requiredQuantity = product.quantity ?: 0.0
     val initialFound = product.pickedQuantity ?: requiredQuantity
 
-    var foundText by remember { mutableStateOf(initialFound.toString()) }
-    val parsedFound = foundText.toIntOrNull()
+    var foundText by remember { mutableStateOf(initialFound.formatDecimal()) }
+    val parsedFound = foundText.toDoubleOrNull()
 
-    val isFoundValid = parsedFound != null && parsedFound in 0..requiredQuantity
+    val isFoundValid = parsedFound != null && parsedFound in 0.0..requiredQuantity
     val statusColor = when {
         parsedFound == requiredQuantity -> StatusDelivered
         else -> StatusPending
@@ -108,7 +110,7 @@ fun PickProductBottomSheet(
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.required_qty, requiredQuantity),
+                text = stringResource(R.string.required_qty, requiredQuantity.formatDecimal()),
                 style = mdMedium.copy(color = Gray900),
                 textAlign = TextAlign.Center,
             )
@@ -118,11 +120,15 @@ fun PickProductBottomSheet(
             OutlinedTextField(
                 value = foundText,
                 textStyle = mdMedium,
-                onValueChange = { input -> if (isValidIntInput(input)) foundText = input },
+                onValueChange = { input ->
+                    if (isValidDecimalInput(input, maxIntegerDigits = 6, maxDecimals = 3)) {
+                        foundText = input
+                    }
+                },
                 label = { Text(stringResource(R.string.found_quantity), style = xsMedium) },
                 singleLine = true,
                 isError = foundText.isNotEmpty() && !isFoundValid,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -130,11 +136,11 @@ fun PickProductBottomSheet(
 
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { foundText = requiredQuantity.toString() },
+                onClick = { foundText = requiredQuantity.formatDecimal() },
                 shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
             ) {
                 Text(
-                    text = stringResource(R.string.pick_all_found, requiredQuantity),
+                    text = stringResource(R.string.pick_all_found, requiredQuantity.formatDecimal()),
                     style = xsMedium.copy(color = StatusDelivered)
                 )
             }
@@ -184,17 +190,11 @@ fun PickProductBottomSheet(
     }
 }
 
-/** Accepts an empty string or up to 6 digits (no decimals, no separators). */
-private fun isValidIntInput(input: String): Boolean {
-    if (input.isEmpty()) return true
-    return input.matches(Regex("^\\d{0,6}$"))
-}
-
 @Preview(showBackground = true, locale = "ar")
 @Composable
 private fun PickProductBottomSheetPreview() {
     PickProductBottomSheet(
-        product = FirebaseProduct(name = "Pepsi 1L", itemPrice = 20, quantity = 2),
+        product = FirebaseProduct(name = "Pepsi 1L", itemPrice = 20.0, quantity = 2.0),
         onConfirm = {},
         onDismiss = {}
     )

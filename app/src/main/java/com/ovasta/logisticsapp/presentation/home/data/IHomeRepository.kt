@@ -54,6 +54,9 @@ interface IHomeRepository {
 
     suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 
+    /** Marks an assigned (sales) order as started; called when the agent first opens it. */
+    suspend fun startSalesOrder(orderId: Int)
+
     suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
     suspend fun createDeliveryOrder(
         deliveryPrice: Double,

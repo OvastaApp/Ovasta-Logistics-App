@@ -74,6 +74,7 @@ import com.ovasta.logisticsapp.base.constants.LocalConstants
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.ext.createImageCaptureUri
+import com.ovasta.logisticsapp.base.ext.formatDecimal
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.orDefault
@@ -278,7 +279,7 @@ fun DropOfOrderDetailsScreen(
                     message = stringResource(
                         R.string.delete_product_message,
                         product.name.orDefault(stringResource(R.string.unknown_product)),
-                        product.quantity ?: 0
+                        (product.quantity ?: 0.0).formatDecimal()
                     ),
                     onPrimaryClick = {
                         viewModel.deleteProduct(index)
@@ -311,7 +312,7 @@ private enum class ProductPickFilter(@StringRes val labelRes: Int) {
         NOT_PICKED -> product.pickedQuantity == null
         PARTIALLY_PICKED -> {
             val picked = product.pickedQuantity
-            picked != null && picked < (product.quantity ?: 0)
+            picked != null && picked < (product.quantity ?: 0.0)
         }
     }
 }
@@ -533,9 +534,8 @@ private fun Modifier.cardSurface(): Modifier {
         )
 }
 
-/** Formats a price without a trailing ".0" for whole numbers (e.g. 250.0 -> "250"). */
-private fun formatPrice(value: Double): String =
-    if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
+/** Formats a price with up to 2 decimals and no trailing zeros (250.0 -> "250", 20.25 -> "20.25"). */
+private fun formatPrice(value: Double): String = value.formatDecimal(maxDecimals = 2)
 
 @Composable
 private fun ProductsSectionHeader(count: Int) {
@@ -820,10 +820,9 @@ private fun ProductCard(
     onPickClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
-    val requiredQuantity = product.quantity ?: 0
+    val requiredQuantity = product.quantity ?: 0.0
     val foundQuantity = product.pickedQuantity
-    val lineTotal = product.totalPrice
-        ?: ((product.itemPrice ?: 0).toDouble() * requiredQuantity)
+    val lineTotal = product.totalPrice ?: ((product.itemPrice ?: 0.0) * requiredQuantity)
 
     Column(
         modifier = Modifier
@@ -862,14 +861,14 @@ private fun ProductCard(
                 Text(
                     text = stringResource(
                         R.string.price_currency,
-                        (product.itemPrice ?: 0).toString()
+                        formatPrice(product.itemPrice ?: 0.0)
                     ),
                     style = xsMedium.copy(color = Gray600)
                 )
                 Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
                 // Quantity highlighted on its own line for visibility.
                 Text(
-                    text = stringResource(R.string.required_qty, requiredQuantity),
+                    text = stringResource(R.string.required_qty, requiredQuantity.formatDecimal()),
                     style = smMedium.copy(color = Gray800)
                 )
             }
@@ -948,14 +947,17 @@ private fun ProductCard(
 }
 
 @Composable
-private fun PickedStatusBadge(requiredQuantity: Int, foundQuantity: Int?) {
+private fun PickedStatusBadge(requiredQuantity: Double, foundQuantity: Double?) {
     if (foundQuantity == null) return
     val isFull = foundQuantity >= requiredQuantity
     val color = if (isFull) StatusDelivered else StatusPending
     val label = if (isFull) {
         stringResource(R.string.status_picked_full)
     } else {
-        stringResource(R.string.status_picked_missing, requiredQuantity - foundQuantity)
+        stringResource(
+            R.string.status_picked_missing,
+            (requiredQuantity - foundQuantity).formatDecimal()
+        )
     }
     Text(
         text = label,
@@ -989,13 +991,13 @@ private fun OrderDetailsContentPreview() {
                 products = listOf(
                     FirebaseProduct(
                         name = "Product 1",
-                        itemPrice = 100,
-                        quantity = 2,
-                        pickedQuantity = 1,
+                        itemPrice = 100.0,
+                        quantity = 2.0,
+                        pickedQuantity = 1.0,
                         totalPrice = 200.0,
                         source = "زيت وسمنه"
                     ),
-                    FirebaseProduct(name = "Product 2", itemPrice = 50, quantity = 1, totalPrice = 50.0),
+                    FirebaseProduct(name = "Product 2", itemPrice = 20.25, quantity = 0.5, totalPrice = 10.125),
                 )
             ),
             currency = "EGP"
