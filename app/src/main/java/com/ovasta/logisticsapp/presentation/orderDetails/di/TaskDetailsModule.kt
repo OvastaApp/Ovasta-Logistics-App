@@ -12,7 +12,7 @@ import retrofit2.Retrofit
 
 val taskDetailsModule = module {
     factory { get<Retrofit>().create(OrderDetailsApi::class.java) }
-    single<IOrderDetailsRemoteDataSource> { OrderDetailsRemoteDataSource(get(), get()) }
+    single<IOrderDetailsRemoteDataSource> { OrderDetailsRemoteDataSource(get(), get(), get()) }
     single<IOrderDetailsRepository> { OrderDetailsRepository(get()) }
     viewModel { TaskDetailsViewModel(get(), get()) }
 }

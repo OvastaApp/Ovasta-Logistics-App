@@ -22,8 +22,8 @@ android {
         applicationId = "com.ovasta.logisticsapp"
         minSdk = 24
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.0.16"
+        versionCode = 17
+        versionName = "1.0.17"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     }
@@ -139,6 +139,8 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.auth)
     implementation(libs.coil.kt.coil.compose)
+    // Reads photo rotation so uploaded images are re-encoded upright
+    implementation(libs.androidx.exifinterface)
     implementation(libs.security.crypto)
 
     implementation(libs.play.services.location)

@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
+import android.net.Uri
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
@@ -31,4 +32,29 @@ class OrderDetailsRepository(
 
     override suspend fun getProductSources(productId: Int): List<ProductSource> =
         taskDetailsRemoteDataSource.getProductSources(productId)
+
+    override suspend fun deliverSalesOrder(orderId: Int, collectedAmount: Double) =
+        taskDetailsRemoteDataSource.deliverSalesOrder(orderId, collectedAmount)
+
+    override suspend fun updateSalesOrderProduct(
+        orderId: Int,
+        catalogProduct: Boolean,
+        productId: Int,
+        quantity: Double,
+        price: Double
+    ) = taskDetailsRemoteDataSource.updateSalesOrderProduct(
+        orderId, catalogProduct, productId, quantity, price
+    )
+
+    override suspend fun deleteSalesOrderProduct(
+        orderId: Int,
+        catalogProduct: Boolean,
+        productId: Int
+    ) = taskDetailsRemoteDataSource.deleteSalesOrderProduct(orderId, catalogProduct, productId)
+
+    override suspend fun requestOrderEdit(orderId: Int, image: Uri) =
+        taskDetailsRemoteDataSource.requestOrderEdit(orderId, image)
+
+    override suspend fun uploadOrderImage(orderId: Int, image: Uri) =
+        taskDetailsRemoteDataSource.uploadOrderImage(orderId, image)
 }

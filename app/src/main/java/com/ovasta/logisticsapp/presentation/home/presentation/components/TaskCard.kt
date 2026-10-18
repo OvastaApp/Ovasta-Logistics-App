@@ -34,6 +34,7 @@ import com.ovasta.logisticsapp.base.StatusDelivered
 import com.ovasta.logisticsapp.base.StatusPicked
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
+import com.google.firebase.Timestamp
 import kotlin.text.ifEmpty
 
 @Composable
@@ -115,6 +116,15 @@ fun TaskCard(
                 modifier = Modifier.testTag("totalPrice")
             )
 
+            homeTask.assignedAt?.let { assignedAt ->
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+
+                AssignedElapsedTime(
+                    assignedAtMillis = assignedAt.toDate().time,
+                    modifier = Modifier.testTag("assignedElapsedTime")
+                )
+            }
+
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -177,7 +187,8 @@ fun PreviewTaskCard() {
             totalPrice = 150.0f,
             clientLat = 37.7749,
             clientLang = -122.4194,
-            clientPhone = "1234567890"
+            clientPhone = "1234567890",
+            assignedAt = Timestamp.now()
         ),
         currency = "$",
         startedTaskId = -1,

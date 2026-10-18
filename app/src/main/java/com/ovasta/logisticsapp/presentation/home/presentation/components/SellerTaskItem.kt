@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.*
+import com.ovasta.logisticsapp.base.ext.toEpochMillisOrNull
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 
@@ -199,6 +201,12 @@ fun SellerTaskItem(
                 }
             }
 
+            val assignedAtMillis = remember(task.assignedAt) { task.assignedAt?.toEpochMillisOrNull() }
+            if (assignedAtMillis != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                AssignedElapsedTime(assignedAtMillis = assignedAtMillis)
+            }
+
             if (task.note.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = stringResource(R.string.notes), style = xsMedium)
@@ -254,7 +262,8 @@ fun SellerTaskItemPreview() {
             receiverMobile = "01198765432",
             deliveryPrice = 25.0,
             collectionAmount = 350.0,
-            note = "Ring the bell twice"
+            note = "Ring the bell twice",
+            assignedAt = "2026-10-18T08:18:22.000000Z"
         ),
         onCallSender = {},
         onCallReceiver = {},

@@ -30,6 +30,10 @@ interface HomeApi {
     @GET("delivery-orders")
     suspend fun getDeliveryOrders(): ApiResponse<List<AssignedDeliveryTask>>
 
+    /** Marks an assigned (sales) order as started when the agent first opens it. */
+    @POST("sales-orders/{id}/confirm-receive")
+    suspend fun startSalesOrder(@Path("id") orderId: Int): ApiResponse<Any>
+
     @POST("delivery-orders/{id}/accept")
     suspend fun acceptDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
 

@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.presentation.home.data.model
 import android.os.Parcelable
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.PropertyName
 import kotlinx.parcelize.Parcelize
@@ -64,7 +65,26 @@ data class HomeTask(
 
     @get:PropertyName("updated_at")
     @PropertyName("updated_at")
-    val updatedAt: Timestamp? = null
+    val updatedAt: Timestamp? = null,
+
+    // Filled from the agent's assigned-order doc (online_drivers/{id}/orders/{orderId})
+    @get:PropertyName("assigned_at")
+    @PropertyName("assigned_at")
+    val assignedAt: Timestamp? = null,
+
+    /** Set by the backend once an edit request is approved: the agent may now edit the order. */
+    @get:PropertyName("is_edit_allowed")
+    @PropertyName("is_edit_allowed")
+    val isEditable: Boolean = false,
+
+    /**
+     * Whether the order's `received_at` is set, i.e. the agent already confirmed receiving it
+     * (`sales-orders/{id}/confirm-receive`). Filled in by the data source rather than mapped by
+     * Firestore, so it works whatever type the backend stores `received_at` as.
+     */
+    @get:Exclude
+    @Exclude
+    val isReceived: Boolean = false
 ) : Parcelable
 
 
@@ -79,9 +99,10 @@ data class FirebaseProduct(
     @PropertyName("is_stock")
     val isStock: Boolean? = null,
 
+    // Decimal: unit price can have piasters (e.g. 20.25)
     @get:PropertyName("item_price")
     @PropertyName("item_price")
-    val itemPrice: Int? = null,
+    val itemPrice: Double? = null,
     @get:PropertyName("main_sys_id")
     @PropertyName("main_sys_id")
     val mainSysId: Int? = null,
@@ -94,13 +115,14 @@ data class FirebaseProduct(
     @PropertyName("name")
     val name: String? = null,
 
+    // Decimal: products sold by weight can have fractional quantities (e.g. 0.5, 0.250)
     @get:PropertyName("quantity")
     @PropertyName("quantity")
-    val quantity: Int? = null,
+    val quantity: Double? = null,
 
     @get:PropertyName("picked_quantity")
     @PropertyName("picked_quantity")
-    val pickedQuantity: Int? = null,
+    val pickedQuantity: Double? = null,
 
     @get:PropertyName("source")
     @PropertyName("source")

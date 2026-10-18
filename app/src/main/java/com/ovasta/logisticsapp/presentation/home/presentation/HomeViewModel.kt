@@ -225,24 +225,24 @@ class HomeViewModel(
                 products = listOf(
                     FirebaseProduct(
                         name = "Coca-Cola 1L",
-                        quantity = 2,
-                        itemPrice = 30,
+                        quantity = 2.0,
+                        itemPrice = 30.0,
                         totalPrice = 60.0,
                         source = "catalog",
                         imageUrl = "https://picsum.photos/seed/cola/200"
                     ),
                     FirebaseProduct(
                         name = "Lay's Chips Large",
-                        quantity = 4,
-                        itemPrice = 20,
+                        quantity = 4.0,
+                        itemPrice = 20.0,
                         totalPrice = 80.0,
                         source = "catalog",
                         imageUrl = "https://picsum.photos/seed/chips/200"
                     ),
                     FirebaseProduct(
                         name = "Galaxy Chocolate",
-                        quantity = 6,
-                        itemPrice = 30,
+                        quantity = 6.0,
+                        itemPrice = 30.0,
                         totalPrice = 180.0,
                         source = "catalog",
                         imageUrl = "https://picsum.photos/seed/choco/200"
@@ -265,16 +265,16 @@ class HomeViewModel(
                 products = listOf(
                     FirebaseProduct(
                         name = "Nescafe Gold 200g",
-                        quantity = 1,
-                        itemPrice = 120,
+                        quantity = 1.0,
+                        itemPrice = 120.0,
                         totalPrice = 120.0,
                         source = "catalog",
                         imageUrl = "https://picsum.photos/seed/coffee/200"
                     ),
                     FirebaseProduct(
                         name = "Juhayna Milk 1L",
-                        quantity = 2,
-                        itemPrice = 15,
+                        quantity = 2.0,
+                        itemPrice = 15.0,
                         totalPrice = 30.0,
                         source = "catalog",
                         imageUrl = "https://picsum.photos/seed/milk/200"
@@ -484,6 +484,22 @@ class HomeViewModel(
                 updateDeliveryFees(taskItemAction.orderId, taskItemAction.fees)
             }
 
+            is HomeItemActions.ShowTaskDetails -> {
+                val task = _viewState.value.appTasks.find { it.taskId == taskItemAction.taskId }
+                if (task != null && !task.isReceived) {
+                    // received_at not set yet: confirm, then mark it received on the backend
+                    _viewState.update { it.copy(orderToStart = task) }
+                } else {
+                    viewModelScope.launch { _taskItemActions.emit(taskItemAction) }
+                }
+            }
+
+            is HomeItemActions.StartOrder -> startOrder(taskItemAction.orderId)
+
+            is HomeItemActions.DismissStartOrder -> {
+                _viewState.update { it.copy(orderToStart = null) }
+            }
+
             is HomeItemActions.MinimizeBottomSheet -> {
                 // Mark only current task as seen (not queued tasks)
                 _viewState.value.currentAlertTask?.orderId?.let { orderId ->
@@ -549,9 +565,10 @@ class HomeViewModel(
                     orderAlarmSound.startAlarm()
                 }
             } catch (ex: Exception) {
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
                 updateUiState(_viewState.value.copy(isTracking = false))
-                error.value = ex
                 Log.e("HomeViewModel", "Failed to start tracking", ex)
+                updateViewStateWithFail(ex)
             }
         }
     }
@@ -566,9 +583,10 @@ class HomeViewModel(
                 // Clear current task and queue
                 _viewState.update { it.copy(currentAlertTask = null, alertQueue = emptyList()) }
             } catch (ex: Exception) {
+                if (ex is kotlinx.coroutines.CancellationException) throw ex
                 updateUiState(_viewState.value.copy(isTracking = true))
-                error.value = ex
                 Log.e("HomeViewModel", "Failed to stop tracking", ex)
+                updateViewStateWithFail(ex)
             }
         }
     }
@@ -613,8 +631,7 @@ class HomeViewModel(
                     toggleTracking(shouldBeTracking = isOnline)
                 }
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -637,8 +654,7 @@ class HomeViewModel(
                 setComposeUILoading(false)
                 toggleTracking(shouldBeTracking = isOnline)
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -655,8 +671,7 @@ class HomeViewModel(
                 setComposeUILoading(false)
                 updateUiState(viewState.value.copy(partnerStatistics = response.data))
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -673,6 +688,22 @@ class HomeViewModel(
                     ToastEvent.StringToastEvent(it.message)
                 )
 
+            }.onFailure {
+                updateViewStateWithFail(it)
+            }
+        }
+    }
+
+    /** Starts the order on the backend (`sales-orders/{id}/confirm-receive`), then opens its details. */
+    private fun startOrder(orderId: Int) {
+        _viewState.update { it.copy(orderToStart = null) }
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching {
+                homeRepository.startSalesOrder(orderId)
+            }.onSuccess {
+                setComposeUILoading(false)
+                _taskItemActions.emit(HomeItemActions.ShowTaskDetails(orderId, 0))
             }.onFailure {
                 updateViewStateWithFail(it)
             }
@@ -760,8 +791,7 @@ class HomeViewModel(
                 updateUiState(_viewState.value.copy(showToastMessage = R.string.order_created_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -778,8 +808,7 @@ class HomeViewModel(
                 updateUiState(_viewState.value.copy(showToastMessage = R.string.delivery_fees_updated_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
+                updateViewStateWithFail(it)
             }
         }
     }

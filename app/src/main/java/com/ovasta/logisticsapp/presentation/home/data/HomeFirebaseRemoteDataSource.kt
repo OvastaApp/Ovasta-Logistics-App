@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -61,21 +62,24 @@ class HomeFirebaseRemoteDataSource(
                             return@addSnapshotListener
                         }
 
-                        val orderIds = value?.documents?.map { it.id } ?: emptyList()
-                        Log.d("assignedOrderIds", "$orderIds")
-                        trySend(orderIds)
+                        val assignedAtByOrderId = value?.documents?.associate { doc ->
+                            doc.id to runCatching { doc.getTimestamp("assigned_at") }.getOrNull()
+                        } ?: emptyMap()
+                        Log.d("assignedOrderIds", "${assignedAtByOrderId.keys}")
+                        trySend(assignedAtByOrderId)
                     }
 
             awaitClose { listenerRegistration.remove() }
-        }.flatMapLatest { orderIds ->
-            listenToOrdersChanges(orderIds, districtId)
+        }.flatMapLatest { assignedAtByOrderId ->
+            listenToOrdersChanges(assignedAtByOrderId, districtId)
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun listenToOrdersChanges(
-        orderIds: List<String>, districtId: Int
+        assignedAtByOrderId: Map<String, Timestamp?>, districtId: Int
     ): Flow<List<HomeTask>> = callbackFlow {
 
+        val orderIds = assignedAtByOrderId.keys
         if (orderIds.isEmpty()) {
             trySend(emptyList())
             close()
@@ -95,10 +99,14 @@ class HomeFirebaseRemoteDataSource(
                 ordersCollection.document(orderId).addSnapshotListener { snapshot, error ->
                     if (error != null) {
                         Log.e("orderDocListener", "Error", error)
+                        close(error)
                         return@addSnapshotListener
                     }
                     snapshot?.toObject(HomeTask::class.java)?.let { task ->
-                        tasksMap[orderId] = task
+                        tasksMap[orderId] = task.copy(
+                            assignedAt = assignedAtByOrderId[orderId] ?: task.assignedAt,
+                            isReceived = snapshot.get("received_at") != null
+                        )
                         trySend(tasksMap.values.toList())
                     }
                 }

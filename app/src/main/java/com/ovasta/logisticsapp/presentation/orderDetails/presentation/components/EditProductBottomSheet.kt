@@ -49,13 +49,16 @@ import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
+import com.ovasta.logisticsapp.base.ext.formatDecimal
+import com.ovasta.logisticsapp.base.ext.isValidDecimalInput
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
 
 /**
  * Bottom sheet that lets the user edit a product's unit price, quantity and/or source.
  *
  * Fields are pre-filled with the product's current values. The source dropdown loads its options
- * lazily via [onLoadSources] the first time it is expanded. Save is enabled only when the inputs
+ * lazily via [onLoadSources] the first time it is expanded, and is hidden when [showSource] is
+ * false (edits that can only change price and quantity). Save is enabled only when the inputs
  * are valid (non-empty, within bounds) and at least one value has actually changed.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,24 +68,27 @@ fun EditProductBottomSheet(
     availableSources: List<ProductSource>,
     isSourcesLoading: Boolean,
     onLoadSources: () -> Unit,
-    onSave: (newPrice: Int, newQuantity: Int, newSource: String?) -> Unit,
+    onSave: (newPrice: Double, newQuantity: Double, newSource: String?) -> Unit,
     onDismiss: () -> Unit,
+    showSource: Boolean = true,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val initialPrice = product.itemPrice ?: 0
-    val initialQuantity = product.quantity ?: 0
+    val initialPrice = product.itemPrice ?: 0.0
+    val initialQuantity = product.quantity ?: 0.0
     val initialSource = product.source.orEmpty()
 
-    var priceText by remember { mutableStateOf(initialPrice.toString()) }
-    var quantityText by remember { mutableStateOf(initialQuantity.toString()) }
+    var priceText by remember { mutableStateOf(initialPrice.formatDecimal(PRICE_DECIMALS)) }
+    var quantityText by remember { mutableStateOf(initialQuantity.formatDecimal(QUANTITY_DECIMALS)) }
     var selectedSource by remember { mutableStateOf(initialSource) }
 
-    val parsedPrice = priceText.toIntOrNull()
-    val parsedQuantity = quantityText.toIntOrNull()
+    val parsedPrice = priceText.toDoubleOrNull()
+    val parsedQuantity = quantityText.toDoubleOrNull()
 
-    val isPriceValid = parsedPrice != null && parsedPrice in 0..MAX_PRICE
-    val isQuantityValid = parsedQuantity != null && parsedQuantity in 1..MAX_QUANTITY
+    val isPriceValid = parsedPrice != null && parsedPrice in 0.0..MAX_PRICE
+    // Fractional quantities are allowed (e.g. 0.5 or 0.250 kg), but not zero
+    val isQuantityValid = parsedQuantity != null && parsedQuantity > 0.0 &&
+        parsedQuantity <= MAX_QUANTITY
     val hasChanged = parsedPrice != initialPrice ||
         parsedQuantity != initialQuantity ||
         selectedSource != initialSource
@@ -123,11 +129,13 @@ fun EditProductBottomSheet(
             OutlinedTextField(
                 value = priceText,
                 textStyle = mdMedium,
-                onValueChange = { input -> if (isValidIntInput(input)) priceText = input },
+                onValueChange = { input ->
+                    if (isValidDecimalInput(input, PRICE_DIGITS, PRICE_DECIMALS)) priceText = input
+                },
                 label = { Text(stringResource(R.string.price), style = xsMedium) },
                 singleLine = true,
                 isError = priceText.isNotEmpty() && !isPriceValid,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -136,85 +144,91 @@ fun EditProductBottomSheet(
             OutlinedTextField(
                 value = quantityText,
                 textStyle = mdMedium,
-                onValueChange = { input -> if (isValidIntInput(input)) quantityText = input },
+                onValueChange = { input ->
+                    if (isValidDecimalInput(input, QUANTITY_DIGITS, QUANTITY_DECIMALS)) {
+                        quantityText = input
+                    }
+                },
                 label = { Text(stringResource(R.string.quantity), style = xsMedium) },
                 singleLine = true,
                 isError = quantityText.isNotEmpty() && !isQuantityValid,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-
             // Source dropdown — options are fetched from the API the first time it is opened.
-            var sourceExpanded by remember { mutableStateOf(false) }
-            var sourcesRequested by remember { mutableStateOf(false) }
-            ExposedDropdownMenuBox(
-                expanded = sourceExpanded,
-                onExpandedChange = { expanded ->
-                    sourceExpanded = expanded
-                    if (expanded && !sourcesRequested) {
-                        sourcesRequested = true
-                        onLoadSources()
-                    }
-                }
-            ) {
-                OutlinedTextField(
-                    value = selectedSource,
-                    onValueChange = {},
-                    readOnly = true,
-                    textStyle = mdMedium,
-                    label = { Text(stringResource(R.string.source), style = xsMedium) },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                )
-                ExposedDropdownMenu(
+            if (showSource) {
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+
+                var sourceExpanded by remember { mutableStateOf(false) }
+                var sourcesRequested by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
                     expanded = sourceExpanded,
-                    onDismissRequest = { sourceExpanded = false }
+                    onExpandedChange = { expanded ->
+                        sourceExpanded = expanded
+                        if (expanded && !sourcesRequested) {
+                            sourcesRequested = true
+                            onLoadSources()
+                        }
+                    }
                 ) {
-                    when {
-                        isSourcesLoading -> DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._14sdp)),
-                                        strokeWidth = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
-                                        color = Primary
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.loading_sources),
-                                        style = smNormal.copy(color = Gray500),
-                                        modifier = Modifier.padding(
-                                            start = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                    OutlinedTextField(
+                        value = selectedSource,
+                        onValueChange = {},
+                        readOnly = true,
+                        textStyle = mdMedium,
+                        label = { Text(stringResource(R.string.source), style = xsMedium) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = sourceExpanded,
+                        onDismissRequest = { sourceExpanded = false }
+                    ) {
+                        when {
+                            isSourcesLoading -> DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._14sdp)),
+                                            strokeWidth = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
+                                            color = Primary
                                         )
-                                    )
-                                }
-                            },
-                            onClick = {}
-                        )
-
-                        availableSources.isEmpty() -> DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.no_sources_available),
-                                    style = smNormal.copy(color = Gray500)
-                                )
-                            },
-                            onClick = { sourceExpanded = false }
-                        )
-
-                        else -> availableSources.forEach { source ->
-                            DropdownMenuItem(
-                                text = { Text(text = source.name.orEmpty(), style = mdMedium) },
-                                onClick = {
-                                    selectedSource = source.name.orEmpty()
-                                    sourceExpanded = false
-                                }
+                                        Text(
+                                            text = stringResource(R.string.loading_sources),
+                                            style = smNormal.copy(color = Gray500),
+                                            modifier = Modifier.padding(
+                                                start = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                                            )
+                                        )
+                                    }
+                                },
+                                onClick = {}
                             )
+
+                            availableSources.isEmpty() -> DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.no_sources_available),
+                                        style = smNormal.copy(color = Gray500)
+                                    )
+                                },
+                                onClick = { sourceExpanded = false }
+                            )
+
+                            else -> availableSources.forEach { source ->
+                                DropdownMenuItem(
+                                    text = { Text(text = source.name.orEmpty(), style = mdMedium) },
+                                    onClick = {
+                                        selectedSource = source.name.orEmpty()
+                                        sourceExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -266,20 +280,20 @@ fun EditProductBottomSheet(
     }
 }
 
-private const val MAX_PRICE = 999_999
-private const val MAX_QUANTITY = 9_999
+private const val MAX_PRICE = 999_999.0
+private const val MAX_QUANTITY = 9_999.0
 
-/** Accepts an empty string or up to 6 digits (no decimals, no separators). */
-private fun isValidIntInput(input: String): Boolean {
-    if (input.isEmpty()) return true
-    return input.matches(Regex("^\\d{0,6}$"))
-}
+// Price: up to 6 digits and 2 decimals (e.g. 20.25). Quantity: up to 4 digits and 3 (e.g. 0.250).
+private const val PRICE_DIGITS = 6
+private const val PRICE_DECIMALS = 2
+private const val QUANTITY_DIGITS = 4
+private const val QUANTITY_DECIMALS = 3
 
 @Preview(showBackground = true, locale = "ar")
 @Composable
 private fun EditProductBottomSheetPreview() {
     EditProductBottomSheet(
-        product = FirebaseProduct(name = "Product 1", itemPrice = 100, quantity = 2),
+        product = FirebaseProduct(name = "Product 1", itemPrice = 20.25, quantity = 0.5),
         availableSources = listOf(ProductSource(id = 1, name = "زيت وسمنه")),
         isSourcesLoading = false,
         onLoadSources = {},

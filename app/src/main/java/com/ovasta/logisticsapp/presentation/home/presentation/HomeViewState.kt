@@ -24,5 +24,7 @@ data class HomeViewState(
     val isLogoutDialogVisible: Boolean = false,
     val isTasksLoading: Boolean = true,
     val isAvailableTasksLoading: Boolean = true,
-    val isLocationConsentDialogVisible: Boolean = false
+    val isLocationConsentDialogVisible: Boolean = false,
+    /** Tapped order with no `received_at` yet; shows the "view order details?" confirmation. */
+    val orderToStart: HomeTask? = null
 )

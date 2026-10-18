@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
+import android.net.Uri
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
@@ -26,4 +27,20 @@ interface IOrderDetailsRepository {
     )
 
     suspend fun getProductSources(productId: Int): List<ProductSource>
+
+    suspend fun deliverSalesOrder(orderId: Int, collectedAmount: Double)
+
+    suspend fun updateSalesOrderProduct(
+        orderId: Int,
+        catalogProduct: Boolean,
+        productId: Int,
+        quantity: Double,
+        price: Double
+    )
+
+    suspend fun deleteSalesOrderProduct(orderId: Int, catalogProduct: Boolean, productId: Int)
+
+    suspend fun requestOrderEdit(orderId: Int, image: Uri)
+
+    suspend fun uploadOrderImage(orderId: Int, image: Uri)
 }

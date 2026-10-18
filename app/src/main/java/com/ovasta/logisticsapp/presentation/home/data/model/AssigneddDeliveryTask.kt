@@ -46,6 +46,9 @@ data class AssignedDeliveryTask(
     var createdAt: String? = null,
 
     @SerializedName("updated_at")
-    var updatedAt: String? = null
+    var updatedAt: String? = null,
+
+    @SerializedName("assigned_at")
+    var assignedAt: String? = null
 
 ) : Parcelable

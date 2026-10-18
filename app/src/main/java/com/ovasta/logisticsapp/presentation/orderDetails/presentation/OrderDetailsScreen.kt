@@ -1,6 +1,10 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -43,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -68,6 +73,8 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.constants.LocalConstants
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
+import com.ovasta.logisticsapp.base.ext.createImageCaptureUri
+import com.ovasta.logisticsapp.base.ext.formatDecimal
 import com.ovasta.logisticsapp.base.ext.makePhoneCall
 import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
 import com.ovasta.logisticsapp.base.ext.orDefault
@@ -83,6 +90,8 @@ import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.EditProductBottomSheet
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.OptionsBottomSheet
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.SheetOption
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.PickProductBottomSheet
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.ReceiveAmountBottomSheet
 
@@ -103,6 +112,35 @@ fun DropOfOrderDetailsScreen(
     var showChangeStatusDialog by remember { mutableStateOf(false) }
     // Whether the receive-amount (deliver order) sheet is showing.
     var showReceiveAmountSheet by remember { mutableStateOf(false) }
+    // Whether the edit-options (request edit / upload receipt) sheet is showing.
+    var showEditOptionsSheet by remember { mutableStateOf(false) }
+    // Whether the image-source (camera / gallery) sheet is showing.
+    var showImageSourceSheet by remember { mutableStateOf(false) }
+    // What the image being picked / captured is for (null = not picking). Saveable, like the
+    // camera file below, because the camera / gallery app can push this screen out of memory.
+    var pendingImageUpload by rememberSaveable { mutableStateOf<OrderImageUpload?>(null) }
+    // File the camera app writes the captured photo into.
+    var cameraImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
+
+    fun uploadImage(image: Uri) {
+        when (pendingImageUpload) {
+            OrderImageUpload.EDIT_REQUEST -> viewModel.requestOrderEdit(image)
+            OrderImageUpload.RECEIPT -> viewModel.uploadOrderReceipt(image)
+            null -> Unit
+        }
+        pendingImageUpload = null
+    }
+
+    val galleryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { image ->
+            if (image != null) uploadImage(image) else pendingImageUpload = null
+        }
+    val cameraLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
+            val image = cameraImageUri
+            if (saved && image != null) uploadImage(image) else pendingImageUpload = null
+        }
 
     BackHandler(enabled = true, onBack = { navigator.pop() })
 
@@ -123,8 +161,59 @@ fun DropOfOrderDetailsScreen(
             onPickClick = { index -> pickingProductIndex = index },
             onDeleteClick = { index -> deletingProductIndex = index },
             onChangeStatusClick = { showChangeStatusDialog = true },
-            onDeliverClick = { showReceiveAmountSheet = true }
+            onDeliverClick = { showReceiveAmountSheet = true },
+            onEditClick = { showEditOptionsSheet = true }
         )
+
+        // Both edit options need an image: pick what it's for, then where it comes from.
+        if (showEditOptionsSheet) {
+            fun chooseImageFor(upload: OrderImageUpload) {
+                pendingImageUpload = upload
+                showEditOptionsSheet = false
+                showImageSourceSheet = true
+            }
+            OptionsBottomSheet(
+                title = R.string.edit_order,
+                options = buildList {
+                    // Already editable (edit request approved): nothing left to request
+                    if (!viewState.task.isEditable) {
+                        add(SheetOption(R.drawable.ic_edit_task, R.string.request_edit) {
+                            chooseImageFor(OrderImageUpload.EDIT_REQUEST)
+                        })
+                    }
+                    add(SheetOption(R.drawable.ic_image, R.string.upload_receipt) {
+                        chooseImageFor(OrderImageUpload.RECEIPT)
+                    })
+                },
+                onDismiss = { showEditOptionsSheet = false }
+            )
+        }
+
+        if (showImageSourceSheet) {
+            OptionsBottomSheet(
+                title = R.string.add_image,
+                options = listOf(
+                    SheetOption(R.drawable.ic_camera, R.string.camera) {
+                        showImageSourceSheet = false
+                        val captureUri = context.createImageCaptureUri()
+                        cameraImageUri = captureUri
+                        // No camera app on the device: drop the pending upload
+                        runCatching { cameraLauncher.launch(captureUri) }
+                            .onFailure { pendingImageUpload = null }
+                    },
+                    SheetOption(R.drawable.ic_image, R.string.gallery) {
+                        showImageSourceSheet = false
+                        galleryLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                ),
+                onDismiss = {
+                    showImageSourceSheet = false
+                    pendingImageUpload = null
+                }
+            )
+        }
 
         if (showReceiveAmountSheet) {
             ReceiveAmountBottomSheet(
@@ -161,7 +250,9 @@ fun DropOfOrderDetailsScreen(
                         viewModel.updateProduct(index, newPrice, newQuantity, newSource)
                         editingProductIndex = null
                     },
-                    onDismiss = { editingProductIndex = null }
+                    onDismiss = { editingProductIndex = null },
+                    // The editable-order API only changes price and quantity
+                    showSource = !viewState.task.isEditable
                 )
             }
         }
@@ -188,7 +279,7 @@ fun DropOfOrderDetailsScreen(
                     message = stringResource(
                         R.string.delete_product_message,
                         product.name.orDefault(stringResource(R.string.unknown_product)),
-                        product.quantity ?: 0
+                        (product.quantity ?: 0.0).formatDecimal()
                     ),
                     onPrimaryClick = {
                         viewModel.deleteProduct(index)
@@ -199,6 +290,15 @@ fun DropOfOrderDetailsScreen(
             }
         }
     }
+}
+
+/** What a picked / captured image is uploaded as. */
+private enum class OrderImageUpload {
+    /** `sales-orders/{id}/allow-edits` — asks for the order to be made editable. */
+    EDIT_REQUEST,
+
+    /** `sales-orders/{id}/images` — attaches the receipt to the order. */
+    RECEIPT
 }
 
 /** Pick-status filter applied to the products list. */
@@ -212,7 +312,7 @@ private enum class ProductPickFilter(@StringRes val labelRes: Int) {
         NOT_PICKED -> product.pickedQuantity == null
         PARTIALLY_PICKED -> {
             val picked = product.pickedQuantity
-            picked != null && picked < (product.quantity ?: 0)
+            picked != null && picked < (product.quantity ?: 0.0)
         }
     }
 }
@@ -227,6 +327,7 @@ private fun OrderDetailsContent(
     onDeleteClick: (Int) -> Unit,
     onChangeStatusClick: () -> Unit,
     onDeliverClick: () -> Unit,
+    onEditClick: () -> Unit,
     actionsEnabled: Boolean = LocalConstants.ORDER_ACTIONS_ENABLED,
 ) {
     val task = viewState.task
@@ -312,7 +413,9 @@ private fun OrderDetailsContent(
                             items(entries, key = { it.index }) { entry ->
                                 ProductCard(
                                     product = entry.value,
-                                    showActions = actionsEnabled,
+                                    // Edit / delete are also allowed once an edit request is approved
+                                    showEditActions = actionsEnabled || task.isEditable,
+                                    showPickAction = actionsEnabled,
                                     onClick = { onProductClick(entry.index) },
                                     onPickClick = { onPickClick(entry.index) },
                                     onDeleteClick = { onDeleteClick(entry.index) }
@@ -330,13 +433,14 @@ private fun OrderDetailsContent(
             //    deleted it (removed from the list).
             //  - On the way (Picked): "deliver order" — opens the receive-amount sheet.
             //  - Delivered / Canceled: no action.
-            // Hidden entirely while order actions are disabled (view-only release).
+            // While order actions are disabled (view-only release) picking is unavailable, so
+            // "deliver order" is the only action and is offered at any active step.
             val currentStep = OrderSteps.fromStatusId(task.statusId)
-            val isOnTheWay = currentStep == OrderSteps.Picked
+            val isDeliverStep = currentStep == OrderSteps.Picked || !actionsEnabled
             val isFinished = currentStep == OrderSteps.Delivered || currentStep == OrderSteps.Canceled
             val canChangeStatus = task.products.isNotEmpty() &&
                 task.products.all { it.pickedQuantity != null }
-            if (actionsEnabled && !isFinished) {
+            if (!isFinished) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -346,7 +450,7 @@ private fun OrderDetailsContent(
                         thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
                         color = Gray200
                     )
-                    if (!isOnTheWay && !canChangeStatus) {
+                    if (!isDeliverStep && !canChangeStatus) {
                         Text(
                             text = stringResource(R.string.change_status_locked_hint),
                             style = xsMedium.copy(color = Gray500),
@@ -360,29 +464,54 @@ private fun OrderDetailsContent(
                                 )
                         )
                     }
-                    val buttonEnabled = isOnTheWay || canChangeStatus
-                    Button(
+                    val buttonEnabled = isDeliverStep || canChangeStatus
+                    val buttonShape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    val buttonPadding = PaddingValues(
+                        vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
+                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                    )
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
-                        onClick = if (isOnTheWay) onDeliverClick else onChangeStatusClick,
-                        enabled = buttonEnabled,
-                        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Primary,
-                            disabledContainerColor = Gray200
-                        ),
-                        contentPadding = PaddingValues(
-                            vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                            horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
-                        )
+                        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(
-                                if (isOnTheWay) R.string.deliver_order else R.string.change_order_status
+                        Button(
+                            // Takes the full width alone, or 3:2 next to the edit button
+                            modifier = Modifier.weight(3f),
+                            onClick = if (isDeliverStep) onDeliverClick else onChangeStatusClick,
+                            enabled = buttonEnabled,
+                            shape = buttonShape,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Primary,
+                                disabledContainerColor = Gray200
                             ),
-                            style = mdMedium.copy(color = if (buttonEnabled) Base_white else Gray500)
-                        )
+                            contentPadding = buttonPadding
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    if (isDeliverStep) R.string.deliver_order else R.string.change_order_status
+                                ),
+                                style = mdMedium.copy(color = if (buttonEnabled) Base_white else Gray500)
+                            )
+                        }
+
+                        // "Edit" sits beside "deliver order" and opens the edit-options sheet
+                        if (isDeliverStep) {
+                            OutlinedButton(
+                                modifier = Modifier.weight(2f),
+                                onClick = onEditClick,
+                                shape = buttonShape,
+                                contentPadding = buttonPadding
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.edit),
+                                    style = mdMedium.copy(color = Primary),
+                                    maxLines = 1
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -405,9 +534,8 @@ private fun Modifier.cardSurface(): Modifier {
         )
 }
 
-/** Formats a price without a trailing ".0" for whole numbers (e.g. 250.0 -> "250"). */
-private fun formatPrice(value: Double): String =
-    if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
+/** Formats a price with up to 2 decimals and no trailing zeros (250.0 -> "250", 20.25 -> "20.25"). */
+private fun formatPrice(value: Double): String = value.formatDecimal(maxDecimals = 2)
 
 @Composable
 private fun ProductsSectionHeader(count: Int) {
@@ -686,15 +814,15 @@ private fun HeaderInfoRow(icon: Int, label: String) {
 @Composable
 private fun ProductCard(
     product: FirebaseProduct,
-    showActions: Boolean,
+    showEditActions: Boolean,
+    showPickAction: Boolean,
     onClick: () -> Unit,
     onPickClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
-    val requiredQuantity = product.quantity ?: 0
+    val requiredQuantity = product.quantity ?: 0.0
     val foundQuantity = product.pickedQuantity
-    val lineTotal = product.totalPrice
-        ?: ((product.itemPrice ?: 0).toDouble() * requiredQuantity)
+    val lineTotal = product.totalPrice ?: ((product.itemPrice ?: 0.0) * requiredQuantity)
 
     Column(
         modifier = Modifier
@@ -706,10 +834,15 @@ private fun ProductCard(
                 modifier = Modifier
                     .size(dimensionResource(com.intuit.sdp.R.dimen._56sdp))
                     .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-                    .background(Gray100),
+                    .background(Gray100)
+                    // Zoom into the product so it fills the thumbnail; clip above keeps it in bounds.
+                    .graphicsLayer {
+                        scaleX = 1.4f
+                        scaleY = 1.4f
+                    },
                 painter = rememberAsyncImagePainter(product.imageUrl.orDefault()),
                 contentDescription = product.name,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
             )
 
             Column(
@@ -728,21 +861,21 @@ private fun ProductCard(
                 Text(
                     text = stringResource(
                         R.string.price_currency,
-                        (product.itemPrice ?: 0).toString()
+                        formatPrice(product.itemPrice ?: 0.0)
                     ),
                     style = xsMedium.copy(color = Gray600)
                 )
                 Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
                 // Quantity highlighted on its own line for visibility.
                 Text(
-                    text = stringResource(R.string.required_qty, requiredQuantity),
+                    text = stringResource(R.string.required_qty, requiredQuantity.formatDecimal()),
                     style = smMedium.copy(color = Gray800)
                 )
             }
 
             // Edit / delete affordances, with the picked-status badge stacked beneath them.
             Column(horizontalAlignment = Alignment.End) {
-                if (showActions) Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showEditActions) Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = onClick,
                         modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._32sdp))
@@ -790,7 +923,7 @@ private fun ProductCard(
         ) {
             Column {
                 Text(
-                    text = stringResource(R.string.total_price),
+                    text = stringResource(R.string.item_total_price),
                     style = xsMedium.copy(color = Gray500)
                 )
                 Text(
@@ -799,7 +932,7 @@ private fun ProductCard(
                 )
             }
 
-            if (showActions) OutlinedButton(
+            if (showPickAction) OutlinedButton(
                 onClick = onPickClick,
                 shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
                 contentPadding = PaddingValues(
@@ -814,14 +947,17 @@ private fun ProductCard(
 }
 
 @Composable
-private fun PickedStatusBadge(requiredQuantity: Int, foundQuantity: Int?) {
+private fun PickedStatusBadge(requiredQuantity: Double, foundQuantity: Double?) {
     if (foundQuantity == null) return
     val isFull = foundQuantity >= requiredQuantity
     val color = if (isFull) StatusDelivered else StatusPending
     val label = if (isFull) {
         stringResource(R.string.status_picked_full)
     } else {
-        stringResource(R.string.status_picked_missing, requiredQuantity - foundQuantity)
+        stringResource(
+            R.string.status_picked_missing,
+            (requiredQuantity - foundQuantity).formatDecimal()
+        )
     }
     Text(
         text = label,
@@ -855,13 +991,13 @@ private fun OrderDetailsContentPreview() {
                 products = listOf(
                     FirebaseProduct(
                         name = "Product 1",
-                        itemPrice = 100,
-                        quantity = 2,
-                        pickedQuantity = 1,
+                        itemPrice = 100.0,
+                        quantity = 2.0,
+                        pickedQuantity = 1.0,
                         totalPrice = 200.0,
                         source = "زيت وسمنه"
                     ),
-                    FirebaseProduct(name = "Product 2", itemPrice = 50, quantity = 1, totalPrice = 50.0),
+                    FirebaseProduct(name = "Product 2", itemPrice = 20.25, quantity = 0.5, totalPrice = 10.125),
                 )
             ),
             currency = "EGP"
@@ -871,6 +1007,7 @@ private fun OrderDetailsContentPreview() {
         onPickClick = {},
         onDeleteClick = {},
         onChangeStatusClick = {},
-        onDeliverClick = {}
+        onDeliverClick = {},
+        onEditClick = {}
     )
 }

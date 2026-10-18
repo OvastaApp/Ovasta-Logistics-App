@@ -26,6 +26,8 @@ interface IHomeServerRemoteDataSource {
 
     suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 
+    suspend fun startSalesOrder(orderId: Int)
+
     suspend fun createDeliveryOrder(
         deliveryPrice: Double,
         receiverMobile: String?,

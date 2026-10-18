@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,7 +24,8 @@ fun InfoRow(
     label: String,
     modifier: Modifier = Modifier,
     textStyle: androidx.compose.ui.text.TextStyle = smNormal.copy(color = Gray500),
-    iconSize: Int = com.intuit.sdp.R.dimen._20sdp // uniform size for all icons
+    iconSize: Int = com.intuit.sdp.R.dimen._20sdp, // uniform size for all icons
+    iconTint: Color = Gray500
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -37,7 +39,7 @@ fun InfoRow(
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
-                tint = Gray500,
+                tint = iconTint,
                 modifier = Modifier.size(dimensionResource(iconSize))
             )
         }

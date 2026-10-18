@@ -1,5 +1,7 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation
 
+import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
@@ -28,7 +30,17 @@ class TaskDetailsViewModel(
 
     fun getTaskDetails(taskId: Int) {
         this.taskId = taskId
+        // This ViewModel is reused for every order in the session, so drop the previous order's
+        // state (including isOrderDelivered, which would otherwise close the screen right away)
+        _viewState.value = TaskDetailsViewState()
+        listenToOrder()
+    }
 
+    /**
+     * (Re)starts the live listener on the current order. Calling it again re-reads the order
+     * while keeping what is already on screen, e.g. after the backend changed it.
+     */
+    private fun listenToOrder() {
         assignedTasksJob?.cancel()
         assignedTasksJob = viewModelScope.launch {
             setComposeUILoading(true)
@@ -49,37 +61,54 @@ class TaskDetailsViewModel(
     }
 
     /**
-     * Persists an edit to a single product's price and/or quantity by rewriting the order's
-     * `products` array in Firestore. The snapshot listener started in [getTaskDetails] reflects
-     * the change back into [viewState] automatically.
+     * Persists an edit to a single product's price and/or quantity. On an editable order
+     * ([HomeTask.isEditable], after an approved edit request) it goes through the backend
+     * (`sales-orders/{id}/update`, price and quantity only); otherwise it rewrites the product in
+     * Firestore. Either way the snapshot listener started in [getTaskDetails] reflects the change
+     * back into [viewState].
      *
      * @param index position of the product within the current product list.
      * @param newPrice the new unit price; when null the existing price is kept.
      * @param newQuantity the new quantity; when null the existing quantity is kept.
      * @param newSource the new source name; when null the existing source is kept.
      */
-    fun updateProduct(index: Int, newPrice: Int?, newQuantity: Int?, newSource: String? = null) {
+    fun updateProduct(
+        index: Int,
+        newPrice: Double?,
+        newQuantity: Double?,
+        newSource: String? = null
+    ) {
         viewModelScope.launch {
             val products = _viewState.value.task.products.toMutableList()
             val product = products.getOrNull(index) ?: return@launch
 
-            val price = newPrice ?: product.itemPrice ?: 0
-            val quantity = newQuantity ?: product.quantity ?: 0
+            val price = newPrice ?: product.itemPrice ?: 0.0
+            val quantity = newQuantity ?: product.quantity ?: 0.0
 
             products[index] = product.copy(
                 itemPrice = price,
                 quantity = quantity,
-                totalPrice = price.toDouble() * quantity,
+                totalPrice = price * quantity,
                 source = newSource ?: product.source
             )
 
             setComposeUILoading(true)
             kotlin.runCatching {
-                orderDetailsRepository.updateProducts(
-                    districtId = settingsRepository.getUseData()?.districtId ?: 0,
-                    taskId = taskId,
-                    products = products
-                )
+                if (_viewState.value.task.isEditable) {
+                    orderDetailsRepository.updateSalesOrderProduct(
+                        orderId = taskId,
+                        catalogProduct = product.catalogProduct ?: false,
+                        productId = product.requireProductId(),
+                        quantity = quantity,
+                        price = price
+                    )
+                } else {
+                    orderDetailsRepository.updateProducts(
+                        districtId = settingsRepository.getUseData()?.districtId ?: 0,
+                        taskId = taskId,
+                        products = products
+                    )
+                }
             }.onSuccess {
                 setComposeUILoading(false)
                 emitToastEvent(ToastEvent.ResourceToastEvent(R.string.product_updated_successfully))
@@ -90,9 +119,10 @@ class TaskDetailsViewModel(
     }
 
     /**
-     * Removes a single product from the order by rewriting the order's `products` array in
-     * Firestore without the product at [index]. The snapshot listener started in [getTaskDetails]
-     * reflects the removal back into [viewState] automatically.
+     * Removes a single product from the order. On an editable order ([HomeTask.isEditable]) it
+     * goes through the backend (`sales-orders/{id}/delete-product`); otherwise it rewrites the
+     * order's products in Firestore without the product at [index]. The snapshot listener started
+     * in [getTaskDetails] reflects the removal back into [viewState].
      *
      * @param index position of the product to delete within the current product list.
      */
@@ -100,15 +130,23 @@ class TaskDetailsViewModel(
         viewModelScope.launch {
             val products = _viewState.value.task.products.toMutableList()
             if (index !in products.indices) return@launch
-            products.removeAt(index)
+            val product = products.removeAt(index)
 
             setComposeUILoading(true)
             kotlin.runCatching {
-                orderDetailsRepository.updateProducts(
-                    districtId = settingsRepository.getUseData()?.districtId ?: 0,
-                    taskId = taskId,
-                    products = products
-                )
+                if (_viewState.value.task.isEditable) {
+                    orderDetailsRepository.deleteSalesOrderProduct(
+                        orderId = taskId,
+                        catalogProduct = product.catalogProduct ?: false,
+                        productId = product.requireProductId()
+                    )
+                } else {
+                    orderDetailsRepository.updateProducts(
+                        districtId = settingsRepository.getUseData()?.districtId ?: 0,
+                        taskId = taskId,
+                        products = products
+                    )
+                }
             }.onSuccess {
                 setComposeUILoading(false)
                 emitToastEvent(ToastEvent.ResourceToastEvent(R.string.product_deleted_successfully))
@@ -124,7 +162,7 @@ class TaskDetailsViewModel(
      * network, then persisted to the product's `picked_quantity` field in Firestore so the
      * action survives restarts and later snapshot emissions.
      */
-    fun markProductPicked(index: Int, foundQuantity: Int) {
+    fun markProductPicked(index: Int, foundQuantity: Double) {
         _viewState.update { state ->
             val products = state.task.products.toMutableList()
             val product = products.getOrNull(index) ?: return@update state
@@ -193,21 +231,17 @@ class TaskDetailsViewModel(
     }
 
     /**
-     * Marks the order as delivered with the cash amount collected from the client. Callers must
-     * validate that [receivedAmount] is at least the order total — the receive-amount sheet
-     * enforces this before enabling its confirm button. On success
-     * [TaskDetailsViewState.isOrderDelivered] is set so the screen can navigate back home.
+     * Marks the order as delivered on the backend (`sales-orders/{id}/deliver`) with the cash
+     * amount collected from the client, which may be less or more than the order total.
+     * On success [TaskDetailsViewState.isOrderDelivered] is set so the screen can navigate back home.
      */
     fun deliverOrder(receivedAmount: Double) {
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
-                orderDetailsRepository.updateOrderStatus(
-                    districtId = settingsRepository.getUseData()?.districtId ?: 0,
-                    taskId = taskId,
-                    statusId = OrderSteps.toStatus(OrderSteps.Delivered),
-                    statusName = DELIVERED_STATUS_NAME,
-                    receivedAmount = receivedAmount
+                orderDetailsRepository.deliverSalesOrder(
+                    orderId = taskId,
+                    collectedAmount = receivedAmount
                 )
             }.onSuccess {
                 setComposeUILoading(false)
@@ -219,14 +253,42 @@ class TaskDetailsViewModel(
         }
     }
 
+    /** Asks the backend to make the order editable, attaching [image] (picked or captured). */
+    fun requestOrderEdit(image: Uri) = uploadOrderImage(R.string.edit_request_sent) {
+        orderDetailsRepository.requestOrderEdit(orderId = taskId, image = image)
+    }
+
+    /** Uploads the order's receipt [image] (picked or captured). */
+    fun uploadOrderReceipt(image: Uri) = uploadOrderImage(R.string.receipt_uploaded) {
+        orderDetailsRepository.uploadOrderImage(orderId = taskId, image = image)
+    }
+
+    private fun uploadOrderImage(@StringRes successMessage: Int, upload: suspend () -> Unit) {
+        viewModelScope.launch {
+            setComposeUILoading(true)
+            kotlin.runCatching { upload() }
+                .onSuccess {
+                    setComposeUILoading(false)
+                    emitToastEvent(ToastEvent.ResourceToastEvent(successMessage))
+                    // The backend may have changed the order (e.g. is_edit_allowed): re-read it
+                    listenToOrder()
+                }.onFailure {
+                    updateViewStateWithFail(it)
+                }
+        }
+    }
+
+    /** The product's id as the sales-order edit APIs expect it (its Firestore `product_id`). */
+    private fun FirebaseProduct.requireProductId(): Int =
+        requireNotNull(productId) { "Product '$name' has no product_id" }
+
     fun updateViewStateWithFail(throwable: Throwable) {
         setComposeUILoading(false)
         emitComposeUIExceptionEvent(throwable.toComposeUIException())
     }
 
     companion object {
-        /** Backend display names stored in the order's `status_name` field. */
+        /** Backend display name stored in the order's `status_name` field. */
         private const val ON_THE_WAY_STATUS_NAME = "On The Way"
-        private const val DELIVERED_STATUS_NAME = "Delivered"
     }
 }

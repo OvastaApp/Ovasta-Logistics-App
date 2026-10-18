@@ -35,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
-import com.ovasta.logisticsapp.base.Error500
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Gray900
@@ -48,8 +47,8 @@ import com.ovasta.logisticsapp.base.xsMedium
 
 /**
  * Bottom sheet shown when delivering an order: the agent enters the cash amount collected from
- * the client. Confirm is enabled only when the amount is at least [totalAmount] — collecting
- * less than the order total is not allowed.
+ * the client. [totalAmount] is shown for reference only — the collected amount may be less or
+ * more than it; Confirm is enabled once any amount is entered.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,9 +61,7 @@ fun ReceiveAmountBottomSheet(
 
     var amountText by remember { mutableStateOf("") }
     val parsedAmount = amountText.toDoubleOrNull()
-
-    val isTooLow = parsedAmount != null && parsedAmount < totalAmount
-    val isValid = parsedAmount != null && parsedAmount >= totalAmount
+    val isValid = parsedAmount != null
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -112,15 +109,6 @@ fun ReceiveAmountBottomSheet(
                 onValueChange = { input -> if (isValidAmountInput(input)) amountText = input },
                 label = { Text(stringResource(R.string.received_amount), style = xsMedium) },
                 singleLine = true,
-                isError = isTooLow,
-                supportingText = {
-                    if (isTooLow) {
-                        Text(
-                            text = stringResource(R.string.received_less_than_total),
-                            style = xsMedium.copy(color = Error500)
-                        )
-                    }
-                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
