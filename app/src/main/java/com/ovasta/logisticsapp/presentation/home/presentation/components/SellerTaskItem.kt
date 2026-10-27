@@ -207,10 +207,11 @@ fun SellerTaskItem(
                 AssignedElapsedTime(assignedAtMillis = assignedAtMillis)
             }
 
-            if (task.note.isNotBlank()) {
+            val note = task.note
+            if (!note.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = stringResource(R.string.notes), style = xsMedium)
-                Text(text = task.note, style = smNormal)
+                Text(text = note, style = smNormal)
             }
 
             // Button for Pick / Deliver
