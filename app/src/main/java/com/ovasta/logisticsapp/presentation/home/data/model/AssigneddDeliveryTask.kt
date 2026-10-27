@@ -39,8 +39,9 @@ data class AssignedDeliveryTask(
     @SerializedName("collection_amount")
     var collectionAmount: Double? = null,
 
+    // Nullable: Gson bypasses Kotlin defaults and writes null when the API returns "note": null
     @SerializedName("note")
-    var note: String = "",
+    var note: String? = null,
 
     @SerializedName("created_at")
     var createdAt: String? = null,
