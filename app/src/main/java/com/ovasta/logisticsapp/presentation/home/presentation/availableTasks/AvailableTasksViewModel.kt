@@ -51,6 +51,7 @@ class AvailableTasksViewModel(
     }
 
     fun acceptOrder(orderId: Int) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {

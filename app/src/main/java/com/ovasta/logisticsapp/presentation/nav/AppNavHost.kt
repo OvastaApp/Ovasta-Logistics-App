@@ -28,10 +28,12 @@ import com.ovasta.logisticsapp.presentation.auth.splash.SplashScreen
 import com.ovasta.logisticsapp.presentation.auth.splash.SplashViewModel
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
+import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewModel
 import com.ovasta.logisticsapp.presentation.home.presentation.ScreenFlashOverlay
 import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksScreen
 import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksViewModel
+import com.ovasta.logisticsapp.presentation.home.presentation.components.LocationBlockedDialogHost
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.DropOfOrderDetailsScreen
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.TaskDetailsViewModel
@@ -146,6 +148,14 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                             }
                         )
                     }
+
+                    // Explains order actions refused while the location isn't tracked, on any
+                    // screen after login (composed last so it shows above the new-order sheet)
+                    LocationBlockedDialogHost(
+                        onRestoreTracking = {
+                            homeViewModel.onTasksScreenAction(HomeScreenActions.RestoreTracking)
+                        }
+                    )
                 }
             }
         }

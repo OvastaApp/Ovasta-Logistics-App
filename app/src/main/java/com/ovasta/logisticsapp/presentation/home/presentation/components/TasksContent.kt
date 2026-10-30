@@ -61,6 +61,8 @@ fun TasksContent(
     partnerStatistics: PartnerStatistics?,
     onTasksScreenAction: (HomeScreenActions) -> Unit,
     onTaskItemAction: (HomeItemActions) -> Unit,
+    // Checked before opening an order action's dialog / sheet; the ViewModel re-checks on submit
+    ensureLocationTracking: () -> Boolean = { true },
 ) {
     val showToast = remember { mutableStateOf(false) }
     val toastText = viewState.showToastMessage?.let { stringResource(it) }
@@ -101,7 +103,7 @@ fun TasksContent(
             floatingActionButton = {
                 if (viewState.isTracking) {
                     FloatingActionButton(
-                        onClick = { showCreateOrderDialog = true },
+                        onClick = { if (ensureLocationTracking()) showCreateOrderDialog = true },
                         containerColor = Primary,
                         contentColor = Base_white
                     ) {
@@ -231,7 +233,9 @@ fun TasksContent(
                                         onTaskItemAction(HomeItemActions.WhatsAppRetailer(whatsapp))
                                     },
                                     onStatusChangeClick = if (LocalConstants.ORDER_ACTIONS_ENABLED) {
-                                        { orderId, status -> confirmDialogState = Pair(orderId, status) }
+                                        { orderId, status ->
+                                            if (ensureLocationTracking()) confirmDialogState = Pair(orderId, status)
+                                        }
                                     } else null)
                             }
 
@@ -244,9 +248,9 @@ fun TasksContent(
                                 }, onCallReceiver = { phone ->
                                     onTaskItemAction(HomeItemActions.CallRetailer(phone))
                                 }, onStatusChangeClick = { orderId, status ->
-                                    confirmDialogState = Pair(orderId, status)
+                                    if (ensureLocationTracking()) confirmDialogState = Pair(orderId, status)
                                 }, onEditFeesClick = { editTask ->
-                                    editFeesState = editTask
+                                    if (ensureLocationTracking()) editFeesState = editTask
                                 })
                             }
                         }

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.exception.ComposeUIException
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.ext.ToastEvent
+import com.ovasta.logisticsapp.base.services.LocationTrackingMonitor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 typealias ContextEvent = (Context) -> Unit
 
@@ -39,6 +41,13 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private val _composeUILoadingEvent = MutableStateFlow<Boolean>(false)
     val composeUILoadingEvent = _composeUILoadingEvent.asStateFlow()
 
+    private val locationTrackingMonitor: LocationTrackingMonitor by inject()
+
+    /**
+     * Returns whether an order action may run now, i.e. the driver's location is tracked and
+     * logged. When it may not, a dialog tells the driver why and how to fix it.
+     */
+    fun ensureLocationTracking(): Boolean = locationTrackingMonitor.ensureLocationTracking()
 
     fun emitContextEvent(event: ContextEvent) {
         viewModelScope.launch { _contextEvent.emit(event) }

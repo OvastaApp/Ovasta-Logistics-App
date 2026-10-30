@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.presentation.home.di
 
 import com.ovasta.logisticsapp.base.services.LocationManager
+import com.ovasta.logisticsapp.base.services.LocationTrackingMonitor
 import com.ovasta.logisticsapp.presentation.home.data.HomeApi
 import com.ovasta.logisticsapp.presentation.home.data.HomeFirebaseRemoteDataSource
 import com.ovasta.logisticsapp.presentation.home.data.HomeRepository
@@ -21,6 +22,7 @@ val homeModule = module {
     single<IHomeServerRemoteDataSource> { HomeServerRemoteDataSource(get()) }
     single<IHomeRepository> { HomeRepository(get(), get(), get()) }
     single { LocationManager(androidContext()) }
+    single { LocationTrackingMonitor(androidContext()) }
     viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
     viewModel { AvailableTasksViewModel(get(), get()) }
 }

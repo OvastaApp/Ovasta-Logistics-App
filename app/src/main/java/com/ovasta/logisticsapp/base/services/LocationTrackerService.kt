@@ -10,17 +10,20 @@ import androidx.core.app.NotificationCompat
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class LocationTrackerService() : Service(), KoinComponent {
     private val homeRepository: IHomeRepository by inject()
     private val settingsRepository: ISettingsRepository by inject()
+    private val locationTrackingMonitor: LocationTrackingMonitor by inject()
     private val scope = CoroutineScope(
         SupervisorJob() + Dispatchers.IO
     )
@@ -73,6 +76,9 @@ class LocationTrackerService() : Service(), KoinComponent {
 
         // Cancel any existing tracking job to prevent duplicate collections
         trackingJob?.cancel()
+        // Log the first fix after every (re)start, so a restart re-checks that logging works
+        lastLoggedLocation = null
+        locationTrackingMonitor.onTrackingStarted()
 
         val locationManager: LocationManager by inject()
 
@@ -81,6 +87,7 @@ class LocationTrackerService() : Service(), KoinComponent {
 
         trackingJob = scope.launch {
             locationManager.trackLocation().collect { location ->
+                locationTrackingMonitor.onLocationReceived()
                 val latitude = location.latitude
                 val longitude = location.longitude
 
@@ -89,12 +96,18 @@ class LocationTrackerService() : Service(), KoinComponent {
                 } ?: true
 
                 if (shouldLog) {
-                    try {
-                        homeRepository.sendLocation(lat = latitude, long = longitude)
-                        lastLoggedLocation = location
+                    val logged = try {
+                        // A write the server doesn't confirm in time (e.g. while offline) failed
+                        withTimeoutOrNull(LOG_TIMEOUT_MS) {
+                            homeRepository.sendLocation(lat = latitude, long = longitude)
+                        } != null
                     } catch (e: Exception) {
+                        if (e is CancellationException) throw e
                         Log.e("LocationTracker", "Failed to send location", e)
+                        false
                     }
+                    if (logged) lastLoggedLocation = location
+                    locationTrackingMonitor.onLocationLogged(logged)
                 }
 
                 // Update notification with current location
@@ -120,6 +133,7 @@ class LocationTrackerService() : Service(), KoinComponent {
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
+        locationTrackingMonitor.onTrackingStopped()
     }
 
     enum class Action {
@@ -129,5 +143,6 @@ class LocationTrackerService() : Service(), KoinComponent {
     companion object {
         const val LOCATION_CHANNEL = "location_channel"
         private const val NOTIFICATION_ID = 1
+        private const val LOG_TIMEOUT_MS = 15_000L
     }
 }

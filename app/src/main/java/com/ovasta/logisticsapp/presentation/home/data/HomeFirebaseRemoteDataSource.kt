@@ -19,6 +19,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.tasks.await
 
 class HomeFirebaseRemoteDataSource(
     private val db: FirebaseFirestore
@@ -35,9 +36,8 @@ class HomeFirebaseRemoteDataSource(
         )
         db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
             .collection(FIRESTORE_ROOT_ONLINE_DRIVERS_NAME).document(userId.toString())
-            .set(locationData, SetOptions.merge()).addOnFailureListener {
-                Log.e("logLocation", "Failed to update location", it)
-            }
+            .set(locationData, SetOptions.merge())
+            .await()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

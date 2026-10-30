@@ -154,15 +154,16 @@ fun DropOfOrderDetailsScreen(
     }
 
     BaseScreen(viewModel = viewModel) {
+        // Order actions only open while the location is tracked; the ViewModel re-checks on submit
         OrderDetailsContent(
             viewState = viewState,
             onBackClick = { navigator.pop() },
-            onProductClick = { index -> editingProductIndex = index },
-            onPickClick = { index -> pickingProductIndex = index },
-            onDeleteClick = { index -> deletingProductIndex = index },
-            onChangeStatusClick = { showChangeStatusDialog = true },
-            onDeliverClick = { showReceiveAmountSheet = true },
-            onEditClick = { showEditOptionsSheet = true }
+            onProductClick = { index -> if (viewModel.ensureLocationTracking()) editingProductIndex = index },
+            onPickClick = { index -> if (viewModel.ensureLocationTracking()) pickingProductIndex = index },
+            onDeleteClick = { index -> if (viewModel.ensureLocationTracking()) deletingProductIndex = index },
+            onChangeStatusClick = { if (viewModel.ensureLocationTracking()) showChangeStatusDialog = true },
+            onDeliverClick = { if (viewModel.ensureLocationTracking()) showReceiveAmountSheet = true },
+            onEditClick = { if (viewModel.ensureLocationTracking()) showEditOptionsSheet = true }
         )
 
         // Both edit options need an image: pick what it's for, then where it comes from.
@@ -493,7 +494,9 @@ private fun OrderDetailsContent(
                                 text = stringResource(
                                     if (isDeliverStep) R.string.deliver_order else R.string.change_order_status
                                 ),
-                                style = mdMedium.copy(color = if (buttonEnabled) Base_white else Gray500)
+                                style = mdMedium.copy(color = if (buttonEnabled) Base_white else Gray500),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
@@ -508,7 +511,8 @@ private fun OrderDetailsContent(
                                 Text(
                                     text = stringResource(R.string.edit),
                                     style = mdMedium.copy(color = Primary),
-                                    maxLines = 1
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -793,7 +797,12 @@ private fun HeaderActionButton(
             modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
         )
         Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
-        Text(text = label, style = smMedium.copy(color = Primary))
+        Text(
+            text = label,
+            style = smMedium.copy(color = Primary),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

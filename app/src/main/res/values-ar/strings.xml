@@ -247,6 +247,19 @@
     <string name="location_consent_ok">موافق</string>
     <string name="location_consent_not_now">ليس الآن</string>
 
+    <!-- Order actions blocked while the location isn't tracked -->
+    <string name="location_blocked_permission_title">مطلوب إذن الوصول إلى الموقع</string>
+    <string name="location_blocked_permission_message">اسمح لـ OvaStar بالوصول إلى موقعك لتتمكن من العمل على الطلبات.</string>
+    <string name="location_blocked_permission_action">فتح الإعدادات</string>
+    <string name="location_blocked_disabled_title">الموقع غير مفعّل</string>
+    <string name="location_blocked_disabled_message">فعّل الموقع في هاتفك لتتمكن من العمل على الطلبات.</string>
+    <string name="location_blocked_disabled_action">تفعيل الموقع</string>
+    <string name="location_blocked_tracking_title">التتبع غير مفعّل</string>
+    <string name="location_blocked_tracking_message">أنت غير متاح حاليًا. فعّل التتبع لتتمكن من العمل على الطلبات.</string>
+    <string name="location_blocked_tracking_action">تفعيل التتبع</string>
+    <string name="location_blocked_logging_title">لا يتم تسجيل موقعك</string>
+    <string name="location_blocked_logging_message">تعذّر تسجيل موقعك مؤخرًا. تحقق من اتصالك بالإنترنت ومن الـ GPS ثم حاول مرة أخرى.</string>
+
     <!-- Update delivery fees -->
     <string name="edit_delivery_fees">تعديل رسوم التوصيل</string>
     <string name="update_delivery_fees_title">تحديث رسوم التوصيل</string>

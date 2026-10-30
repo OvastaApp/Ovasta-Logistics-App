@@ -105,7 +105,8 @@ fun HomeScreen(viewModel: HomeViewModel) {
             startedTaskId = viewModel.startedTaskId,
             partnerStatistics = viewState.partnerStatistics,
             onTasksScreenAction = viewModel::onTasksScreenAction,
-            onTaskItemAction = viewModel::onTaskItemAction
+            onTaskItemAction = viewModel::onTaskItemAction,
+            ensureLocationTracking = viewModel::ensureLocationTracking
         )
 
         LogoutDialog(
@@ -122,6 +123,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 title = stringResource(R.string.view_order_details_title),
                 message = stringResource(
                     R.string.view_order_details_message,
+                    // Customer name, or the order number when the order has none
                     // Customer name, or the order number when the order has none
                     order.customerName?.takeIf { it.isNotBlank() } ?: "#${order.taskId}"
                 ),

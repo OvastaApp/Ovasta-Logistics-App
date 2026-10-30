@@ -30,6 +30,9 @@ sealed interface HomeScreenActions {
 
     object ToggleTracking : HomeScreenActions
 
+    /** Brings location tracking back: goes online, or restarts the tracker when already online. */
+    data object RestoreTracking : HomeScreenActions
+
     data class ChangeLogoutDialogStatus(val isVisible: Boolean) : HomeScreenActions
     object OnLogoutClicked : HomeScreenActions
     data class OnMonthYearFilterChanged(val month: Int, val year: Int) : HomeScreenActions

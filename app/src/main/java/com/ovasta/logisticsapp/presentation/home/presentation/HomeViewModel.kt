@@ -387,6 +387,14 @@ class HomeViewModel(
                 }
             }
 
+            HomeScreenActions.RestoreTracking -> {
+                if (viewState.value.isTracking) {
+                    restartLocationTracking()
+                } else {
+                    onTasksScreenAction(HomeScreenActions.ToggleTracking)
+                }
+            }
+
             HomeScreenActions.AcceptLocationConsent -> {
                 viewModelScope.launch {
                     settingsRepository.setLocationConsentShown(true)
@@ -488,7 +496,7 @@ class HomeViewModel(
                 val task = _viewState.value.appTasks.find { it.taskId == taskItemAction.taskId }
                 if (task != null && !task.isReceived) {
                     // received_at not set yet: confirm, then mark it received on the backend
-                    _viewState.update { it.copy(orderToStart = task) }
+                    if (ensureLocationTracking()) _viewState.update { it.copy(orderToStart = task) }
                 } else {
                     viewModelScope.launch { _taskItemActions.emit(taskItemAction) }
                 }
@@ -569,6 +577,17 @@ class HomeViewModel(
                 updateUiState(_viewState.value.copy(isTracking = false))
                 Log.e("HomeViewModel", "Failed to start tracking", ex)
                 updateViewStateWithFail(ex)
+            }
+        }
+    }
+
+    /** Restarts the tracker service while staying online, e.g. after it stopped or stalled. */
+    private fun restartLocationTracking() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                homeRepository.startLocationTracking(context)
+            }.onFailure {
+                updateViewStateWithFail(it)
             }
         }
     }
@@ -677,6 +696,7 @@ class HomeViewModel(
     }
 
     fun changeDeliveryOrderStatus(orderId: Int, status: OrderSteps) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
@@ -696,6 +716,7 @@ class HomeViewModel(
 
     /** Starts the order on the backend (`sales-orders/{id}/confirm-receive`), then opens its details. */
     private fun startOrder(orderId: Int) {
+        if (!ensureLocationTracking()) return
         _viewState.update { it.copy(orderToStart = null) }
         viewModelScope.launch {
             setComposeUILoading(true)
@@ -711,6 +732,7 @@ class HomeViewModel(
     }
 
     private fun acceptDeliveryOrder(orderId: Int) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
@@ -777,6 +799,7 @@ class HomeViewModel(
         toAddress: String?,
         note: String?,
     ) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
@@ -797,6 +820,7 @@ class HomeViewModel(
     }
 
     private fun updateDeliveryFees(orderId: Int, fees: Double) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {

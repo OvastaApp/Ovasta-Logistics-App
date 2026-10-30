@@ -187,7 +187,8 @@ fun EditProductBottomSheet(
                     )
                     ExposedDropdownMenu(
                         expanded = sourceExpanded,
-                        onDismissRequest = { sourceExpanded = false }
+                        onDismissRequest = { sourceExpanded = false },
+                        containerColor = Base_white
                     ) {
                         when {
                             isSourcesLoading -> DropdownMenuItem(

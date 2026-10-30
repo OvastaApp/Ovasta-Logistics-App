@@ -78,6 +78,7 @@ class TaskDetailsViewModel(
         newQuantity: Double?,
         newSource: String? = null
     ) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             val products = _viewState.value.task.products.toMutableList()
             val product = products.getOrNull(index) ?: return@launch
@@ -127,6 +128,7 @@ class TaskDetailsViewModel(
      * @param index position of the product to delete within the current product list.
      */
     fun deleteProduct(index: Int) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             val products = _viewState.value.task.products.toMutableList()
             if (index !in products.indices) return@launch
@@ -163,6 +165,7 @@ class TaskDetailsViewModel(
      * action survives restarts and later snapshot emissions.
      */
     fun markProductPicked(index: Int, foundQuantity: Double) {
+        if (!ensureLocationTracking()) return
         _viewState.update { state ->
             val products = state.task.products.toMutableList()
             val product = products.getOrNull(index) ?: return@update state
@@ -212,6 +215,7 @@ class TaskDetailsViewModel(
      * deleted) — the UI enforces this by disabling the change-status button otherwise.
      */
     fun changeOrderStatusToOnTheWay() {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
@@ -236,6 +240,7 @@ class TaskDetailsViewModel(
      * On success [TaskDetailsViewState.isOrderDelivered] is set so the screen can navigate back home.
      */
     fun deliverOrder(receivedAmount: Double) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
@@ -264,6 +269,7 @@ class TaskDetailsViewModel(
     }
 
     private fun uploadOrderImage(@StringRes successMessage: Int, upload: suspend () -> Unit) {
+        if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching { upload() }

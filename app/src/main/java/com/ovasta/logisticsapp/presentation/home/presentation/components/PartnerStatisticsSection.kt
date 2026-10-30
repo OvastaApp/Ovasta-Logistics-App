@@ -297,7 +297,8 @@ private fun MonthYearFilter(
             }
             DropdownMenu(
                 expanded = monthExpanded,
-                onDismissRequest = { monthExpanded = false }
+                onDismissRequest = { monthExpanded = false },
+                containerColor = Base_white
             ) {
                 availableMonths.forEach { month ->
                     val name = String.format(Locale.ENGLISH, "%02d", month)
@@ -346,7 +347,8 @@ private fun MonthYearFilter(
             }
             DropdownMenu(
                 expanded = yearExpanded,
-                onDismissRequest = { yearExpanded = false }
+                onDismissRequest = { yearExpanded = false },
+                containerColor = Base_white
             ) {
                 years.forEach { year ->
                     DropdownMenuItem(
