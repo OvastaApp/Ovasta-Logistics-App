@@ -19,15 +19,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,6 +52,7 @@ import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.presentation.nav.Charge
 import com.ovasta.logisticsapp.presentation.nav.Wallet
+import com.ovasta.logisticsapp.presentation.profile.presentation.components.LogoutDialog
 
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel) {
@@ -57,7 +63,8 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
         ProfileContent(
             viewState = viewState,
             onChargeClick = { navigator.push(Charge) },
-            onWalletClick = { navigator.push(Wallet) }
+            onWalletClick = { navigator.push(Wallet) },
+            onLogoutConfirmed = viewModel::logout
         )
     }
 }
@@ -66,14 +73,26 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
 fun ProfileContent(
     viewState: ProfileViewState,
     onChargeClick: () -> Unit,
-    onWalletClick: () -> Unit
+    onWalletClick: () -> Unit,
+    onLogoutConfirmed: () -> Unit
 ) {
+    var isLogoutDialogVisible by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenteredTextAppBar(
                 title = stringResource(R.string.profile),
-                showBackButton = false
+                showBackButton = false,
+                actions = {
+                    IconButton(onClick = { isLogoutDialogVisible = true }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_logout),
+                            contentDescription = stringResource(R.string.logout),
+                            tint = Color.Black
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -127,6 +146,15 @@ fun ProfileContent(
             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._20sdp)))
         }
     }
+
+    LogoutDialog(
+        isVisible = isLogoutDialogVisible,
+        onConfirm = {
+            isLogoutDialogVisible = false
+            onLogoutConfirmed()
+        },
+        onDismiss = { isLogoutDialogVisible = false }
+    )
 }
 
 // Placeholder until the agent's profile image is available
@@ -185,6 +213,7 @@ fun ProfileContentPreview() {
             phoneNumber = "01012345678"
         ),
         onChargeClick = {},
-        onWalletClick = {}
+        onWalletClick = {},
+        onLogoutConfirmed = {}
     )
 }

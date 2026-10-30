@@ -15,11 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
-import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.ext.ToastEvent
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
-import com.ovasta.logisticsapp.presentation.nav.Login
 import com.ovasta.logisticsapp.presentation.nav.TaskDetails
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -407,14 +405,6 @@ class HomeViewModel(
                 _viewState.update { it.copy(isLocationConsentDialogVisible = false) }
             }
 
-            is HomeScreenActions.ChangeLogoutDialogStatus -> {
-                updateUiState(viewState.value.copy(isLogoutDialogVisible = tasksScreenAction.isVisible))
-            }
-
-            HomeScreenActions.OnLogoutClicked -> {
-                logout()
-            }
-
             is HomeScreenActions.CreateDeliveryOrder -> {
                 createDeliveryOrder(
                     deliveryPrice = tasksScreenAction.deliveryPrice,
@@ -616,22 +606,6 @@ class HomeViewModel(
         }
     }
 
-
-    fun logout() {
-        viewModelScope.launch {
-            setComposeUILoading(true)
-            kotlin.runCatching {
-                settingsRepository.logout()
-            }.onSuccess {
-                setComposeUILoading(false)
-                stopTracking()
-                settingsRepository.clearUserData()
-                emitScreenDirectionEvent(ScreenDirection.Replace(Login))
-            }.onFailure {
-                updateViewStateWithFail(it)
-            }
-        }
-    }
 
     private fun getPartnerStatus() {
         viewModelScope.launch {

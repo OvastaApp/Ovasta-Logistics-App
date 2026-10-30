@@ -21,7 +21,6 @@ data class HomeViewState(
     val partnerStatistics: PartnerStatistics? = null,
     val monthFilter: Int = LocalDate.now().monthValue,
     val yearFilter: Int = LocalDate.now().year,
-    val isLogoutDialogVisible: Boolean = false,
     val isTasksLoading: Boolean = true,
     val isAvailableTasksLoading: Boolean = true,
     val isLocationConsentDialogVisible: Boolean = false,
