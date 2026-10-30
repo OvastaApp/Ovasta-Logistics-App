@@ -294,4 +294,11 @@
     <string name="gallery">Gallery</string>
     <string name="edit_request_sent">Edit request sent</string>
     <string name="receipt_uploaded">Receipt uploaded</string>
+
+    <!-- Profile -->
+    <string name="profile_image">Profile image</string>
+    <string name="charge">Charge</string>
+    <string name="wallet">Wallet</string>
+    <string name="charge_placeholder">No charge records yet</string>
+    <string name="wallet_placeholder">No wallet transactions yet</string>
 </resources>

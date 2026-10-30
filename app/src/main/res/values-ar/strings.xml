@@ -293,4 +293,11 @@
     <string name="gallery">المعرض</string>
     <string name="edit_request_sent">تم إرسال طلب التعديل</string>
     <string name="receipt_uploaded">تم رفع الفاتورة</string>
+
+    <!-- Profile -->
+    <string name="profile_image">صورة الملف الشخصي</string>
+    <string name="charge">الشحن</string>
+    <string name="wallet">المحفظة</string>
+    <string name="charge_placeholder">لا توجد عمليات شحن حتى الآن</string>
+    <string name="wallet_placeholder">لا توجد معاملات في المحفظة حتى الآن</string>
 </resources>
