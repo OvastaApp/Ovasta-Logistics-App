@@ -3,7 +3,6 @@ package com.ovasta.logisticsapp.presentation.profile.presentation
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.ScreenDirection
@@ -31,7 +30,6 @@ class ProfileViewModel(
 
     init {
         loadAgentInfo()
-        loadOutsourceStatus()
     }
 
     private fun loadAgentInfo() {
@@ -40,22 +38,9 @@ class ProfileViewModel(
             _viewState.update {
                 it.copy(
                     agentName = user?.name.orEmpty(),
-                    phoneNumber = user?.mobile.orEmpty()
+                    phoneNumber = user?.mobile.orEmpty(),
+                    isOutsource = user?.isOutsource == true
                 )
-            }
-        }
-    }
-
-    // Whether the agent is outsource comes from `home`, not the login response. A failure is
-    // only logged: Home already shows the error for the same call.
-    private fun loadOutsourceStatus() {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                homeRepository.getHome()
-            }.onSuccess { response ->
-                _viewState.update { it.copy(isOutsource = response.data?.courier?.isOutsource == true) }
-            }.onFailure {
-                Log.e("ProfileViewModel", "Failed to load home data", it)
             }
         }
     }

@@ -6,6 +6,7 @@ import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.ext.OrderAlarmSound
 import com.ovasta.logisticsapp.base.services.LocationManager
+import com.ovasta.logisticsapp.data.User
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
@@ -653,28 +654,60 @@ class HomeViewModel(
     }
 
     /**
-     * Loads `home`, which says whether the courier is an outsource agent and carries their wallet
-     * warning. Outsource agents don't see the partner statistics, so only the others load them.
+     * Outsource agents (per the logged-in user) load `home` for their wallet warning; the others
+     * load the partner statistics, which outsource agents don't see.
      */
     private fun loadHomeData() {
+        viewModelScope.launch {
+            val isOutsource = settingsRepository.getUseData()?.isOutsource == true
+            _viewState.update { it.copy(isOutsource = isOutsource) }
+            if (isOutsource) getHome() else getPartnerStatistics()
+        }
+    }
+
+    private fun getHome() {
         viewModelScope.launch {
             kotlin.runCatching {
                 homeRepository.getHome()
             }.onSuccess { response ->
                 val home = response.data
-                val isOutsource = home?.courier?.isOutsource == true
                 _viewState.update {
-                    it.copy(
-                        isOutsource = isOutsource,
-                        walletWarning = home?.walletWarning?.takeIf { warning -> warning.isNotBlank() }
-                    )
+                    it.copy(walletWarning = home?.walletWarning?.takeIf { warning -> warning.isNotBlank() })
                 }
-                if (!isOutsource) getPartnerStatistics()
+                home?.courier?.isOutsource?.let { isOutsource -> updateOutsourceFlag(isOutsource) }
             }.onFailure {
                 updateViewStateWithFail(it)
             }
         }
     }
+
+    /**
+     * Applies the outsource flag from `home` when it differs from the logged-in user's, saving it
+     * so later screens (and launches) use it too. An agent who is no longer outsource gets the
+     * partner statistics instead of the wallet warning.
+     */
+    private suspend fun updateOutsourceFlag(isOutsource: Boolean) {
+        val user = settingsRepository.getUseData() ?: return
+        if (user.isOutsource == isOutsource) return
+        settingsRepository.saveUserData(user.withOutsource(isOutsource))
+        _viewState.update {
+            it.copy(isOutsource = isOutsource, walletWarning = it.walletWarning.takeIf { isOutsource })
+        }
+        if (!isOutsource) getPartnerStatistics()
+    }
+
+    private fun User.withOutsource(isOutsource: Boolean) = User(
+        id = id,
+        deliveryId = deliveryId,
+        districtId = districtId,
+        name = name,
+        mobile = mobile,
+        email = email,
+        userTypeId = userTypeId,
+        available = available,
+        isOutsource = isOutsource,
+        token = token,
+    )
 
     private fun getPartnerStatistics(
     ) {

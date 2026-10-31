@@ -89,7 +89,7 @@ fun TasksContent(
                 )
             },
             floatingActionButton = {
-                // Outsource agents can't create orders; hidden until `home` says which they are
+                // Outsource agents can't create orders; hidden until we know which they are
                 if (viewState.isTracking && viewState.isOutsource == false) {
                     FloatingActionButton(
                         onClick = { if (ensureLocationTracking()) showCreateOrderDialog = true },
