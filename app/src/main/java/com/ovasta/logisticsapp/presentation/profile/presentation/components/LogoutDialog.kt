@@ -1,4 +1,4 @@
-package com.ovasta.logisticsapp.presentation.home.presentation.components
+package com.ovasta.logisticsapp.presentation.profile.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

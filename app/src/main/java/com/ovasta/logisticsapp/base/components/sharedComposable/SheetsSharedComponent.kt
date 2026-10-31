@@ -35,8 +35,7 @@ import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
-import com.ovasta.logisticsapp.base.Primary200
-import com.ovasta.logisticsapp.base.Primary500
+import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.mdRegular
 import kotlin.text.isEmpty
 
@@ -51,16 +50,16 @@ fun ConfirmButton(isEnabled: Boolean, onClick: () -> Unit) {
             .height(dimensionResource(com.intuit.sdp.R.dimen._44sdp))
             .testTag("confirmButton"),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Primary500,
-            disabledContainerColor = Primary200,
+            containerColor = Primary,
+            disabledContainerColor = Primary.copy(alpha = 0.4f),
             contentColor = Base_white,
-            disabledContentColor = Base_white
+            disabledContentColor = Base_white.copy(alpha = 0.7f)
         ),
         shape = RoundedCornerShape(dimensionResource(id = com.intuit.sdp.R.dimen._8sdp)),
     ) {
         Text(
             text = stringResource(id = R.string.confirm),
-            color = Color.White,
+            color = if (isEnabled) Base_white else Base_white.copy(alpha = 0.7f),
             style = mdRegular
         )
     }

@@ -26,4 +26,13 @@ class Navigator(
         backStack.clear()
         backStack.add(screen)
     }
+
+    // Removes every screen above the last [screen] in the back stack
+    fun popUpTo(screen: Any) {
+        val index = backStack.lastIndexOf(screen)
+        if (index == -1) return
+        while (backStack.lastIndex > index) {
+            backStack.removeAt(backStack.lastIndex)
+        }
+    }
 }

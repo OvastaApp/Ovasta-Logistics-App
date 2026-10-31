@@ -18,10 +18,13 @@ data class HomeViewState(
     val error: ComposeUIException? = null,
     val showToastMessage: Int? = null,
     val isTracking: Boolean = false,
+    /** From `home`; null until it loads. Outsource agents don't see the partner statistics. */
+    val isOutsource: Boolean? = null,
+    /** Message about the courier's wallet from `home`, shown above the orders; null for none. */
+    val walletWarning: String? = null,
     val partnerStatistics: PartnerStatistics? = null,
     val monthFilter: Int = LocalDate.now().monthValue,
     val yearFilter: Int = LocalDate.now().year,
-    val isLogoutDialogVisible: Boolean = false,
     val isTasksLoading: Boolean = true,
     val isAvailableTasksLoading: Boolean = true,
     val isLocationConsentDialogVisible: Boolean = false,

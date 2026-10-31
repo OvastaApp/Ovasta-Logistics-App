@@ -98,6 +98,8 @@ class HomeRepository(
         year: Int,
     ) = homeServerRemoteDataSource.getPartnerStatistics(month, year)
 
+    override suspend fun getHome() = homeServerRemoteDataSource.getHome()
+
     override suspend fun getAssignedDeliveryOrders() =
         homeServerRemoteDataSource.getAssignedDeliveryOrders()
 

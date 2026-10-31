@@ -37,7 +37,6 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.ovasta.logisticsapp.presentation.home.presentation.components.LogoutDialog
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
 import com.ovasta.logisticsapp.presentation.nav.AvailableTasks
@@ -108,15 +107,6 @@ fun HomeScreen(viewModel: HomeViewModel) {
             onTaskItemAction = viewModel::onTaskItemAction,
             ensureLocationTracking = viewModel::ensureLocationTracking
         )
-
-        LogoutDialog(
-            viewState.isLogoutDialogVisible,
-            onConfirm = {
-                viewModel.onTasksScreenAction(HomeScreenActions.OnLogoutClicked)
-                viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
-            }, onDismiss = {
-                viewModel.onTasksScreenAction(HomeScreenActions.ChangeLogoutDialogStatus(isVisible = false))
-            })
 
         viewState.orderToStart?.let { order ->
             ConfirmDialog(

@@ -27,7 +27,7 @@ import kotlin.getValue
 class LogisticsApp : Application() {
 
     override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(LocaleHelper.applyDefaultLocale(base))
+        super.attachBaseContext(LocaleHelper.applySavedLocale(base))
     }
 
     override fun onCreate() {
