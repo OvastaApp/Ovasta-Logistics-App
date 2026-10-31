@@ -2,6 +2,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
+import com.ovasta.logisticsapp.presentation.home.data.model.HomeData
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
@@ -21,6 +22,9 @@ interface IHomeServerRemoteDataSource {
         month: Int,
         year: Int,
     ): ApiResponse<PartnerStatistics>
+
+    /** Fetches the courier's account and wallet state. */
+    suspend fun getHome(): ApiResponse<HomeData?>
 
     suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
 

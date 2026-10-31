@@ -14,5 +14,6 @@ class User(
     @SerializedName("email") var email: String?,
     @SerializedName("type_id") var userTypeId: Int?,
     @SerializedName("available") var available: Boolean?,
+    @SerializedName("is_outsource") val isOutsource: Boolean = false,
    var token: String?,
 )

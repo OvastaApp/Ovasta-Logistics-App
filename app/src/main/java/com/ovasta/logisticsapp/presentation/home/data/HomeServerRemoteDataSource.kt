@@ -20,6 +20,8 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
         year: Int,
     ) = homeApi.getPartnerStatistics(month, year)
 
+    override suspend fun getHome() = homeApi.getHome()
+
     override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit> {
         return when (status) {
             is OrderSteps.Assigned -> homeApi.acceptDeliveryOrder(orderId)

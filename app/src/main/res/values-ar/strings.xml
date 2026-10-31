@@ -298,6 +298,23 @@
     <string name="profile_image">صورة الملف الشخصي</string>
     <string name="charge">الشحن</string>
     <string name="wallet">المحفظة</string>
-    <string name="charge_placeholder">لا توجد عمليات شحن حتى الآن</string>
+    <string name="charge_placeholder">لا توجد طلبات شحن حتى الآن</string>
     <string name="wallet_placeholder">لا توجد معاملات في المحفظة حتى الآن</string>
-</resources>
+    <string name="top_up_requests">طلبات الشحن</string>
+    <string name="new_top_up">طلب شحن جديد</string>
+    <string name="top_up_amount">المبلغ</string>
+    <string name="top_up_proof">إثبات التحويل</string>
+    <string name="top_up_proof_hint">أضف صورة إيصال التحويل</string>
+    <string name="top_up_proof_image">صورة إثبات التحويل</string>
+    <string name="remove_image">حذف الصورة</string>
+    <string name="send_request">إرسال الطلب</string>
+    <string name="top_up_request_sent">تم إرسال طلب الشحن</string>
+    <string name="top_up_status_pending">جاري المراجعة</string>
+    <string name="top_up_status_approved">مقبول</string>
+    <string name="top_up_status_rejected">مرفوض</string>
+    <string name="rejection_reason">سبب الرفض: %s</string>
+    <string name="approved_amount">المبلغ المقبول: %s</string>
+    <string name="wallet_balance">الرصيد الحالي</string>
+    <string name="wallet_transactions">المعاملات</string>
+    <string name="wallet_credit">إيداع</string>
+    <string name="wallet_debit">خصم</string></resources>

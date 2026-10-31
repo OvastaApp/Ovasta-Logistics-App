@@ -89,7 +89,8 @@ fun TasksContent(
                 )
             },
             floatingActionButton = {
-                if (viewState.isTracking) {
+                // Outsource agents can't create orders; hidden until `home` says which they are
+                if (viewState.isTracking && viewState.isOutsource == false) {
                     FloatingActionButton(
                         onClick = { if (ensureLocationTracking()) showCreateOrderDialog = true },
                         containerColor = Primary,
@@ -133,6 +134,14 @@ fun TasksContent(
                             onToggle = { onTasksScreenAction(HomeScreenActions.ToggleTracking) })
                     }
 
+                    // Wallet warning from `home`, shown whether tracking or not
+                    viewState.walletWarning?.let { warning ->
+                        item(key = "wallet_warning") {
+                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                            WalletWarningCard(message = warning)
+                        }
+                    }
+
                     // Partner statistics
                     if (partnerStatistics != null && viewState.isTracking) {
                         item(key = "statistics") {
@@ -151,7 +160,7 @@ fun TasksContent(
                                     })
                             }
                         }
-                    } else if (!viewState.isTracking) {
+                    } else if (!viewState.isTracking && viewState.isOutsource == false) {
                         item(key = "statistics_hint") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
                             StatisticsTrackingHint()

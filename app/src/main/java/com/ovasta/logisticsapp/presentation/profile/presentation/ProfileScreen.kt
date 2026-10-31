@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,12 +47,15 @@ import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray600
+import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
+import com.ovasta.logisticsapp.base.local.AppLanguage
 import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.presentation.nav.Charge
 import com.ovasta.logisticsapp.presentation.nav.Wallet
+import com.ovasta.logisticsapp.presentation.profile.presentation.components.LanguageBottomSheet
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.LogoutDialog
 
 @Composable
@@ -64,6 +68,7 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
             viewState = viewState,
             onChargeClick = { navigator.push(Charge) },
             onWalletClick = { navigator.push(Wallet) },
+            onLanguageSelected = viewModel::changeLanguage,
             onLogoutConfirmed = viewModel::logout
         )
     }
@@ -74,9 +79,11 @@ fun ProfileContent(
     viewState: ProfileViewState,
     onChargeClick: () -> Unit,
     onWalletClick: () -> Unit,
+    onLanguageSelected: (AppLanguage) -> Unit,
     onLogoutConfirmed: () -> Unit
 ) {
     var isLogoutDialogVisible by rememberSaveable { mutableStateOf(false) }
+    var isLanguageSheetVisible by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -131,20 +138,41 @@ fun ProfileContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._20sdp)))
 
-            ProfileItemCard(
-                title = stringResource(R.string.charge),
-                onClick = onChargeClick
-            )
+            if (viewState.isOutsource) {
+                ProfileItemCard(
+                    title = stringResource(R.string.charge),
+                    onClick = onChargeClick
+                )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+
+                ProfileItemCard(
+                    title = stringResource(R.string.wallet),
+                    onClick = onWalletClick
+                )
+
+                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+            }
 
             ProfileItemCard(
-                title = stringResource(R.string.wallet),
-                onClick = onWalletClick
+                title = stringResource(R.string.language),
+                value = stringResource(viewState.language.nameRes),
+                onClick = { isLanguageSheetVisible = true }
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._20sdp)))
         }
+    }
+
+    if (isLanguageSheetVisible) {
+        LanguageBottomSheet(
+            currentLanguage = viewState.language,
+            onConfirm = { language ->
+                isLanguageSheetVisible = false
+                onLanguageSelected(language)
+            },
+            onDismiss = { isLanguageSheetVisible = false }
+        )
     }
 
     LogoutDialog(
@@ -177,7 +205,7 @@ private fun ProfileImagePlaceholder() {
 }
 
 @Composable
-private fun ProfileItemCard(title: String, onClick: () -> Unit) {
+private fun ProfileItemCard(title: String, value: String? = null, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -193,13 +221,19 @@ private fun ProfileItemCard(title: String, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = title, style = smMedium, color = Gray600)
-            // The back arrow flipped, so it points forward in both LTR and RTL
-            Icon(
-                painter = painterResource(R.drawable.arrow_narrow_left),
-                contentDescription = null,
-                tint = Gray600,
-                modifier = Modifier.scale(scaleX = -1f, scaleY = 1f)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (value != null) {
+                    Text(text = value, style = smMedium, color = Primary)
+                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                }
+                // The back arrow flipped, so it points forward in both LTR and RTL
+                Icon(
+                    painter = painterResource(R.drawable.arrow_narrow_left),
+                    contentDescription = null,
+                    tint = Gray600,
+                    modifier = Modifier.scale(scaleX = -1f, scaleY = 1f)
+                )
+            }
         }
     }
 }
@@ -210,10 +244,12 @@ fun ProfileContentPreview() {
     ProfileContent(
         viewState = ProfileViewState(
             agentName = "Ahmed Hassan",
-            phoneNumber = "01012345678"
+            phoneNumber = "01012345678",
+            isOutsource = true
         ),
         onChargeClick = {},
         onWalletClick = {},
+        onLanguageSelected = {},
         onLogoutConfirmed = {}
     )
 }

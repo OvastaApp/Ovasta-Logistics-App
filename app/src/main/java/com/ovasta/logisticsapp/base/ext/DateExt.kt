@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.base.ext
 
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
@@ -33,3 +34,18 @@ fun String.toEpochMillisOrNull(): Long? {
         }.getOrNull()
     }
 }
+
+/**
+ * Formats a server date's day as "31/10/2026" in the device's time zone, or returns it unchanged
+ * if it can't be read. Uses Western digits, like the rest of the app's numbers.
+ */
+fun String.toDisplayDate(): String = formatServerDate("dd/MM/yyyy") ?: this
+
+/**
+ * Formats a server date's time as "02:05 PM" in the device's time zone, or null if it can't be
+ * read. Kept left-to-right so "PM" stays after the time inside Arabic text.
+ */
+fun String.toDisplayTime(): String? = formatServerDate("hh:mm a")?.let { "⁦$it⁩" }
+
+private fun String.formatServerDate(pattern: String): String? =
+    toEpochMillisOrNull()?.let { SimpleDateFormat(pattern, Locale.ENGLISH).format(Date(it)) }

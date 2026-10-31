@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.presentation.home.data
 import android.content.Context
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
+import com.ovasta.logisticsapp.presentation.home.data.model.HomeData
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
@@ -51,6 +52,9 @@ interface IHomeRepository {
         month: Int,
         year: Int,
     ): ApiResponse<PartnerStatistics>
+
+    /** The courier's account and wallet state, including whether they are an outsource agent. */
+    suspend fun getHome(): ApiResponse<HomeData?>
 
     suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 

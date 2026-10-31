@@ -189,7 +189,7 @@ class HomeViewModel(
 
     init {
         getPartnerStatus()
-        getPartnerStatistics()
+        loadHomeData()
         getAssignedOrders()
         listenToNewDeliveryTasks()
         getAssignedDeliveryOrders()
@@ -362,7 +362,7 @@ class HomeViewModel(
             HomeScreenActions.LoadTasks -> {}
             HomeScreenActions.RefreshTasks -> {
                 _viewState.update { it.copy(isTasksLoading = true, isAvailableTasksLoading = true) }
-                getPartnerStatistics()
+                loadHomeData()
                 getPartnerStatus()
                 listenToNewDeliveryTasks()
                 getAssignedOrders()
@@ -646,6 +646,30 @@ class HomeViewModel(
             }.onSuccess {
                 setComposeUILoading(false)
                 toggleTracking(shouldBeTracking = isOnline)
+            }.onFailure {
+                updateViewStateWithFail(it)
+            }
+        }
+    }
+
+    /**
+     * Loads `home`, which says whether the courier is an outsource agent and carries their wallet
+     * warning. Outsource agents don't see the partner statistics, so only the others load them.
+     */
+    private fun loadHomeData() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                homeRepository.getHome()
+            }.onSuccess { response ->
+                val home = response.data
+                val isOutsource = home?.courier?.isOutsource == true
+                _viewState.update {
+                    it.copy(
+                        isOutsource = isOutsource,
+                        walletWarning = home?.walletWarning?.takeIf { warning -> warning.isNotBlank() }
+                    )
+                }
+                if (!isOutsource) getPartnerStatistics()
             }.onFailure {
                 updateViewStateWithFail(it)
             }
