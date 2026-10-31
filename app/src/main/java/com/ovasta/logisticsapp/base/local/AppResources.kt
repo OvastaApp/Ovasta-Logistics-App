@@ -4,5 +4,7 @@ import android.app.Application
 
 
 class AppResources(private val application: Application) {
-    fun getString(resId: Int): String = application.getString(resId)
+    // Resolved on each call, since the agent can change the language while the app runs
+    fun getString(resId: Int): String =
+        LocaleHelper.localizedContext(application).getString(resId)
 }

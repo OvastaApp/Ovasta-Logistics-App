@@ -9,7 +9,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,19 +36,28 @@ import com.ovasta.logisticsapp.presentation.home.presentation.components.Locatio
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.DropOfOrderDetailsScreen
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.TaskDetailsViewModel
+import com.ovasta.logisticsapp.presentation.profile.presentation.ProfileScreen
+import com.ovasta.logisticsapp.presentation.profile.presentation.ProfileViewModel
+import com.ovasta.logisticsapp.presentation.profile.presentation.charge.ChargeScreen
+import com.ovasta.logisticsapp.presentation.profile.presentation.charge.ChargeViewModel
+import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletScreen
+import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletViewModel
 import org.koin.androidx.compose.koinViewModel
 
 data object Splash
 data object Login
 data object Home
+data object Profile
+data object Charge
+data object Wallet
 data object AvailableTasks
 data class TaskDetails(val taskId: Int)
 
 
 @Composable
 fun AppNavHost(modifier: Modifier = Modifier) {
-    val backStack = remember { mutableStateListOf<Any>(Splash) }
-    val navigator = remember { Navigator(backStack) }
+    val backStack = viewModel<NavBackStackViewModel>().backStack
+    val navigator = remember(backStack) { Navigator(backStack) }
     
     // HomeViewModel at nav-level — alive once Home is reached (not on Splash/Login).
     // It and the other logged-in screens' ViewModels live in the session store, not the
@@ -78,8 +86,22 @@ fun AppNavHost(modifier: Modifier = Modifier) {
         }
     }
 
+    val currentRoute = backStack.lastOrNull()
+
     CompositionLocalProvider(LocalNavigator provides navigator) {
-        Scaffold(bottomBar = {}) { paddingValues ->
+        Scaffold(bottomBar = {
+            if (BottomNavTab.isTopLevel(currentRoute)) {
+                AppBottomNavigation(
+                    currentRoute = currentRoute,
+                    onTabSelected = { tab ->
+                        // Home stays at the bottom of the back stack (it keeps the session
+                        // alive), so other tabs are pushed on top of it and back returns to Home
+                        navigator.popUpTo(Home)
+                        if (tab.route != Home) navigator.push(tab.route)
+                    }
+                )
+            }
+        }) { paddingValues ->
             Box(Modifier.padding(paddingValues)) {
                 NavDisplay(
                     modifier = modifier,
@@ -101,6 +123,24 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                             is Home -> NavEntry(key) {
                                 // Use the hoisted HomeViewModel instead of creating a new one
                                 HomeScreen(homeViewModel!!)
+                            }
+
+                            is Profile -> NavEntry(key) {
+                                val viewModel: ProfileViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                ProfileScreen(viewModel)
+                            }
+
+                            is Charge -> NavEntry(key) {
+                                val viewModel: ChargeViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                ChargeScreen(viewModel)
+                            }
+
+                            is Wallet -> NavEntry(key) {
+                                val viewModel: WalletViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                WalletScreen(viewModel)
                             }
 
                             is AvailableTasks -> NavEntry(key) {

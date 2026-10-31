@@ -718,7 +718,7 @@ private fun MilestoneRow(
 private fun formatMonthDisplay(monthString: String): String {
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM", Locale.ENGLISH)
-        val outputFormat = SimpleDateFormat("MMMM yyyy", Locale("ar"))
+        val outputFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         val date = inputFormat.parse(monthString) ?: return monthString
         outputFormat.format(date)
     } catch (_: Exception) {

@@ -15,11 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
-import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.ext.ToastEvent
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
-import com.ovasta.logisticsapp.presentation.nav.Login
 import com.ovasta.logisticsapp.presentation.nav.TaskDetails
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -191,7 +189,7 @@ class HomeViewModel(
 
     init {
         getPartnerStatus()
-        getPartnerStatistics()
+        loadHomeData()
         getAssignedOrders()
         listenToNewDeliveryTasks()
         getAssignedDeliveryOrders()
@@ -364,7 +362,7 @@ class HomeViewModel(
             HomeScreenActions.LoadTasks -> {}
             HomeScreenActions.RefreshTasks -> {
                 _viewState.update { it.copy(isTasksLoading = true, isAvailableTasksLoading = true) }
-                getPartnerStatistics()
+                loadHomeData()
                 getPartnerStatus()
                 listenToNewDeliveryTasks()
                 getAssignedOrders()
@@ -405,14 +403,6 @@ class HomeViewModel(
 
             HomeScreenActions.DismissLocationConsent -> {
                 _viewState.update { it.copy(isLocationConsentDialogVisible = false) }
-            }
-
-            is HomeScreenActions.ChangeLogoutDialogStatus -> {
-                updateUiState(viewState.value.copy(isLogoutDialogVisible = tasksScreenAction.isVisible))
-            }
-
-            HomeScreenActions.OnLogoutClicked -> {
-                logout()
             }
 
             is HomeScreenActions.CreateDeliveryOrder -> {
@@ -617,22 +607,6 @@ class HomeViewModel(
     }
 
 
-    fun logout() {
-        viewModelScope.launch {
-            setComposeUILoading(true)
-            kotlin.runCatching {
-                settingsRepository.logout()
-            }.onSuccess {
-                setComposeUILoading(false)
-                stopTracking()
-                settingsRepository.clearUserData()
-                emitScreenDirectionEvent(ScreenDirection.Replace(Login))
-            }.onFailure {
-                updateViewStateWithFail(it)
-            }
-        }
-    }
-
     private fun getPartnerStatus() {
         viewModelScope.launch {
             setComposeUILoading(true)
@@ -672,6 +646,30 @@ class HomeViewModel(
             }.onSuccess {
                 setComposeUILoading(false)
                 toggleTracking(shouldBeTracking = isOnline)
+            }.onFailure {
+                updateViewStateWithFail(it)
+            }
+        }
+    }
+
+    /**
+     * Loads `home`, which says whether the courier is an outsource agent and carries their wallet
+     * warning. Outsource agents don't see the partner statistics, so only the others load them.
+     */
+    private fun loadHomeData() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                homeRepository.getHome()
+            }.onSuccess { response ->
+                val home = response.data
+                val isOutsource = home?.courier?.isOutsource == true
+                _viewState.update {
+                    it.copy(
+                        isOutsource = isOutsource,
+                        walletWarning = home?.walletWarning?.takeIf { warning -> warning.isNotBlank() }
+                    )
+                }
+                if (!isOutsource) getPartnerStatistics()
             }.onFailure {
                 updateViewStateWithFail(it)
             }

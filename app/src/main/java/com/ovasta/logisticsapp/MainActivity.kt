@@ -15,7 +15,7 @@ import com.ovasta.logisticsapp.ui.theme.OvastaLogisticsAppTheme
 class MainActivity : ComponentActivity() {
 
     override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(LocaleHelper.applyDefaultLocale(newBase))
+        super.attachBaseContext(LocaleHelper.applySavedLocale(newBase))
     }
 
     private val permissions = arrayOf(

@@ -4,6 +4,7 @@ import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.CreateDeliveryOrderRequest
+import com.ovasta.logisticsapp.presentation.home.data.model.HomeData
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
 import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
@@ -26,6 +27,10 @@ interface HomeApi {
         @Query("month") month: Int,
         @Query("year") year: Int,
     ): ApiResponse<PartnerStatistics>
+
+    /** The courier's account and wallet state, including whether they are an outsource agent. */
+    @GET("home")
+    suspend fun getHome(): ApiResponse<HomeData?>
 
     @GET("delivery-orders")
     suspend fun getDeliveryOrders(): ApiResponse<List<AssignedDeliveryTask>>

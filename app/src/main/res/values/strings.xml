@@ -294,4 +294,31 @@
     <string name="gallery">Gallery</string>
     <string name="edit_request_sent">Edit request sent</string>
     <string name="receipt_uploaded">Receipt uploaded</string>
+
+    <!-- Profile -->
+    <string name="profile_image">Profile image</string>
+    <string name="charge">Charge</string>
+    <string name="wallet">Wallet</string>
+    <string name="charge_placeholder">No top-up requests yet</string>
+    <string name="wallet_placeholder">No wallet transactions yet</string>
+    <string name="top_up_requests">Top-up requests</string>
+    <string name="new_top_up">New top-up</string>
+    <string name="top_up_amount">Amount</string>
+    <string name="top_up_proof">Transfer proof</string>
+    <string name="top_up_proof_hint">Add a photo of the transfer receipt</string>
+    <string name="top_up_proof_image">Transfer proof image</string>
+    <string name="remove_image">Remove image</string>
+    <string name="send_request">Send request</string>
+    <string name="top_up_request_sent">Top-up request sent</string>
+    <string name="top_up_status_pending">Under review</string>
+    <string name="top_up_status_approved">Approved</string>
+    <string name="top_up_status_rejected">Rejected</string>
+    <string name="rejection_reason">Rejection reason: %s</string>
+    <string name="approved_amount">Approved amount: %s</string>
+    <string name="wallet_balance">Current balance</string>
+    <string name="wallet_transactions">Transactions</string>
+    <string name="wallet_credit">Credit</string>
+    <string name="wallet_debit">Debit</string>    <!-- Each language is named in itself, so it can be found whichever language is active -->
+    <string name="language_arabic" translatable="false">العربية</string>
+    <string name="language_english" translatable="false">English</string>
 </resources>
