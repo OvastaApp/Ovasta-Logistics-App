@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -237,9 +238,10 @@ fun TasksContent(
                             }
 
                             // Assigned delivery tasks
-                            items(
+                            // Fall back to the index so tasks with a null order id don't share a key
+                            itemsIndexed(
                                 viewState.assignedDeliveryTasks,
-                                key = { "delivery_${it.orderId}" }) { task ->
+                                key = { index, task -> "delivery_${task.orderId ?: "index_$index"}" }) { _, task ->
                                 SellerTaskItem(task = task, onCallSender = { phone ->
                                     onTaskItemAction(HomeItemActions.CallRetailer(phone))
                                 }, onCallReceiver = { phone ->
@@ -298,18 +300,20 @@ fun TasksContent(
         }
 
         editFeesState?.let { task ->
+            // The edit button is hidden for tasks without an order id, so this is only a type guard
+            val orderId = task.orderId ?: return@let
             DeliveryFeesDialog(
                 title = stringResource(R.string.update_delivery_fees_title),
                 message = stringResource(
                     R.string.update_delivery_fees_message,
-                    task.orderId,
-                    task.fromAddress.ifBlank { stringResource(R.string.sender_info) }
+                    orderId,
+                    task.fromAddress.orEmpty().ifBlank { stringResource(R.string.sender_info) }
                 ),
                 maxValue = 9999.0,
                 confirmText = stringResource(R.string.confirm),
                 initialValue = task.deliveryPrice,
                 onConfirm = { fees ->
-                    onTaskItemAction(HomeItemActions.UpdateDeliveryFees(task.orderId, fees))
+                    onTaskItemAction(HomeItemActions.UpdateDeliveryFees(orderId, fees))
                     editFeesState = null
                 },
                 onDismiss = { editFeesState = null }

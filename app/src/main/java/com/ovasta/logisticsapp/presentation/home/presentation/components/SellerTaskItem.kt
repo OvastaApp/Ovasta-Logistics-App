@@ -55,17 +55,17 @@ fun SellerTaskItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "#${task.orderId}", style = mdSemiBold)
+                Text(text = task.orderId?.let { "#$it" }.orEmpty(), style = mdSemiBold)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = task.statusName,
+                        text = task.statusName.orEmpty(),
                         style = xsMedium.copy(color = statusColor),
                         modifier = Modifier
                             .background(statusColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                     // Editing fees is allowed on every order returned by getAssignedDeliveryOrders
-                    if (onEditFeesClick != null) {
+                    if (onEditFeesClick != null && task.orderId != null) {
                         IconButton(
                             onClick = { onEditFeesClick(task) },
                             modifier = Modifier.size(32.dp)
@@ -100,15 +100,16 @@ fun SellerTaskItem(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = task.fromAddress.ifBlank { stringResource(R.string.sender_info) },
+                        text = task.fromAddress.orEmpty().ifBlank { stringResource(R.string.sender_info) },
                         style = mdMedium,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    if (task.senderMobile.isNotBlank()) {
+                    val senderMobile = task.senderMobile.orEmpty()
+                    if (senderMobile.isNotBlank()) {
                         IconButton(
-                            onClick = { onCallSender(task.senderMobile) },
+                            onClick = { onCallSender(senderMobile) },
                             modifier = Modifier.size(40.dp)
                         ) {
                             Icon(
@@ -143,17 +144,18 @@ fun SellerTaskItem(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = task.toAddress.ifBlank { stringResource(R.string.receiver_info) },
+                        text = task.toAddress.orEmpty().ifBlank { stringResource(R.string.receiver_info) },
                         style = mdMedium,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    val isValidPhone = task.receiverMobile.length >= 10 &&
-                            task.receiverMobile.all { it.isDigit() || it == '+' }
-                    if (task.receiverMobile.isNotBlank() && isValidPhone) {
+                    val receiverMobile = task.receiverMobile.orEmpty()
+                    val isValidPhone = receiverMobile.length >= 10 &&
+                            receiverMobile.all { it.isDigit() || it == '+' }
+                    if (receiverMobile.isNotBlank() && isValidPhone) {
                         IconButton(
-                            onClick = { onCallReceiver(task.receiverMobile) },
+                            onClick = { onCallReceiver(receiverMobile) },
                             modifier = Modifier.size(40.dp)
                         ) {
                             Icon(
@@ -222,7 +224,8 @@ fun SellerTaskItem(
                 else -> null
             }
 
-            if (nextStep != null && onStatusChangeClick != null) {
+            val orderId = task.orderId
+            if (nextStep != null && onStatusChangeClick != null && orderId != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 val buttonColor = when (nextStep) {
                     is OrderSteps.Picked -> StatusPicked
@@ -230,7 +233,7 @@ fun SellerTaskItem(
                     else -> Primary
                 }
                 Button(
-                    onClick = { onStatusChangeClick(task.orderId, nextStep) },
+                    onClick = { onStatusChangeClick(orderId, nextStep) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = buttonColor)

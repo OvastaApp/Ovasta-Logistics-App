@@ -10,28 +10,29 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @IgnoreExtraProperties
 @Keep
+// All fields are nullable: Gson bypasses Kotlin defaults and writes null when the API returns null
 data class AssignedDeliveryTask(
 
     @SerializedName("order_id")
-    var orderId: Int = 0,
+    var orderId: Int? = null,
 
     @SerializedName("status_id")
     var statusId: Int? = null,
 
     @SerializedName("status_name")
-    var statusName: String = "",
+    var statusName: String? = null,
 
     @SerializedName("sender_mobile")
-    var senderMobile: String = "",
+    var senderMobile: String? = null,
 
     @SerializedName("from_address")
-    var fromAddress: String = "",
+    var fromAddress: String? = null,
 
     @SerializedName("to_address")
-    var toAddress: String = "",
+    var toAddress: String? = null,
 
     @SerializedName("receiver_mobile")
-    var receiverMobile: String = "",
+    var receiverMobile: String? = null,
 
     @SerializedName("delivery_price")
     var deliveryPrice: Double? = null,
@@ -39,7 +40,6 @@ data class AssignedDeliveryTask(
     @SerializedName("collection_amount")
     var collectionAmount: Double? = null,
 
-    // Nullable: Gson bypasses Kotlin defaults and writes null when the API returns "note": null
     @SerializedName("note")
     var note: String? = null,
 
