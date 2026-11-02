@@ -29,7 +29,7 @@ Library choices:
 | Dates, numbers | `SimpleDateFormat`, `java.time`, `NumberFormat` | kotlinx-datetime plus a small `expect fun formatDecimal()` |
 | Storage | DataStore + Keystore `Crypto.kt` + EncryptedSharedPreferences | DataStore-core (KMP) + seller app `SecureStorage` (Keychain on iOS) |
 | Images | Coil 2 and 3 | Coil 3 + `coil-network-ktor` (drop Coil 2) |
-| Navigation | Navigation3 | Use JetBrains' multiplatform Navigation3 artifact if it is stable for the chosen CMP version, which keeps `AppNavHost` almost unchanged. Otherwise fall back to the seller app's `NavHost.kt` / `AppScreens.kt`. |
+| Navigation | Navigation3 | JetBrains' multiplatform Navigation3 (`org.jetbrains.androidx.navigation3`, stable 1.1.x on CMP 1.10), which keeps `AppNavHost` almost unchanged. |
 | Strings | `res/values`, `values-ar` (about 305 strings) | `composeResources/values{,-ar}`, generated `Res` |
 | Camera / gallery | `TakePicture` / `PickVisualMedia` + FileProvider | `expect` image picker that returns a `ByteArray`. iOS uses `PHPickerViewController` / `UIImagePickerController`. Multipart upload takes bytes instead of a `Uri`. |
 | Geocoder | `android.location.Geocoder` | `expect` reverse geocoder, `CLGeocoder` on iOS |
@@ -43,9 +43,16 @@ Library choices:
    - ✅ Removed `@Parcelize` and the parcelize plugin. No model went through a Bundle or `rememberSaveable`.
    - ✅ Fixed the `com.maxab.basemodule...` package declarations (`Country`, `RemoteConfigModel`, `LogoutListener`).
 2. **Skeleton.**
-   - Add `:shared` and rename `:app` → `:androidApp` (keep `applicationId com.ovasta.logisticsapp`).
-   - Add catalog entries (kotlin-multiplatform, compose-multiplatform, ktor, koin-compose-viewmodel, gitlive, coil3, datastore-core, kotlinx-datetime).
-   - Create `iosApp/` from the seller app scaffold.
+   - ✅ Renamed `:app` → `:androidApp` (`applicationId com.ovasta.logisticsapp` unchanged) and added `:shared`, with Android and iOS targets and the `sharedKit` framework.
+   - ✅ Versions: Kotlin 2.2.20 and Compose Multiplatform 1.10.3, the release JetBrains Navigation3 1.1.x is built on, so `AppNavHost` keeps Navigation3. This lifts the Android app's androidx Compose from 1.9.5 to 1.10.5.
+   - ✅ `DateExt` is in `shared/commonMain`, with its test in `androidUnitTest`. This proves the Android app consumes shared code. `App()` and `MainViewController()` are placeholders for the iOS app.
+   - ✅ `iosApp/`: xcodegen `project.yml`, a Podfile with the Firebase pods, a SwiftUI entry and Info.plist. The Info.plist has location and camera texts in ar/en and the background modes location and remote-notification. The entitlements cover push and time-sensitive notifications. The framework is built by `embedAndSignAppleFrameworkForXcode`, which also copies Compose resources.
+   - Ktor, Koin, GitLive, Coil 3 for KMP and DataStore-core enter the catalog in the phase that first uses them, so each version is checked by a real build.
+   - Still needed before iOS builds:
+     - a Mac (iOS targets don't build on Windows)
+     - an iOS app `com.ovasta.logisticsapp` in the Firebase console, with its `GoogleService-Info.plist`
+     - a 1024px app icon
+     - fastlane/match signing, done in Phase 6
 3. **Data layer to commonMain.**
    - Rewrite the Retrofit APIs as Ktor: Login, Home, Settings, OrderDetails, Wallet.
    - Port interceptors to Ktor plugins (headers, error mapping, cache).

@@ -1,5 +1,6 @@
 [versions]
-agp = "8.11.1"
+# 8.13+: with Kotlin 2.2.20, AGP 8.11 leaves the app classes off the unit-test compile classpath
+agp = "8.13.2"
 coilCompose = "3.3.0"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.7"
@@ -8,7 +9,7 @@ firebaseBom = "34.2.0"
 koinAndroid = "4.1.0"
 koinAndroidxScope = "2.2.3"
 kotlinxSerializationJson = "1.9.0"
-kotlin = "2.2.0"
+kotlin = "2.2.20"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -33,9 +34,12 @@ firebaseCrashlytics = "3.0.7"
 playServicesLocation = "21.2.0"
 kotlinxDatetime = "0.7.1"
 desugarJdkLibs = "2.1.5"
+# Compose Multiplatform for :shared. 1.10 is what JetBrains navigation3 1.1.x is built on,
+# so AppNavHost can keep Navigation3 when the UI moves to commonMain
+composeMultiplatform = "1.10.3"
+coroutines = "1.10.2"
 nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.11.0-alpha03"
-kotlinSerialization = "2.2.21"
 kotlinxSerializationCore = "1.9.0"
 material3AdaptiveNav3 = "1.3.0-alpha09"
 
@@ -90,6 +94,11 @@ constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayou
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+compose-mp-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
+compose-mp-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
+compose-mp-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 
@@ -104,3 +113,6 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 gms-google-service = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics ={id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
