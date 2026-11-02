@@ -44,7 +44,7 @@ Library choices:
    - ✅ Fixed the `com.maxab.basemodule...` package declarations (`Country`, `RemoteConfigModel`, `LogoutListener`).
 2. **Skeleton.**
    - ✅ Renamed `:app` → `:androidApp` (`applicationId com.ovasta.logisticsapp` unchanged) and added `:shared`, with Android and iOS targets and the `sharedKit` framework.
-   - ✅ Versions: Kotlin 2.2.20 and Compose Multiplatform 1.10.3, the release JetBrains Navigation3 1.1.x is built on, so `AppNavHost` keeps Navigation3. This lifts the Android app's androidx Compose from 1.9.5 to 1.10.5.
+   - ✅ Versions: Kotlin 2.2.20 and Compose Multiplatform 1.10.3, the release JetBrains Navigation3 1.1.x is built on, so `AppNavHost` keeps Navigation3. This lifts the Android app's androidx Compose from 1.9.5 to 1.10.5. AGP goes from 8.11.1 to 8.13.2, because with Kotlin 2.2.20 AGP 8.11 leaves the app classes off the unit-test compile classpath.
    - ✅ `DateExt` is in `shared/commonMain`, with its test in `androidUnitTest`. This proves the Android app consumes shared code. `App()` and `MainViewController()` are placeholders for the iOS app.
    - ✅ `iosApp/`: xcodegen `project.yml`, a Podfile with the Firebase pods, a SwiftUI entry and Info.plist. The Info.plist has location and camera texts in ar/en and the background modes location and remote-notification. The entitlements cover push and time-sensitive notifications. The framework is built by `embedAndSignAppleFrameworkForXcode`, which also copies Compose resources.
    - Ktor, Koin, GitLive, Coil 3 for KMP and DataStore-core enter the catalog in the phase that first uses them, so each version is checked by a real build.
