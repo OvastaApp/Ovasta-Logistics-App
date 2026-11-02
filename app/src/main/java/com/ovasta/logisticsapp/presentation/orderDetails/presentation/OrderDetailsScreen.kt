@@ -50,7 +50,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -94,6 +93,7 @@ import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.SheetOption
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.PickProductBottomSheet
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.ReceiveAmountBottomSheet
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun DropOfOrderDetailsScreen(
@@ -366,10 +366,10 @@ private fun OrderDetailsContent(
                 state = listState,
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._12sdp)
+                    horizontal = 12.sdp,
+                    vertical = 12.sdp
                 ),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                verticalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 item { OrderHeader(task = task) }
 
@@ -387,7 +387,7 @@ private fun OrderDetailsContent(
                                 onSelect = { selectedFilter = it },
                                 modifier = Modifier
                                     .background(Gray100)
-                                    .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                                    .padding(vertical = 4.sdp)
                             )
                         }
                     }
@@ -448,7 +448,7 @@ private fun OrderDetailsContent(
                         .background(Base_white)
                 ) {
                     HorizontalDivider(
-                        thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                        thickness = 1.sdp,
                         color = Gray200
                     )
                     if (!isDeliverStep && !canChangeStatus) {
@@ -459,23 +459,23 @@ private fun OrderDetailsContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(
-                                    top = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
-                                    start = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
-                                    end = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                                    top = 8.sdp,
+                                    start = 16.sdp,
+                                    end = 16.sdp
                                 )
                         )
                     }
                     val buttonEnabled = isDeliverStep || canChangeStatus
-                    val buttonShape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    val buttonShape = RoundedCornerShape(8.sdp)
                     val buttonPadding = PaddingValues(
-                        vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                        vertical = 10.sdp,
+                        horizontal = 16.sdp
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
-                        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                            .padding(16.sdp),
+                        horizontalArrangement = Arrangement.spacedBy(8.sdp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Button(
@@ -526,13 +526,13 @@ private fun OrderDetailsContent(
 /** Shared card look used by the header and each product row (matches [TaskCard]). */
 @Composable
 private fun Modifier.cardSurface(): Modifier {
-    val shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+    val shape = RoundedCornerShape(8.sdp)
     return this
         .fillMaxWidth()
         .clip(shape)
         .background(Base_white, shape)
         .border(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = Gray200,
             shape = shape
         )
@@ -549,18 +549,18 @@ private fun ProductsSectionHeader(count: Int) {
             style = mdSemiBold
         )
         if (count > 0) {
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+            Spacer(modifier = Modifier.width(6.sdp))
             Text(
                 text = count.toString(),
                 style = xsMedium.copy(color = Primary),
                 modifier = Modifier
                     .background(
                         Primary.copy(alpha = 0.1f),
-                        RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                        RoundedCornerShape(8.sdp)
                     )
                     .padding(
-                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._6sdp),
-                        vertical = dimensionResource(com.intuit.sdp.R.dimen._2sdp)
+                        horizontal = 6.sdp,
+                        vertical = 2.sdp
                     )
             )
         }
@@ -576,16 +576,16 @@ private fun CategoryHeader(source: String?, count: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = dimensionResource(com.intuit.sdp.R.dimen._4sdp)),
+            .padding(top = 4.sdp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_count),
             contentDescription = null,
             tint = Gray500,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+            modifier = Modifier.size(16.sdp)
         )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Spacer(modifier = Modifier.width(6.sdp))
         Text(
             text = source ?: stringResource(R.string.other_products),
             style = smSemiBold.copy(color = Gray800),
@@ -593,18 +593,18 @@ private fun CategoryHeader(source: String?, count: Int) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false)
         )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Spacer(modifier = Modifier.width(6.sdp))
         Text(
             text = count.toString(),
             style = xsMedium.copy(color = Primary),
             modifier = Modifier
                 .background(
                     Primary.copy(alpha = 0.1f),
-                    RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    RoundedCornerShape(8.sdp)
                 )
                 .padding(
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._6sdp),
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._2sdp)
+                    horizontal = 6.sdp,
+                    vertical = 2.sdp
                 )
         )
     }
@@ -621,11 +621,11 @@ private fun ProductFilterRow(
         modifier = modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._6sdp))
+        horizontalArrangement = Arrangement.spacedBy(6.sdp)
     ) {
         ProductPickFilter.entries.forEach { filter ->
             val isSelected = filter == selected
-            val shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+            val shape = RoundedCornerShape(16.sdp)
             Text(
                 text = stringResource(filter.labelRes),
                 style = xsMedium.copy(color = if (isSelected) Base_white else Gray600),
@@ -634,14 +634,14 @@ private fun ProductFilterRow(
                     .clip(shape)
                     .background(if (isSelected) Primary else Base_white, shape)
                     .border(
-                        width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                        width = 1.sdp,
                         color = if (isSelected) Primary else Gray200,
                         shape = shape
                     )
                     .clickable { onSelect(filter) }
                     .padding(
-                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                        vertical = dimensionResource(com.intuit.sdp.R.dimen._6sdp)
+                        horizontal = 10.sdp,
+                        vertical = 6.sdp
                     )
             )
         }
@@ -653,16 +653,16 @@ private fun EmptyProductsCard(@StringRes messageRes: Int = R.string.no_products_
     Column(
         modifier = Modifier
             .cardSurface()
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._24sdp)),
+            .padding(24.sdp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_count),
             contentDescription = null,
             tint = Gray500,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._28sdp))
+            modifier = Modifier.size(28.sdp)
         )
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+        Spacer(modifier = Modifier.height(8.sdp))
         Text(
             text = stringResource(messageRes),
             style = smNormal.copy(color = Gray500),
@@ -677,7 +677,7 @@ private fun OrderHeader(task: HomeTask) {
     Column(
         modifier = Modifier
             .cardSurface()
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+            .padding(16.sdp)
     ) {
         // Order id + status
         Row(
@@ -696,17 +696,17 @@ private fun OrderHeader(task: HomeTask) {
 
         // Client data
         Text(text = stringResource(R.string.client_information), style = smMedium.copy(color = Gray500))
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+        Spacer(modifier = Modifier.height(4.sdp))
         HeaderInfoRow(R.drawable.ic_profile, task.customerName.orDefault(stringResource(R.string.not_available)))
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+        Spacer(modifier = Modifier.height(4.sdp))
         HeaderInfoRow(R.drawable.ic_address, task.customerAddress.orDefault(stringResource(R.string.no_address)))
 
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+        Spacer(modifier = Modifier.height(10.sdp))
 
         // Contact actions
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+            horizontalArrangement = Arrangement.spacedBy(8.sdp)
         ) {
             HeaderActionButton(
                 modifier = Modifier.weight(1f),
@@ -730,7 +730,7 @@ private fun OrderHeader(task: HomeTask) {
             value = (task.itemsCount.takeIf { it > 0 } ?: task.products.size).toString()
         )
         if (task.deliveryFees > 0f) {
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+            Spacer(modifier = Modifier.height(6.sdp))
             SummaryRow(
                 label = stringResource(R.string.delivery_fees),
                 value = stringResource(
@@ -739,7 +739,7 @@ private fun OrderHeader(task: HomeTask) {
                 )
             )
         }
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Spacer(modifier = Modifier.height(6.sdp))
         SummaryRow(
             label = stringResource(R.string.total_price),
             value = stringResource(
@@ -772,8 +772,8 @@ private fun SummaryRow(label: String, value: String, emphasized: Boolean = false
 @Composable
 private fun HeaderDivider() {
     HorizontalDivider(
-        modifier = Modifier.padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
-        thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+        modifier = Modifier.padding(vertical = 8.sdp),
+        thickness = 1.sdp,
         color = Gray200
     )
 }
@@ -788,15 +788,15 @@ private fun HeaderActionButton(
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+        shape = RoundedCornerShape(8.sdp)
     ) {
         Icon(
             painter = painterResource(icon),
             contentDescription = null,
             tint = Primary,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+            modifier = Modifier.size(18.sdp)
         )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Spacer(modifier = Modifier.width(6.sdp))
         Text(
             text = label,
             style = smMedium.copy(color = Primary),
@@ -813,9 +813,9 @@ private fun HeaderInfoRow(icon: Int, label: String) {
             painter = painterResource(icon),
             contentDescription = null,
             tint = Gray500,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+            modifier = Modifier.size(18.sdp)
         )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+        Spacer(modifier = Modifier.width(8.sdp))
         Text(text = label, style = smNormal.copy(color = Gray800))
     }
 }
@@ -836,13 +836,13 @@ private fun ProductCard(
     Column(
         modifier = Modifier
             .cardSurface()
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+            .padding(12.sdp)
     ) {
         Row(verticalAlignment = Alignment.Top) {
             Image(
                 modifier = Modifier
-                    .size(dimensionResource(com.intuit.sdp.R.dimen._56sdp))
-                    .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                    .size(56.sdp)
+                    .clip(RoundedCornerShape(8.sdp))
                     .background(Gray100)
                     // Zoom into the product so it fills the thumbnail; clip above keeps it in bounds.
                     .graphicsLayer {
@@ -857,7 +857,7 @@ private fun ProductCard(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp))
+                    .padding(horizontal = 10.sdp)
             ) {
                 Text(
                     text = product.name.orDefault(stringResource(R.string.unknown_product)),
@@ -865,7 +865,7 @@ private fun ProductCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Spacer(modifier = Modifier.height(4.sdp))
                 // Unit price on its own line.
                 Text(
                     text = stringResource(
@@ -874,7 +874,7 @@ private fun ProductCard(
                     ),
                     style = xsMedium.copy(color = Gray600)
                 )
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Spacer(modifier = Modifier.height(4.sdp))
                 // Quantity highlighted on its own line for visibility.
                 Text(
                     text = stringResource(R.string.required_qty, requiredQuantity.formatDecimal()),
@@ -887,30 +887,30 @@ private fun ProductCard(
                 if (showEditActions) Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = onClick,
-                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._32sdp))
+                        modifier = Modifier.size(32.sdp)
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_edit_task),
                             contentDescription = stringResource(R.string.edit_product),
                             tint = Primary,
-                            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                            modifier = Modifier.size(18.sdp)
                         )
                     }
-                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                    Spacer(modifier = Modifier.width(4.sdp))
                     IconButton(
                         onClick = onDeleteClick,
-                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._32sdp))
+                        modifier = Modifier.size(32.sdp)
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_delete),
                             contentDescription = stringResource(R.string.delete_product),
                             tint = Error500,
-                            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                            modifier = Modifier.size(18.sdp)
                         )
                     }
                 }
                 if (foundQuantity != null) {
-                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                    Spacer(modifier = Modifier.height(4.sdp))
                     PickedStatusBadge(
                         requiredQuantity = requiredQuantity,
                         foundQuantity = foundQuantity
@@ -920,8 +920,8 @@ private fun ProductCard(
         }
 
         HorizontalDivider(
-            modifier = Modifier.padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
-            thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            modifier = Modifier.padding(vertical = 8.sdp),
+            thickness = 1.sdp,
             color = Gray200
         )
 
@@ -943,10 +943,10 @@ private fun ProductCard(
 
             if (showPickAction) OutlinedButton(
                 onClick = onPickClick,
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                shape = RoundedCornerShape(8.sdp),
                 contentPadding = PaddingValues(
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._6sdp)
+                    horizontal = 12.sdp,
+                    vertical = 6.sdp
                 )
             ) {
                 Text(text = stringResource(R.string.mark_picked), style = xsMedium.copy(color = Primary))
@@ -974,11 +974,11 @@ private fun PickedStatusBadge(requiredQuantity: Double, foundQuantity: Double?) 
         modifier = Modifier
             .background(
                 color.copy(alpha = 0.1f),
-                RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                RoundedCornerShape(8.sdp)
             )
             .padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp)
+                horizontal = 8.sdp,
+                vertical = 4.sdp
             )
     )
 }

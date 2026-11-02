@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +56,7 @@ import com.ovasta.logisticsapp.presentation.nav.Charge
 import com.ovasta.logisticsapp.presentation.nav.Wallet
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.LanguageBottomSheet
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.LogoutDialog
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel) {
@@ -96,7 +96,8 @@ fun ProfileContent(
                         Icon(
                             painter = painterResource(R.drawable.ic_logout),
                             contentDescription = stringResource(R.string.logout),
-                            tint = Color.Black
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.sdp)
                         )
                     }
                 }
@@ -109,14 +110,14 @@ fun ProfileContent(
                 .padding(padding)
                 .background(Gray100)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                .padding(horizontal = 12.sdp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._20sdp)))
+            Spacer(modifier = Modifier.height(20.sdp))
 
             ProfileImagePlaceholder()
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+            Spacer(modifier = Modifier.height(12.sdp))
 
             if (viewState.agentName.isNotBlank()) {
                 Text(
@@ -136,7 +137,7 @@ fun ProfileContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._20sdp)))
+            Spacer(modifier = Modifier.height(20.sdp))
 
             if (viewState.isOutsource) {
                 ProfileItemCard(
@@ -144,14 +145,14 @@ fun ProfileContent(
                     onClick = onChargeClick
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+                Spacer(modifier = Modifier.height(10.sdp))
 
                 ProfileItemCard(
                     title = stringResource(R.string.wallet),
                     onClick = onWalletClick
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+                Spacer(modifier = Modifier.height(10.sdp))
             }
 
             ProfileItemCard(
@@ -160,7 +161,7 @@ fun ProfileContent(
                 onClick = { isLanguageSheetVisible = true }
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._20sdp)))
+            Spacer(modifier = Modifier.height(20.sdp))
         }
     }
 
@@ -190,7 +191,7 @@ fun ProfileContent(
 private fun ProfileImagePlaceholder() {
     Box(
         modifier = Modifier
-            .size(dimensionResource(com.intuit.sdp.R.dimen._70sdp))
+            .size(70.sdp)
             .clip(CircleShape)
             .background(Base_white),
         contentAlignment = Alignment.Center
@@ -199,7 +200,7 @@ private fun ProfileImagePlaceholder() {
             painter = painterResource(R.drawable.ic_profile),
             contentDescription = stringResource(R.string.profile_image),
             tint = Gray500,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._36sdp))
+            modifier = Modifier.size(36.sdp)
         )
     }
 }
@@ -216,7 +217,7 @@ private fun ProfileItemCard(title: String, value: String? = null, onClick: () ->
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                .padding(12.sdp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -224,7 +225,7 @@ private fun ProfileItemCard(title: String, value: String? = null, onClick: () ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (value != null) {
                     Text(text = value, style = smMedium, color = Primary)
-                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                    Spacer(modifier = Modifier.width(8.sdp))
                 }
                 // The back arrow flipped, so it points forward in both LTR and RTL
                 Icon(

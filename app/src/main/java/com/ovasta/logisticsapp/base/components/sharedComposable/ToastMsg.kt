@@ -16,12 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.base.Gray25
 import com.ovasta.logisticsapp.base.Gray700
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun ToastMsg(
@@ -30,18 +30,18 @@ fun ToastMsg(
 ) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            .clip(RoundedCornerShape(16.sdp))
             .background(backgroundColor)
             .padding(
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp),
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp)
+                vertical = 4.sdp,
+                horizontal = 12.sdp
             ), verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = text, style = xsMedium.copy(color = Gray25, textAlign = TextAlign.Center))
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Spacer(modifier = Modifier.width(6.sdp))
         if(hasIcon==true){
             Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(
-                dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                8.sdp
             ))
         }
     }

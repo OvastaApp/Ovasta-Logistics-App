@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -29,6 +28,7 @@ import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 // Material 1's button padding, which keeps the two buttons' labels from wrapping
 private val DialogButtonPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
@@ -51,10 +51,10 @@ fun BaseDialog(
         }
     ) {
         Surface(
-            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            shape = RoundedCornerShape(12.sdp),
             color = Base_white,
         ) {
-            Column(modifier = Modifier.padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))) {
+            Column(modifier = Modifier.padding(16.sdp)) {
 
                 Icon(
                     painter = icon ?: painterResource(R.drawable.alert_circle_red),
@@ -63,11 +63,11 @@ fun BaseDialog(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .size(
-                            dimensionResource(com.intuit.sdp.R.dimen._24sdp)
+                            24.sdp
                         )
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+                Spacer(modifier = Modifier.height(16.sdp))
 
 
                 title?.let {
@@ -78,7 +78,7 @@ fun BaseDialog(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                    Spacer(modifier = Modifier.height(8.sdp))
                 }
 
                 message?.let {
@@ -89,7 +89,7 @@ fun BaseDialog(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+                    Spacer(modifier = Modifier.height(12.sdp))
                 }
 
                 Row(
@@ -102,11 +102,11 @@ fun BaseDialog(
                         OutlinedButton(
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(end = dimensionResource(com.intuit.sdp.R.dimen._4sdp)),
+                                .padding(end = 4.sdp),
                             onClick = { onSecondaryClick?.invoke() },
-                            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                            shape = RoundedCornerShape(8.sdp),
                             border = BorderStroke(
-                                width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                                width = 1.sdp,
                                 color = Primary
                             ),
                             contentPadding = DialogButtonPadding
@@ -137,7 +137,7 @@ fun BaseDialog(
                             onClick = {
                                 onPrimaryClick?.invoke()
                             },
-                            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                            shape = RoundedCornerShape(8.sdp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Primary,
                             ),

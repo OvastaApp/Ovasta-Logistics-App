@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,6 +48,7 @@ import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
 import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,12 +123,12 @@ fun TasksContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .testTag("tasksList")
-                        .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                        .padding(horizontal = 12.sdp),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     // Tracking toggle
                     item(key = "tracking") {
-                        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+                        Spacer(modifier = Modifier.height(12.sdp))
                         TrackingToggleCard(
                             isTracking = viewState.isTracking,
                             onToggle = { onTasksScreenAction(HomeScreenActions.ToggleTracking) })
@@ -137,7 +137,7 @@ fun TasksContent(
                     // Wallet warning from `home`, shown whether tracking or not
                     viewState.walletWarning?.let { warning ->
                         item(key = "wallet_warning") {
-                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                            Spacer(modifier = Modifier.height(8.sdp))
                             WalletWarningCard(message = warning)
                         }
                     }
@@ -145,7 +145,7 @@ fun TasksContent(
                     // Partner statistics
                     if (partnerStatistics != null && viewState.isTracking) {
                         item(key = "statistics") {
-                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                            Spacer(modifier = Modifier.height(8.sdp))
                             PartnerStatisticsSection(
                                 statistics = partnerStatistics,
                                 selectedMonth = viewState.monthFilter,
@@ -160,7 +160,7 @@ fun TasksContent(
                         }
                     } else if (!viewState.isTracking && viewState.isOutsource == false) {
                         item(key = "statistics_hint") {
-                            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                            Spacer(modifier = Modifier.height(8.sdp))
                             StatisticsTrackingHint()
                         }
                     }
@@ -174,12 +174,12 @@ fun TasksContent(
 
                         if (viewState.isAvailableTasksLoading) {
                             item(key = "available_orders_shimmer") {
-                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                Spacer(modifier = Modifier.height(8.sdp))
                                 ShimmerAvailableOrdersCard()
                             }
                         } else if (shouldShowSummary && availableCount > 0) {
                             item(key = "available_orders_card") {
-                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                Spacer(modifier = Modifier.height(8.sdp))
                                 AvailableOrdersSummaryCard(
                                     count = availableCount,
                                     onClick = { onTaskItemAction(HomeItemActions.NavigateToAvailableTasks) })
@@ -192,12 +192,12 @@ fun TasksContent(
 
                         if (viewState.isTasksLoading) {
                             item(key = "tasks_shimmer") {
-                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                Spacer(modifier = Modifier.height(8.sdp))
                                 ShimmerTasksList()
                             }
                         } else if (hasAppTasks || hasDeliveryTasks) {
                             item(key = "tasks_header") {
-                                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                                Spacer(modifier = Modifier.height(8.sdp))
                                 Text(
                                     text = stringResource(R.string.tasks),
                                     style = lgSemiBold,
@@ -256,7 +256,7 @@ fun TasksContent(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp)),
+                                        .padding(top = 90.sdp),
                                     contentAlignment = Alignment.TopCenter
                                 ) {
                                     Text(
@@ -269,7 +269,7 @@ fun TasksContent(
                     }
 
                     // Extra bottom space so the FAB doesn't overlap the last item
-                    item { Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._80sdp))) }
+                    item { Spacer(modifier = Modifier.height(80.sdp)) }
                 }
             }
         }
@@ -279,9 +279,9 @@ fun TasksContent(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .padding(
-                        bottom = dimensionResource(com.intuit.sdp.R.dimen._60sdp),
-                        start = dimensionResource(com.intuit.sdp.R.dimen._60sdp),
-                        end = dimensionResource(com.intuit.sdp.R.dimen._60sdp)
+                        bottom = 60.sdp,
+                        start = 60.sdp,
+                        end = 60.sdp
                     ), contentAlignment = Alignment.Center
             ) {
                 if (toastText != null) {

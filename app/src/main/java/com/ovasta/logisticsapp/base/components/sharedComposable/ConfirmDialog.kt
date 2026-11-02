@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +36,7 @@ import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.base.smNormal
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun ConfirmDialog(
@@ -51,24 +51,24 @@ fun ConfirmDialog(
     ) {
         Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+                .clip(RoundedCornerShape(12.sdp))
                 .background(
                     color = Base_white,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+                    shape = RoundedCornerShape(12.sdp)
                 )
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
+                .padding(16.sdp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Text(
-                modifier = Modifier.padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                modifier = Modifier.padding(bottom = 8.sdp),
                 text = title,
                 style = lgMedium.copy(color = Gray900)
             )
 
             Text(
-                modifier = Modifier.padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._24sdp)),
+                modifier = Modifier.padding(bottom = 24.sdp),
                 text = message ?: "",
                 style = smNormal.copy(color = Gray500),
                 textAlign = TextAlign.Center
@@ -77,15 +77,15 @@ fun ConfirmDialog(
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = rememberSafeClick { onPrimaryClick() },
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                shape = RoundedCornerShape(8.sdp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Primary
                 ),
                 // Material 1's default, which this button had before
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
                 contentPadding = PaddingValues(
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                    vertical = 10.sdp,
+                    horizontal = 16.sdp
                 )
             ) {
                 Text(
@@ -97,16 +97,16 @@ fun ConfirmDialog(
             OutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                    .padding(top = 12.sdp),
                 onClick = { onDismiss() },
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                shape = RoundedCornerShape(8.sdp),
                 border = BorderStroke(
-                    dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                    1.sdp,
                     Gray300
                 ),
                 contentPadding = PaddingValues(
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                    vertical = 10.sdp,
+                    horizontal = 16.sdp
                 )
             ) {
                 Text(

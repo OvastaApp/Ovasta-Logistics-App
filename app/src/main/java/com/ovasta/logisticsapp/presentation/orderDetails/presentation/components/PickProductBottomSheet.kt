@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +46,7 @@ import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
  * Bottom sheet that lets the user mark a product as picked, either fully (found == required)
@@ -87,8 +87,8 @@ fun PickProductBottomSheet(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .navigationBarsPadding()
-                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
-                .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                .padding(horizontal = 16.sdp)
+                .padding(bottom = 16.sdp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -97,7 +97,7 @@ fun PickProductBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+            Spacer(modifier = Modifier.height(4.sdp))
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -106,7 +106,7 @@ fun PickProductBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -115,7 +115,7 @@ fun PickProductBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+            Spacer(modifier = Modifier.height(12.sdp))
 
             OutlinedTextField(
                 value = foundText,
@@ -132,12 +132,12 @@ fun PickProductBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { foundText = requiredQuantity.formatDecimal() },
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                shape = RoundedCornerShape(8.sdp),
             ) {
                 Text(
                     text = stringResource(R.string.pick_all_found, requiredQuantity.formatDecimal()),
@@ -145,17 +145,17 @@ fun PickProductBottomSheet(
                 )
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                horizontalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
                         text = stringResource(R.string.cancel),
@@ -170,7 +170,7 @@ fun PickProductBottomSheet(
                         val found = parsedFound ?: return@Button
                         onConfirm(found)
                     },
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = statusColor,
                         contentColor = Base_white,

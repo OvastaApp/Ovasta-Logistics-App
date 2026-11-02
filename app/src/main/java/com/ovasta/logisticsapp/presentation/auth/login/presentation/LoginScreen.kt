@@ -40,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -61,6 +60,7 @@ import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.mdRegular
 import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.presentation.auth.login.presentation.components.UserTypeOption
+import com.ovasta.logisticsapp.base.ext.sdp
 
 object LoginContentTestTag {
 
@@ -128,11 +128,11 @@ private fun LoginContent(
                     .weight(1f)
                     .background(Gray100)
                     .verticalScroll(rememberScrollState()) // Make content scrollable
-                    .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                    .padding(horizontal = 16.sdp)
             ) {
                 // Phone Number Field
                 Text(
-                    modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._24sdp)),
+                    modifier = Modifier.padding(top = 24.sdp),
                     text = stringResource(R.string.enter_your_phone_number),
                     style = smMedium
                 )
@@ -141,12 +141,12 @@ private fun LoginContent(
                     modifier = Modifier
                         .testTag(LoginContentTestTag.TF_PHONE)
                         .fillMaxWidth()
-                        .padding(top = dimensionResource(com.intuit.sdp.R.dimen._6sdp))
-                        .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                        .padding(top = 6.sdp)
+                        .clip(RoundedCornerShape(8.sdp))
                         .border(
-                            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                            width = 1.sdp,
                             if (viewState.isPhoneValid) Gray200 else Primary,
-                            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                            shape = RoundedCornerShape(8.sdp)
                         ),
                     value = viewState.phoneNumber,
                     onValueChange = { input ->
@@ -182,13 +182,13 @@ private fun LoginContent(
                         color = Primary,
                         modifier = Modifier
                             .testTag(LoginContentTestTag.TXT_INVALID_PHONE)
-                            .padding(top = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                            .padding(top = 4.sdp)
                     )
                 }
 
                 // Password Field
                 Text(
-                    modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
+                    modifier = Modifier.padding(top = 16.sdp),
                     text = stringResource(R.string.password),
                     style = smMedium
                 )
@@ -197,12 +197,12 @@ private fun LoginContent(
                     modifier = Modifier
                         .testTag(LoginContentTestTag.TF_PASSWORD)
                         .fillMaxWidth()
-                        .padding(top = dimensionResource(com.intuit.sdp.R.dimen._6sdp))
-                        .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                        .padding(top = 6.sdp)
+                        .clip(RoundedCornerShape(8.sdp))
                         .border(
-                            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                            width = 1.sdp,
                             if (viewState.isPasswordValid) Gray200 else Primary,
-                            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                            shape = RoundedCornerShape(8.sdp)
                         ),
                     value = viewState.password,
                     onValueChange = { input ->
@@ -236,7 +236,7 @@ private fun LoginContent(
                             onClick = { passwordVisible = !passwordVisible }
                         ) {
                             Icon(
-                                modifier = Modifier.padding(end = dimensionResource(com.intuit.sdp.R.dimen._4sdp)),
+                                modifier = Modifier.padding(end = 4.sdp),
                                 painter = painterResource(
                                     if (passwordVisible)
                                         R.drawable.ic_visibility_on
@@ -265,13 +265,13 @@ private fun LoginContent(
                         color = Primary,
                         modifier = Modifier
                             .testTag(LoginContentTestTag.TXT_INVALID_PASSWORD)
-                            .padding(top = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                            .padding(top = 4.sdp)
                     )
                 }
 
                 // User Type Selection
                 Text(
-                    modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
+                    modifier = Modifier.padding(top = 16.sdp),
                     text = stringResource(R.string.agent_type),
                     style = smMedium
                 )
@@ -280,10 +280,10 @@ private fun LoginContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            top = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
-                            bottom = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                            top = 8.sdp,
+                            bottom = 16.sdp
                         ),
-                    horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+                    horizontalArrangement = Arrangement.spacedBy(12.sdp)
                 ) {
 
                     // Delivery Agent Option
@@ -327,14 +327,14 @@ private fun LoginContent(
                     .navigationBarsPadding()
                     .background(Base_white)
                     .border(
-                        width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                        width = 1.sdp,
                         color = Gray200
                     )
                     .padding(
-                        end = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
-                        start = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
-                        top = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
-                        bottom = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                        end = 16.sdp,
+                        start = 16.sdp,
+                        top = 8.sdp,
+                        bottom = 8.sdp
                     ),
                 contentAlignment = Alignment.Center,
             ) {
@@ -344,7 +344,7 @@ private fun LoginContent(
                         .fillMaxWidth()
                         .testTag(LoginContentTestTag.BTN_LOGIN),
                     onClick = { onAction(LoginAction.Login) },
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Primary
                     ),

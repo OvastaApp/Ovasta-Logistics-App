@@ -27,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +40,7 @@ import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.local.AppLanguage
 import com.ovasta.logisticsapp.base.mdMedium
 import kotlinx.coroutines.launch
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
  * Lets the agent pick the app language. The pick is only applied on Confirm, so the agent
@@ -68,8 +68,8 @@ fun LanguageBottomSheet(
                 .navigationBarsPadding()
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                modifier = Modifier.padding(horizontal = 16.sdp),
+                verticalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -78,7 +78,7 @@ fun LanguageBottomSheet(
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Spacer(modifier = Modifier.height(4.sdp))
 
                 AppLanguage.entries.forEach { language ->
                     LanguageOptionRow(
@@ -105,18 +105,18 @@ private fun LanguageOptionRow(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+    val shape = RoundedCornerShape(8.sdp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .border(
-                width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                width = 1.sdp,
                 color = if (isSelected) Primary else Gray200,
                 shape = shape
             )
             .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            .padding(12.sdp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
@@ -125,7 +125,7 @@ private fun LanguageOptionRow(
             onClick = null,
             colors = RadioButtonDefaults.colors(selectedColor = Primary)
         )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+        Spacer(modifier = Modifier.width(8.sdp))
         Text(
             text = stringResource(language.nameRes),
             style = mdMedium.copy(color = Gray900),

@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,6 +45,7 @@ import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
  * Bottom sheet that collects the fields required to create a delivery order.
@@ -85,8 +85,8 @@ fun CreateDeliveryOrderBottomSheet(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .navigationBarsPadding()
-                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
-                .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                .padding(horizontal = 16.sdp)
+                .padding(bottom = 16.sdp)
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_delivery_truck),
@@ -94,10 +94,10 @@ fun CreateDeliveryOrderBottomSheet(
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .height(dimensionResource(com.intuit.sdp.R.dimen._24sdp))
+                    .height(24.sdp)
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+            Spacer(modifier = Modifier.height(12.sdp))
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -106,7 +106,7 @@ fun CreateDeliveryOrderBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+            Spacer(modifier = Modifier.height(4.sdp))
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -115,7 +115,7 @@ fun CreateDeliveryOrderBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             OutlinedTextField(
                 value = priceText,
@@ -169,17 +169,17 @@ fun CreateDeliveryOrderBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                horizontalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
                         text = stringResource(R.string.cancel),
@@ -200,7 +200,7 @@ fun CreateDeliveryOrderBottomSheet(
                             )
                         }
                     },
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Primary,
                         contentColor = Base_white,

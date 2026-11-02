@@ -17,11 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.smNormal
+import com.ovasta.logisticsapp.base.ext.sdp
 
 
 @Composable
@@ -33,10 +33,10 @@ fun TrackingToggleCard(
     val accentColor = if (isTracking) Color(0xFF2E7D32) else Color(0xFFB71C1C)
 
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = accentColor.copy(alpha = 0.3f)
         ),
         modifier = Modifier.fillMaxWidth()
@@ -45,8 +45,8 @@ fun TrackingToggleCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._6sdp)
+                    horizontal = 12.sdp,
+                    vertical = 6.sdp
                 ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -61,9 +61,9 @@ fun TrackingToggleCard(
                     ),
                     contentDescription = null,
                     tint = accentColor,
-                    modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                    modifier = Modifier.size(18.sdp)
                 )
-                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Spacer(modifier = Modifier.width(8.sdp))
                 Text(
                     text = if (isTracking) stringResource(R.string.tracking_active)
                     else stringResource(R.string.tracking_inactive),

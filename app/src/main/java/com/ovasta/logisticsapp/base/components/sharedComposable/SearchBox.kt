@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,6 +31,7 @@ import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.mdRegular
+import com.ovasta.logisticsapp.base.ext.sdp
 
 
 @Composable
@@ -47,17 +47,17 @@ fun SearchBox(
 
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         color = Base_white,
-        border = BorderStroke(dimensionResource(com.intuit.sdp.R.dimen._1sdp), Gray200),
-        shadowElevation = dimensionResource(com.intuit.sdp.R.dimen._1sdp)
+        border = BorderStroke(1.sdp, Gray200),
+        shadowElevation = 1.sdp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._14sdp),
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp)
+                    horizontal = 14.sdp,
+                    vertical = 10.sdp
                 ), verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -67,12 +67,12 @@ fun SearchBox(
                 modifier = Modifier.clickable {
                     onSearchTriggered()
                     keyboardController?.hide() })
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.width(8.sdp))
 
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+                    .padding(end = 4.sdp)
             ) {
                 BasicTextField(
                     value = searchKey,

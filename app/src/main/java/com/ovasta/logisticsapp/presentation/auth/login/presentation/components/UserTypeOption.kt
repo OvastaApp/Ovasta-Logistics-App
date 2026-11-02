@@ -14,13 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.smMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun UserTypeOption(
@@ -32,22 +32,22 @@ fun UserTypeOption(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            .clip(RoundedCornerShape(8.sdp))
             .background(if (isSelected) Primary.copy(alpha = 0.1f) else Base_white)
             .border(
-                width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                width = 1.sdp,
                 color = if (isSelected) Primary else Gray200,
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                shape = RoundedCornerShape(8.sdp)
             )
             .clickable { onClick() }
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            .padding(12.sdp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
             painter = painterResource(icon),
             contentDescription = label,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._32sdp)),
+            modifier = Modifier.size(32.sdp),
             tint = if (isSelected) Primary else Gray800
         )
         Text(
@@ -55,7 +55,7 @@ fun UserTypeOption(
             style = smMedium.copy(
                 color = if (isSelected) Primary else Gray800
             ),
-            modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._4sdp))
+            modifier = Modifier.padding(top = 4.sdp)
         )
     }
 }

@@ -111,8 +111,6 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
 
 
-    implementation(libs.sdp)
-    implementation(libs.ssp)
 
     implementation(libs.kotlinx.serialization.json)
 

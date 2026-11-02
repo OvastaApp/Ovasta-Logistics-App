@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +43,7 @@ import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
  * Bottom sheet shown when delivering an order: the agent enters the cash amount collected from
@@ -74,8 +74,8 @@ fun ReceiveAmountBottomSheet(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .navigationBarsPadding()
-                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
-                .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                .padding(horizontal = 16.sdp)
+                .padding(bottom = 16.sdp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -84,7 +84,7 @@ fun ReceiveAmountBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -101,7 +101,7 @@ fun ReceiveAmountBottomSheet(
                 )
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+            Spacer(modifier = Modifier.height(12.sdp))
 
             OutlinedTextField(
                 value = amountText,
@@ -113,17 +113,17 @@ fun ReceiveAmountBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                horizontalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
                         text = stringResource(R.string.cancel),
@@ -138,7 +138,7 @@ fun ReceiveAmountBottomSheet(
                         val amount = parsedAmount ?: return@Button
                         onConfirm(amount)
                     },
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Primary,
                         contentColor = Base_white,

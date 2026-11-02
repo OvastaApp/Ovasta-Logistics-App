@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +51,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.base.ext.formatDecimal
 import com.ovasta.logisticsapp.base.ext.isValidDecimalInput
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
  * Bottom sheet that lets the user edit a product's unit price, quantity and/or source.
@@ -105,8 +105,8 @@ fun EditProductBottomSheet(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .navigationBarsPadding()
-                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
-                .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                .padding(horizontal = 16.sdp)
+                .padding(bottom = 16.sdp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -115,7 +115,7 @@ fun EditProductBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+            Spacer(modifier = Modifier.height(4.sdp))
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -124,7 +124,7 @@ fun EditProductBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             OutlinedTextField(
                 value = priceText,
@@ -139,7 +139,7 @@ fun EditProductBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             OutlinedTextField(
                 value = quantityText,
@@ -158,7 +158,7 @@ fun EditProductBottomSheet(
 
             // Source dropdown — options are fetched from the API the first time it is opened.
             if (showSource) {
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Spacer(modifier = Modifier.height(8.sdp))
 
                 var sourceExpanded by remember { mutableStateOf(false) }
                 var sourcesRequested by remember { mutableStateOf(false) }
@@ -195,15 +195,15 @@ fun EditProductBottomSheet(
                                 text = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         CircularProgressIndicator(
-                                            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._14sdp)),
-                                            strokeWidth = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
+                                            modifier = Modifier.size(14.sdp),
+                                            strokeWidth = 2.sdp,
                                             color = Primary
                                         )
                                         Text(
                                             text = stringResource(R.string.loading_sources),
                                             style = smNormal.copy(color = Gray500),
                                             modifier = Modifier.padding(
-                                                start = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                                                start = 8.sdp
                                             )
                                         )
                                     }
@@ -235,17 +235,17 @@ fun EditProductBottomSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                horizontalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
                         text = stringResource(R.string.cancel),
@@ -261,7 +261,7 @@ fun EditProductBottomSheet(
                         val quantity = parsedQuantity ?: return@Button
                         onSave(price, quantity, selectedSource.takeIf { it.isNotBlank() })
                     },
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Primary,
                         contentColor = Base_white,

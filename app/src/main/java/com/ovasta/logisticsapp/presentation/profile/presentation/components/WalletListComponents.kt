@@ -25,7 +25,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import com.ovasta.logisticsapp.R
@@ -40,17 +39,18 @@ import com.ovasta.logisticsapp.base.mdSemiBold
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.base.xsRegular
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /** Shared card look for the wallet and charge list rows (matches the order details cards). */
 @Composable
 fun Modifier.walletCardSurface(): Modifier {
-    val shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+    val shape = RoundedCornerShape(8.sdp)
     return this
         .fillMaxWidth()
         .clip(shape)
         .background(Base_white, shape)
         .border(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = Gray200,
             shape = shape
         )
@@ -62,18 +62,18 @@ fun ListSectionHeader(title: String, count: Int) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(text = title, style = mdSemiBold)
         if (count > 0) {
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+            Spacer(modifier = Modifier.width(6.sdp))
             Text(
                 text = count.toString(),
                 style = xsMedium.copy(color = Primary),
                 modifier = Modifier
                     .background(
                         Primary.copy(alpha = 0.1f),
-                        RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                        RoundedCornerShape(8.sdp)
                     )
                     .padding(
-                        horizontal = dimensionResource(com.intuit.sdp.R.dimen._6sdp),
-                        vertical = dimensionResource(com.intuit.sdp.R.dimen._2sdp)
+                        horizontal = 6.sdp,
+                        vertical = 2.sdp
                     )
             )
         }
@@ -85,16 +85,16 @@ fun EmptyListMessage(message: String) {
     Column(
         modifier = Modifier
             .walletCardSurface()
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._24sdp)),
+            .padding(24.sdp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_price),
             contentDescription = null,
             tint = Gray500,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._28sdp))
+            modifier = Modifier.size(28.sdp)
         )
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+        Spacer(modifier = Modifier.height(8.sdp))
         Text(
             text = message,
             style = smNormal.copy(color = Gray500),
@@ -145,13 +145,13 @@ fun LoadingMoreIndicator() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+            .padding(vertical = 8.sdp),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
             color = Primary,
-            strokeWidth = dimensionResource(com.intuit.sdp.R.dimen._2sdp),
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._24sdp))
+            strokeWidth = 2.sdp,
+            modifier = Modifier.size(24.sdp)
         )
     }
 }

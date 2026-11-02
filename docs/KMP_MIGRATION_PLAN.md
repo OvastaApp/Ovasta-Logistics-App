@@ -36,10 +36,10 @@ Library choices:
 
 ## Phases
 1. **Pre-work on Android, still in `:app`, shipped as normal releases.** This lowers risk before any module move.
-   - Gson → kotlinx.serialization on all models. Watch the leniency of nullable fields.
-   - Replace `SimpleDateFormat`, `java.time`, `NumberFormat` and `String.format` with kotlinx-datetime and helpers. Keep `DateExtTest` green.
-   - Remove `LiveData` / `SingleLiveEvent` from `BaseViewModel`, plus Material 1, Coil 2 and `android.arch.lifecycle:extensions`.
-   - Remove sdp/ssp (32 files) and compare screenshots.
+   - ✅ Gson → kotlinx.serialization on all models (`apiJson` in `RemoteModule.kt`, covered by `ApiJsonTest`).
+   - ✅ Dates moved to kotlinx-datetime. Still left: `NumberFormat`, `String.format` and the localized month name. They become an `expect` formatter in Phase 4.
+   - ✅ Removed `LiveData` / `SingleLiveEvent`, Material 1, Coil 2 and `android.arch.lifecycle:extensions`.
+   - ✅ sdp/ssp replaced by `Int.sdp` / `Int.ssp` in `base/ext/DimensExt.kt`, which use the same scaling and are covered by `DimensExtTest`. In Phase 4 only the smallest-width lookup becomes `expect`, since `LocalConfiguration` is Android-only; iOS uses the screen's smallest width in points.
    - Remove `@Parcelize` from models; it isn't needed with Nav3 keys.
    - Fix the package declarations in `data/setting/model/*` (currently `com.maxab.basemodule...`).
 2. **Skeleton.**

@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -64,6 +63,7 @@ import com.ovasta.logisticsapp.base.ext.today
 import kotlinx.datetime.number
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun PartnerStatisticsSection(
@@ -80,10 +80,10 @@ fun PartnerStatisticsSection(
     )
 
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         colors = CardDefaults.cardColors(containerColor = Base_white),
         border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = Gray200
         ),
         modifier = Modifier
@@ -93,7 +93,7 @@ fun PartnerStatisticsSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+                .padding(12.sdp)
         ) {
             // Header - Always visible
             Row(
@@ -109,9 +109,9 @@ fun PartnerStatisticsSection(
                         painter = painterResource(R.drawable.ic_price),
                         contentDescription = null,
                         tint = Primary,
-                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                        modifier = Modifier.size(18.sdp)
                     )
-                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                    Spacer(modifier = Modifier.width(8.sdp))
                     Column {
                         Text(
                             text = stringResource(R.string.statistics),
@@ -139,7 +139,7 @@ fun PartnerStatisticsSection(
                     contentDescription = if (isExpanded) "Collapse" else "Expand",
                     tint = Gray500,
                     modifier = Modifier
-                        .size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
+                        .size(20.sdp)
                         .rotate(rotationAngle)
                 )
             }
@@ -157,8 +157,8 @@ fun PartnerStatisticsSection(
                 ) + fadeOut(animationSpec = tween(300))
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
-                    modifier = Modifier.padding(top = dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+                    verticalArrangement = Arrangement.spacedBy(8.sdp),
+                    modifier = Modifier.padding(top = 12.sdp)
                 ) {
                     // Month/Year filter row
                     MonthYearFilter(
@@ -172,7 +172,7 @@ fun PartnerStatisticsSection(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(IntrinsicSize.Min),
-                        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                        horizontalArrangement = Arrangement.spacedBy(8.sdp)
                     ) {
                         StatCard(
                             modifier = Modifier.weight(1f),
@@ -254,13 +254,13 @@ private fun MonthYearFilter(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            .clip(RoundedCornerShape(8.sdp))
             .background(Color(0xFFF5F5F5))
             .padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._8sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                horizontal = 8.sdp,
+                vertical = 8.sdp
             ),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        horizontalArrangement = Arrangement.spacedBy(8.sdp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Month dropdown
@@ -268,7 +268,7 @@ private fun MonthYearFilter(
             OutlinedButton(
                 onClick = { monthExpanded = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                shape = RoundedCornerShape(8.sdp)
             ) {
                 Text(
                     text = monthName,
@@ -278,13 +278,13 @@ private fun MonthYearFilter(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Spacer(modifier = Modifier.width(4.sdp))
                 Icon(
                     painter = painterResource(R.drawable.ic_black_arrow_down),
                     contentDescription = "Change month",
                     tint = Gray500,
                     modifier = Modifier
-                        .size(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                        .size(16.sdp)
                         .rotate(monthRotation)
                 )
             }
@@ -319,7 +319,7 @@ private fun MonthYearFilter(
             OutlinedButton(
                 onClick = { yearExpanded = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                shape = RoundedCornerShape(8.sdp)
             ) {
                 Text(
                     text = selectedYear.toString(),
@@ -328,13 +328,13 @@ private fun MonthYearFilter(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Spacer(modifier = Modifier.width(4.sdp))
                 Icon(
                     painter = painterResource(R.drawable.ic_black_arrow_down),
                     contentDescription = "Change year",
                     tint = Gray500,
                     modifier = Modifier
-                        .size(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                        .size(16.sdp)
                         .rotate(yearRotation)
                 )
             }
@@ -382,10 +382,10 @@ private fun StatCard(
     borderColor: Color
 ) {
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = borderColor
         ),
         modifier = modifier.fillMaxHeight()
@@ -394,8 +394,8 @@ private fun StatCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                    vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                    horizontal = 10.sdp,
+                    vertical = 8.sdp
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -403,9 +403,9 @@ private fun StatCard(
                 painter = painterResource(icon),
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                modifier = Modifier.size(18.sdp)
             )
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.width(8.sdp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = label,
@@ -431,10 +431,10 @@ private fun IncentivesProgressCard(
     val completedOrders = incentives.completedOrders ?: 0
 
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+        shape = RoundedCornerShape(12.sdp),
         colors = CardDefaults.cardColors(containerColor = Base_white),
         border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = Gray200
         ),
         modifier = Modifier.fillMaxWidth()
@@ -442,7 +442,7 @@ private fun IncentivesProgressCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+                .padding(12.sdp)
         ) {
             // Header row with icon and title
             Row(
@@ -458,9 +458,9 @@ private fun IncentivesProgressCard(
                         painter = painterResource(R.drawable.ic_delivery_truck),
                         contentDescription = null,
                         tint = Primary,
-                        modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                        modifier = Modifier.size(18.sdp)
                     )
-                    Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                    Spacer(modifier = Modifier.width(8.sdp))
                     Text(
                         text = if (!incentives.month.isNullOrBlank()) {
                             stringResource(R.string.incentives) + " (" + formatMonthDisplay(
@@ -491,7 +491,7 @@ private fun IncentivesProgressCard(
             val bonusPercentage = incentives.currentBonusPercentage ?: 0.0
             val bonusAmount = incentives.currentBonusAmount ?: 0.0
             if (bonusPercentage > 0.0 || bonusAmount > 0.0) {
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Spacer(modifier = Modifier.height(8.sdp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -518,12 +518,12 @@ private fun IncentivesProgressCard(
                             )
                         }
                         if (bonusPercentage > 0.0 && bonusAmount > 0.0) {
-                            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                            Spacer(modifier = Modifier.width(4.sdp))
                             Text(
                                 text = "•",
                                 style = xsMedium.copy(color = Gray500)
                             )
-                            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                            Spacer(modifier = Modifier.width(4.sdp))
                         }
                         if (bonusAmount > 0.0) {
                             Text(
@@ -544,9 +544,9 @@ private fun IncentivesProgressCard(
 
             // Milestones list - each with its own progress
             if (incentives.milestones.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Spacer(modifier = Modifier.height(8.sdp))
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._6sdp))
+                    verticalArrangement = Arrangement.spacedBy(6.sdp)
                 ) {
                     incentives.milestones.forEach { milestone ->
                         MilestoneRow(
@@ -596,11 +596,11 @@ private fun MilestoneRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            .clip(RoundedCornerShape(8.sdp))
             .background(bgColor)
             .padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                horizontal = 10.sdp,
+                vertical = 8.sdp
             )
     ) {
         // Top row: target info and status
@@ -629,7 +629,7 @@ private fun MilestoneRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.width(8.sdp))
             // Status badge
             Text(
                 text = if (isAchieved) {
@@ -649,27 +649,27 @@ private fun MilestoneRow(
             )
         }
 
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Spacer(modifier = Modifier.height(6.sdp))
 
         // Progress bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(com.intuit.sdp.R.dimen._4sdp))
-                .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._2sdp)))
+                .height(4.sdp)
+                .clip(RoundedCornerShape(2.sdp))
                 .background(progressColor.copy(alpha = 0.15f))
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction = animatedProgress)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._2sdp)))
+                    .clip(RoundedCornerShape(2.sdp))
                     .background(progressColor)
             )
         }
 
         // Bottom row: progress count and bonus amount
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._3sdp)))
+        Spacer(modifier = Modifier.height(3.sdp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -782,10 +782,10 @@ fun PartnerStatisticsSectionPreview() {
 @Composable
 fun StatisticsTrackingHint() {
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
         border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = Color(0xFFFFCC02).copy(alpha = 0.4f)
         ),
         modifier = Modifier.fillMaxWidth()
@@ -793,16 +793,16 @@ fun StatisticsTrackingHint() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                .padding(12.sdp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_price),
                 contentDescription = null,
                 tint = Color(0xFFF9A825),
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
+                modifier = Modifier.size(20.sdp)
             )
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+            Spacer(modifier = Modifier.width(10.sdp))
             Text(
                 text = stringResource(R.string.statistics_tracking_hint),
                 style = xsMedium.copy(color = Color(0xFF795548))

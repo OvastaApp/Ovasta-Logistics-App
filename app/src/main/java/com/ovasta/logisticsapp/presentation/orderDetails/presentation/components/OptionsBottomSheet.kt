@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,6 +35,7 @@ import com.ovasta.logisticsapp.base.Gray900
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.mdMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /** One tappable row in an [OptionsBottomSheet]. */
 data class SheetOption(
@@ -66,9 +66,9 @@ fun OptionsBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
-                .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                .padding(horizontal = 16.sdp)
+                .padding(bottom = 16.sdp),
+            verticalArrangement = Arrangement.spacedBy(8.sdp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -77,7 +77,7 @@ fun OptionsBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             options.forEach { option -> OptionRow(option) }
         }
@@ -86,27 +86,27 @@ fun OptionsBottomSheet(
 
 @Composable
 private fun OptionRow(option: SheetOption) {
-    val shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+    val shape = RoundedCornerShape(8.sdp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .border(
-                width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                width = 1.sdp,
                 color = Gray200,
                 shape = shape
             )
             .clickable(onClick = option.onClick)
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            .padding(12.sdp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(option.icon),
             contentDescription = null,
             tint = Primary,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
+            modifier = Modifier.size(20.sdp)
         )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+        Spacer(modifier = Modifier.width(12.sdp))
         Text(
             text = stringResource(option.label),
             style = mdMedium.copy(color = Gray900),

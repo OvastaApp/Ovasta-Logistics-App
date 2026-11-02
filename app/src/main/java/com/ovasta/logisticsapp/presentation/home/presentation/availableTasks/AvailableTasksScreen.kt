@@ -17,7 +17,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +29,7 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.mdRegular
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 import com.ovasta.logisticsapp.presentation.home.presentation.components.PendingDeliveryTaskItem
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun AvailableTasksScreen(viewModel: AvailableTasksViewModel, onOrderAccepted: () -> Unit = {}) {
@@ -59,7 +59,7 @@ fun AvailableTasksScreen(viewModel: AvailableTasksViewModel, onOrderAccepted: ()
                     .fillMaxSize()
                     .padding(padding)
                     .background(Gray100)
-                    .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                    .padding(horizontal = 12.sdp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (tasks.isEmpty()) {
@@ -67,7 +67,7 @@ fun AvailableTasksScreen(viewModel: AvailableTasksViewModel, onOrderAccepted: ()
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = dimensionResource(com.intuit.sdp.R.dimen._90sdp)),
+                                .padding(top = 90.sdp),
                             contentAlignment = Alignment.TopCenter
                         ) {
                             Text(

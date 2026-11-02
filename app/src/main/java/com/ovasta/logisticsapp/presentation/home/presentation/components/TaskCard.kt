@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.R
@@ -36,6 +35,7 @@ import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
 import com.google.firebase.Timestamp
 import kotlin.text.ifEmpty
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun TaskCard(
@@ -49,21 +49,21 @@ fun TaskCard(
     onStatusChangeClick: ((orderId: Int, OrderSteps) -> Unit)? = null,
 ) {
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         colors = CardDefaults.cardColors(containerColor = Base_white),
         border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = Gray200
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+            .padding(top = 8.sdp)
             .clickable { onTaskDetailsClick(homeTask.taskId, 0) }
             .testTag("taskCard_${homeTask.taskId}")
     ) {
         Column(
             modifier = Modifier.padding(
-                all = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                all = 16.sdp
             )
         ) {
             Row(
@@ -86,7 +86,7 @@ fun TaskCard(
                 )
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             InfoRow(
                 icon = R.drawable.ic_address,
@@ -95,7 +95,7 @@ fun TaskCard(
                 modifier = Modifier.testTag("clientAddress")
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             InfoRow(
                 icon = R.drawable.ic_count,
@@ -103,7 +103,7 @@ fun TaskCard(
                 modifier = Modifier.testTag("productCount")
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             InfoRow(
                 icon = R.drawable.ic_price,
@@ -117,7 +117,7 @@ fun TaskCard(
             )
 
             homeTask.assignedAt?.let { assignedAt ->
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Spacer(modifier = Modifier.height(8.sdp))
 
                 AssignedElapsedTime(
                     assignedAtMillis = assignedAt.toDate().time,
@@ -128,8 +128,8 @@ fun TaskCard(
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
-                thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                    .padding(vertical = 12.sdp),
+                thickness = 1.sdp,
                 color = Gray200
             )
 
@@ -152,14 +152,14 @@ fun TaskCard(
             }
 
             if (nextStep != null && onStatusChangeClick != null) {
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Spacer(modifier = Modifier.height(8.sdp))
                 
                 Button(
                     onClick = { onStatusChangeClick(homeTask.taskId, nextStep) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("statusChangeButton_${homeTask.taskId}"),
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    shape = RoundedCornerShape(8.sdp)
                 ) {
                     Text(
                         text = when (nextStep) {

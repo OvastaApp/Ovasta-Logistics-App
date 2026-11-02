@@ -8,10 +8,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.base.xsMedium
 import com.ovasta.logisticsapp.presentation.home.data.model.TaskStatus
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun StatusTag(
@@ -31,11 +31,11 @@ fun StatusTag(
         modifier = modifier
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                shape = RoundedCornerShape(16.sdp)
             )
             .padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._12sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp)
+                horizontal = 12.sdp,
+                vertical = 4.sdp
             )
     ) {
         Text(

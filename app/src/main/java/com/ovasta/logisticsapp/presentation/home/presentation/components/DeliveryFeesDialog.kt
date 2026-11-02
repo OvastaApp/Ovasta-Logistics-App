@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,6 +38,7 @@ import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
  * Dialog that collects a delivery-fees value (a non-negative double) and reports it on confirm.
@@ -68,10 +68,10 @@ fun DeliveryFeesDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            shape = RoundedCornerShape(12.sdp),
             color = Base_white,
         ) {
-            Column(modifier = Modifier.padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))) {
+            Column(modifier = Modifier.padding(16.sdp)) {
 
                 Icon(
                     painter = painterResource(R.drawable.ic_delivery_truck),
@@ -79,10 +79,10 @@ fun DeliveryFeesDialog(
                     tint = Color.Unspecified,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .height(dimensionResource(com.intuit.sdp.R.dimen._24sdp))
+                        .height(24.sdp)
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+                Spacer(modifier = Modifier.height(16.sdp))
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -91,7 +91,7 @@ fun DeliveryFeesDialog(
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+                Spacer(modifier = Modifier.height(8.sdp))
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -100,7 +100,7 @@ fun DeliveryFeesDialog(
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+                Spacer(modifier = Modifier.height(12.sdp))
 
                 OutlinedTextField(
                     value = text,
@@ -114,7 +114,7 @@ fun DeliveryFeesDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+                Spacer(modifier = Modifier.height(12.sdp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -123,9 +123,9 @@ fun DeliveryFeesDialog(
                     OutlinedButton(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(end = dimensionResource(com.intuit.sdp.R.dimen._4sdp)),
+                            .padding(end = 4.sdp),
                         onClick = onDismiss,
-                        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                        shape = RoundedCornerShape(8.sdp),
                     ) {
                         Text(
                             text = stringResource(R.string.cancel),
@@ -138,7 +138,7 @@ fun DeliveryFeesDialog(
                         enabled = isValid,
                         onClick = { parsed?.let(onConfirm) },
                         shape = RoundedCornerShape(
-                            dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                            8.sdp
                         ),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Primary,

@@ -12,11 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.smNormal
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun InfoRow(
@@ -24,7 +25,7 @@ fun InfoRow(
     label: String,
     modifier: Modifier = Modifier,
     textStyle: androidx.compose.ui.text.TextStyle = smNormal.copy(color = Gray500),
-    iconSize: Int = com.intuit.sdp.R.dimen._20sdp, // uniform size for all icons
+    iconSize: Dp = 20.sdp, // uniform size for all icons
     iconTint: Color = Gray500
 ) {
     Row(
@@ -33,17 +34,17 @@ fun InfoRow(
     ) {
         Box(
             modifier = Modifier
-                .size(dimensionResource(iconSize)),
+                .size(iconSize),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(dimensionResource(iconSize))
+                modifier = Modifier.size(iconSize)
             )
         }
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+        Spacer(modifier = Modifier.width(4.sdp))
         Text(
             text = label,
             style = textStyle

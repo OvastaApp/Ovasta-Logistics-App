@@ -37,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,6 +56,7 @@ import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smMedium
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
  * Bottom sheet for a new top-up request: the agent enters the amount and attaches a photo of the
@@ -91,8 +91,8 @@ fun NewTopUpBottomSheet(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .navigationBarsPadding()
-                .padding(horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
-                .padding(bottom = dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                .padding(horizontal = 16.sdp)
+                .padding(bottom = 16.sdp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -101,7 +101,7 @@ fun NewTopUpBottomSheet(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             OutlinedTextField(
                 value = amountText,
@@ -117,11 +117,11 @@ fun NewTopUpBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             Text(text = stringResource(R.string.top_up_proof), style = smMedium.copy(color = Gray800))
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            Spacer(modifier = Modifier.height(8.sdp))
 
             if (proofImage != null) {
                 ProofImagePreview(image = proofImage, onRemove = onRemoveImage)
@@ -130,17 +130,17 @@ fun NewTopUpBottomSheet(
                 ProofImageSourceButtons(onCameraClick = onCameraClick, onGalleryClick = onGalleryClick)
             }
 
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._16sdp)))
+            Spacer(modifier = Modifier.height(16.sdp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                horizontalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
                         text = stringResource(R.string.cancel),
@@ -156,7 +156,7 @@ fun NewTopUpBottomSheet(
                         val proof = proofImage ?: return@Button
                         onSubmit(amount, proof)
                     },
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                    shape = RoundedCornerShape(8.sdp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Primary,
                         contentColor = Base_white,
@@ -181,9 +181,9 @@ private fun ProofImageSourceButtons(onCameraClick: () -> Unit, onGalleryClick: (
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+            .clip(RoundedCornerShape(8.sdp))
             .background(Gray100)
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            .padding(12.sdp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -191,10 +191,10 @@ private fun ProofImageSourceButtons(onCameraClick: () -> Unit, onGalleryClick: (
             style = xsMedium.copy(color = Gray500),
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+        Spacer(modifier = Modifier.height(8.sdp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+            horizontalArrangement = Arrangement.spacedBy(8.sdp)
         ) {
             ImageSourceButton(
                 modifier = Modifier.weight(1f),
@@ -222,31 +222,31 @@ private fun ImageSourceButton(
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         colors = ButtonDefaults.outlinedButtonColors(containerColor = Base_white)
     ) {
         Icon(
             painter = painterResource(icon),
             contentDescription = null,
             tint = Primary,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+            modifier = Modifier.size(18.sdp)
         )
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+        Spacer(modifier = Modifier.width(6.sdp))
         Text(text = label, style = smMedium.copy(color = Primary), maxLines = 1)
     }
 }
 
 @Composable
 private fun ProofImagePreview(image: Uri, onRemove: () -> Unit) {
-    val shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+    val shape = RoundedCornerShape(8.sdp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(com.intuit.sdp.R.dimen._160sdp))
+            .height(160.sdp)
             .clip(shape)
             .background(Gray100)
             .border(
-                width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                width = 1.sdp,
                 color = Gray200,
                 shape = shape
             )
@@ -261,8 +261,8 @@ private fun ProofImagePreview(image: Uri, onRemove: () -> Unit) {
             onClick = onRemove,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._6sdp))
-                .size(dimensionResource(com.intuit.sdp.R.dimen._28sdp))
+                .padding(6.sdp)
+                .size(28.sdp)
                 .clip(CircleShape)
                 .background(Base_white.copy(alpha = 0.9f))
         ) {
@@ -270,7 +270,7 @@ private fun ProofImagePreview(image: Uri, onRemove: () -> Unit) {
                 painter = painterResource(R.drawable.ic_close),
                 contentDescription = stringResource(R.string.remove_image),
                 tint = Gray800,
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._14sdp))
+                modifier = Modifier.size(14.sdp)
             )
         }
     }

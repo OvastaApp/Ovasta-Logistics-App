@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,6 +37,7 @@ import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.mdRegular
 import kotlin.text.isEmpty
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun ConfirmButton(isEnabled: Boolean, onClick: () -> Unit) {
@@ -45,9 +45,9 @@ fun ConfirmButton(isEnabled: Boolean, onClick: () -> Unit) {
         enabled = isEnabled,
         onClick = onClick,
         modifier = Modifier
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+            .padding(16.sdp)
             .fillMaxWidth()
-            .height(dimensionResource(com.intuit.sdp.R.dimen._44sdp))
+            .height(44.sdp)
             .testTag("confirmButton"),
         colors = ButtonDefaults.buttonColors(
             containerColor = Primary,
@@ -55,7 +55,7 @@ fun ConfirmButton(isEnabled: Boolean, onClick: () -> Unit) {
             contentColor = Base_white,
             disabledContentColor = Base_white.copy(alpha = 0.7f)
         ),
-        shape = RoundedCornerShape(dimensionResource(id = com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
     ) {
         Text(
             text = stringResource(id = R.string.confirm),
@@ -73,34 +73,34 @@ fun SearchTextField(onSearchValueChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Gray100)
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+            .padding(16.sdp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
                     color = Color.White,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    shape = RoundedCornerShape(8.sdp)
                 )
                 .border(
-                    width = dimensionResource(com.intuit.ssp.R.dimen._1ssp),
+                    width = 1.sdp,
                     color = Gray200,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    shape = RoundedCornerShape(8.sdp)
                 )
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(dimensionResource(com.intuit.sdp.R.dimen._44sdp))
+                    .height(44.sdp)
             ) {
                 Image(
                     modifier = Modifier
                         .padding(
-                            start = dimensionResource(com.intuit.sdp.R.dimen._13sdp),
-                            end = dimensionResource(com.intuit.sdp.R.dimen._8sdp)
+                            start = 13.sdp,
+                            end = 8.sdp
                         )
-                        .size(dimensionResource(com.intuit.sdp.R.dimen._18sdp)),
+                        .size(18.sdp),
                     painter = painterResource(id = R.drawable.ic_search),
                     contentDescription = "Search icon"
                 )
@@ -119,7 +119,7 @@ fun SearchTextField(onSearchValueChange: (String) -> Unit) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(dimensionResource(com.intuit.sdp.R.dimen._44sdp)),
+                                .height(44.sdp),
                             contentAlignment = Alignment.CenterStart
                         ) {
                             if (searchQuery.isEmpty()) {

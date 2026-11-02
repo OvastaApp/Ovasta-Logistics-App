@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,6 +27,7 @@ import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray300
 import com.ovasta.logisticsapp.base.Gray700
 import com.ovasta.logisticsapp.base.smMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 
 @Composable
@@ -39,7 +39,7 @@ fun NavigationAction(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+        horizontalArrangement = Arrangement.spacedBy(8.sdp)
     ) {
         ContactButton(
             iconRes = R.drawable.ic_pick_pin,
@@ -78,14 +78,14 @@ fun ActionButton(
 ) {
     Surface(
         modifier = modifier.clickable { onClick() },
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         color = Base_white,
-        border = BorderStroke(dimensionResource(com.intuit.sdp.R.dimen._1sdp), Gray300),
+        border = BorderStroke(1.sdp, Gray300),
     ) {
         Row(
             modifier = Modifier.padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._6sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp)
+                horizontal = 6.sdp,
+                vertical = 10.sdp
             ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -93,10 +93,10 @@ fun ActionButton(
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = stringResource(textRes),
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
+                modifier = Modifier.size(16.sdp),
                 tint = Color.Unspecified
             )
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+            Spacer(modifier = Modifier.width(4.sdp))
             Text(
                 text = stringResource(textRes),
                 style = smMedium.copy(color = Gray700),

@@ -31,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,6 +60,7 @@ import com.ovasta.logisticsapp.presentation.profile.presentation.components.Load
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.LoadingMoreIndicator
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.formatAmount
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.walletCardSurface
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun WalletScreen(viewModel: WalletViewModel) {
@@ -119,8 +119,8 @@ fun WalletContent(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                contentPadding = PaddingValues(12.sdp),
+                verticalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 // Before the first load returns only the refresh indicator shows
                 if (transactions != null) {
@@ -159,23 +159,23 @@ private fun BalanceCard(balance: Double) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+            .clip(RoundedCornerShape(12.sdp))
             .background(Primary)
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
+            .padding(16.sdp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_price),
             contentDescription = null,
             tint = Base_white,
-            modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._28sdp))
+            modifier = Modifier.size(28.sdp)
         )
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+        Spacer(modifier = Modifier.height(8.sdp))
         Text(
             text = stringResource(R.string.wallet_balance),
             style = smNormal.copy(color = Base_white.copy(alpha = 0.85f))
         )
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+        Spacer(modifier = Modifier.height(4.sdp))
         Text(
             text = stringResource(R.string.price_currency, formatAmount(balance)),
             style = xlSemiBold.copy(color = Base_white)
@@ -192,12 +192,12 @@ private fun TransactionItem(transaction: WalletTransaction) {
     Row(
         modifier = Modifier
             .walletCardSurface()
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+            .padding(12.sdp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(dimensionResource(com.intuit.sdp.R.dimen._36sdp))
+                .size(36.sdp)
                 .clip(CircleShape)
                 .background(color.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center
@@ -206,11 +206,11 @@ private fun TransactionItem(transaction: WalletTransaction) {
                 painter = painterResource(if (isCredit) R.drawable.ic_add else R.drawable.ic_minus),
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                modifier = Modifier.size(18.sdp)
             )
         }
 
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+        Spacer(modifier = Modifier.width(10.sdp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -221,12 +221,12 @@ private fun TransactionItem(transaction: WalletTransaction) {
                 overflow = TextOverflow.Ellipsis
             )
             transaction.createdAt?.let { createdAt ->
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._2sdp)))
+                Spacer(modifier = Modifier.height(2.sdp))
                 CreatedAtLines(createdAt = createdAt)
             }
         }
 
-        Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
+        Spacer(modifier = Modifier.width(8.sdp))
 
         Text(
             text = stringResource(R.string.price_currency, formatAmount(amount, showPlus = true)),

@@ -15,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.R
@@ -24,15 +23,16 @@ import com.ovasta.logisticsapp.base.Error50
 import com.ovasta.logisticsapp.base.Error600
 import com.ovasta.logisticsapp.base.Error700
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
 
 /** Warning about the courier's wallet (e.g. a low balance), sent by `home` as [message]. */
 @Composable
 fun WalletWarningCard(message: String) {
     Card(
-        shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+        shape = RoundedCornerShape(8.sdp),
         colors = CardDefaults.cardColors(containerColor = Error50),
         border = BorderStroke(
-            width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            width = 1.sdp,
             color = Error300
         ),
         modifier = Modifier.fillMaxWidth()
@@ -40,16 +40,16 @@ fun WalletWarningCard(message: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                .padding(12.sdp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_info),
                 contentDescription = null,
                 tint = Error600,
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._20sdp))
+                modifier = Modifier.size(20.sdp)
             )
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._10sdp)))
+            Spacer(modifier = Modifier.width(10.sdp))
             Text(
                 text = message,
                 style = xsMedium.copy(color = Error700)

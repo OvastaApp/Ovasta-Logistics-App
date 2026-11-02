@@ -39,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,6 +71,7 @@ import com.ovasta.logisticsapp.presentation.profile.presentation.components.Load
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.NewTopUpBottomSheet
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.formatAmount
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.walletCardSurface
+import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun ChargeScreen(viewModel: ChargeViewModel) {
@@ -186,8 +186,8 @@ fun ChargeContent(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                contentPadding = PaddingValues(12.sdp),
+                verticalArrangement = Arrangement.spacedBy(8.sdp)
             ) {
                 // Before the first load returns only the refresh indicator shows
                 if (requests != null) {
@@ -223,28 +223,28 @@ private fun NewTopUpBar(onClick: () -> Unit) {
             .background(Base_white)
     ) {
         HorizontalDivider(
-            thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+            thickness = 1.sdp,
             color = Gray200
         )
         Button(
             onClick = onClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(com.intuit.sdp.R.dimen._16sdp)),
-            shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
+                .padding(16.sdp),
+            shape = RoundedCornerShape(8.sdp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary),
             contentPadding = PaddingValues(
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                vertical = 10.sdp,
+                horizontal = 16.sdp
             )
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_add),
                 contentDescription = null,
                 tint = Base_white,
-                modifier = Modifier.size(dimensionResource(com.intuit.sdp.R.dimen._18sdp))
+                modifier = Modifier.size(18.sdp)
             )
-            Spacer(modifier = Modifier.width(dimensionResource(com.intuit.sdp.R.dimen._6sdp)))
+            Spacer(modifier = Modifier.width(6.sdp))
             Text(
                 text = stringResource(R.string.new_top_up),
                 style = mdMedium.copy(color = Base_white)
@@ -259,7 +259,7 @@ private fun TopUpRequestCard(request: TopUpRequest) {
     Column(
         modifier = Modifier
             .walletCardSurface()
-            .padding(dimensionResource(com.intuit.sdp.R.dimen._12sdp))
+            .padding(12.sdp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -274,13 +274,13 @@ private fun TopUpRequestCard(request: TopUpRequest) {
         }
 
         request.createdAt?.let { createdAt ->
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+            Spacer(modifier = Modifier.height(4.sdp))
             CreatedAtLines(createdAt = createdAt)
         }
 
         // The reviewer approved a different amount than requested
         request.adjustedAmount?.takeIf { status != TopUpStatus.REJECTED }?.let { adjustedAmount ->
-            Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+            Spacer(modifier = Modifier.height(4.sdp))
             Text(
                 text = stringResource(
                     R.string.approved_amount,
@@ -295,7 +295,7 @@ private fun TopUpRequestCard(request: TopUpRequest) {
 
         if (status == TopUpStatus.REJECTED) {
             request.rejectionReason?.takeIf { it.isNotBlank() }?.let { reason ->
-                Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._4sdp)))
+                Spacer(modifier = Modifier.height(4.sdp))
                 Text(
                     text = stringResource(R.string.rejection_reason, reason),
                     style = xsMedium.copy(color = Error500)
@@ -318,11 +318,11 @@ private fun TopUpStatusTag(status: TopUpStatus) {
         modifier = Modifier
             .background(
                 color.copy(alpha = 0.1f),
-                RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._16sdp))
+                RoundedCornerShape(16.sdp)
             )
             .padding(
-                horizontal = dimensionResource(com.intuit.sdp.R.dimen._10sdp),
-                vertical = dimensionResource(com.intuit.sdp.R.dimen._4sdp)
+                horizontal = 10.sdp,
+                vertical = 4.sdp
             )
     )
 }

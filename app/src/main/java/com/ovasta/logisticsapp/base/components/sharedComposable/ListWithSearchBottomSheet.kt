@@ -33,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.R
@@ -50,6 +49,7 @@ import kotlin.collections.forEach
 import kotlin.let
 import kotlin.text.contains
 import kotlin.text.isEmpty
+import com.ovasta.logisticsapp.base.ext.sdp
 
 
 data class MultiSelectItem(
@@ -79,7 +79,7 @@ fun ListWithSearchBottomSheet(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = dimensionResource(com.intuit.sdp.R.dimen._400sdp))
+            .heightIn(max = 400.sdp)
             .background(Color.White)
     ) {
         Column(
@@ -92,10 +92,10 @@ fun ListWithSearchBottomSheet(
                     .fillMaxWidth()
                     .background(Color.White)
                     .padding(
-                        start = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
-                        end = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
-                        bottom = dimensionResource(com.intuit.sdp.R.dimen._22sdp),
-                        top = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                        start = 16.sdp,
+                        end = 16.sdp,
+                        bottom = 22.sdp,
+                        top = 16.sdp
                     ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -129,9 +129,9 @@ fun ListWithSearchBottomSheet(
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = dimensionResource(com.intuit.sdp.R.dimen._12sdp)),
+                    .padding(top = 12.sdp),
                 color = Gray200,
-                thickness = dimensionResource(com.intuit.sdp.R.dimen._1sdp)
+                thickness = 1.sdp
             )
 
 
@@ -158,33 +158,33 @@ fun OptionsList(
     }
 
     filteredItems.forEach { option ->
-        Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._12sdp)))
+        Spacer(modifier = Modifier.height(12.sdp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(dimensionResource(com.intuit.sdp.R.dimen._44sdp))
+                .height(44.sdp)
                 .padding(
-                    start = dimensionResource(com.intuit.sdp.R.dimen._16sdp),
-                    end = dimensionResource(com.intuit.sdp.R.dimen._16sdp)
+                    start = 16.sdp,
+                    end = 16.sdp
                 )
                 .background(
                     if (selectedOption?.id == option.id) Primary50 else White,
-                    shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    shape = RoundedCornerShape(8.sdp)
                 )
                 .border(
-                    dimensionResource(com.intuit.sdp.R.dimen._1sdp),
+                    1.sdp,
                     color = if (selectedOption?.id == option.id) Primary50 else Gray200,
-                    RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp))
+                    RoundedCornerShape(8.sdp)
                 )
                 .clickable {
                     selectedOption = option
                     onSelectOption(option)
                 }
-                .padding(vertical = dimensionResource(com.intuit.sdp.R.dimen._10sdp))
+                .padding(vertical = 10.sdp)
                 .testTag("listItem_${option.title}"),
         verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = option.title, style = mdRegular.copy(color = Gray900), modifier = Modifier.padding(start = dimensionResource(com.intuit.sdp.R.dimen._14sdp)))
+            Text(text = option.title, style = mdRegular.copy(color = Gray900), modifier = Modifier.padding(start = 14.sdp))
             Spacer(modifier = Modifier.weight(1f))
             RadioButton(
                 selected = selectedOption?.id == option.id,
