@@ -54,10 +54,16 @@ Library choices:
      - a 1024px app icon
      - fastlane/match signing, done in Phase 6
 3. **Data layer to commonMain.**
-   - Rewrite the Retrofit APIs as Ktor: Login, Home, Settings, OrderDetails, Wallet.
-   - Port interceptors to Ktor plugins (headers, error mapping, cache).
-   - Move the Firestore data sources (`HomeFirebaseRemoteDataSource`, `OrderDetailsRemoteDataSource`) to GitLive: `snapshots` Flow, `set(merge = true)`, `FieldValue.serverTimestamp`, `@Serializable` models instead of `@PropertyName` / `toObject`.
-   - Firebase custom-token sign-in uses GitLive `signInWithCustomToken`.
+   - ✅ REST on Ktor (`shared/.../data/remote/HttpClientFactory.kt`). It behaves like the old interceptors: same headers, `APIException` / `NetworkException` mapping, and the OkHttp disk cache plus HTTP/1.1 on Android. The 5 APIs are Ktor classes with the same methods; uploads take JPEG bytes. The REST models, response and exception types and the Home/Settings remote data sources are in `:shared`, wired by the shared Koin `networkModule`. Retrofit is gone. Covered by `HttpClientFactoryTest` (MockEngine) and `NetworkModuleTest`.
+   - Next, storage: `SessionStore` interface in commonMain.
+     - Android: wraps today's encrypted `DataStore<SessionPreferences>` (Keystore AES), so existing sessions are kept.
+     - iOS: stores the session JSON in the Keychain. CryptoKit is Swift-only, and the session is small.
+     - `SettingsRepository`, the local data source and `SessionHeaderCache` then move to `:shared`.
+   - Next, Firestore: GitLive `dev.gitlive:firebase-firestore` / `firebase-auth` **2.7.0**.
+     - Version choice: 2.7.0 is built on Firebase BOM 34.18, the same major as the app's 34.2. 2.4.0 matches Kotlin 2.2.20 but is on BOM 33.x.
+     - Effect: Android Firebase rises to 34.18, so regression-test Firestore, push and Crashlytics. Match the iOS pods to the Firebase iOS SDK that 2.7.0 expects.
+     - Work: move `HomeFirebaseRemoteDataSource` and the Firestore half of `OrderDetailsRemoteDataSource` (`snapshots` Flow, `set(merge = true)`, batch update, `FieldValue.serverTimestamp`), and replace `@PropertyName` / `toObject` with `@Serializable` models. Custom-token sign-in uses GitLive `signInWithCustomToken`.
+   - Stays in the app until Phase 4/5: `Uri` image compression, location, Geocoder and the Android string resources (behind `NetworkErrorMessages`).
 4. **UI to commonMain.** Move theme, components, the 8 screens, about 12 sheets and dialogs, and the ViewModels (KMP `lifecycle-viewmodel` + `koin-compose-viewmodel`). Replace `R.*` with `Res.*`. Move `LocaleHelper` to the seller app's `LanguageApplier` (Arabic default, RTL).
 5. **Platform features:** tracking and notifications, detailed below.
 6. **Thin apps.**
