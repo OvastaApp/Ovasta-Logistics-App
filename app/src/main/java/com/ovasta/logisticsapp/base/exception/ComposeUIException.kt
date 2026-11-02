@@ -2,17 +2,15 @@ package com.ovasta.logisticsapp.base.exception
 
 import android.content.Context
 import androidx.annotation.StringRes
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
 import com.ovasta.logisticsapp.R
 import java.io.IOException
 
 data class ComposeUIException(
     @StringRes val exceptionTitleResource: Int? = null,
-    @SerializedName("msg", alternate = ["message"]) var errorMessage: String?,
+    var errorMessage: String?,
     @StringRes val exceptionMessageResource: Int? = null,
-    @Expose var code: Int?,
-    @SerializedName("data") val data: Any? = null,
+    var code: Int?,
+    val data: Any? = null,
     val actions: List<(() -> Unit)> = listOf(),
 ) : IOException() {
 

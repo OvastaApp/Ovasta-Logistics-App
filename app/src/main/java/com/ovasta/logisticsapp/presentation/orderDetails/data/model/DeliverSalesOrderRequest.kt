@@ -1,7 +1,9 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class DeliverSalesOrderRequest(
-    @SerializedName("collected_amount") val collectedAmount: Double
+    @SerialName("collected_amount") val collectedAmount: Double
 )

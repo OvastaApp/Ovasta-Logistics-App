@@ -2,9 +2,14 @@ package com.ovasta.logisticsapp.base.interceptor
 
 import com.ovasta.logisticsapp.base.exception.NetworkException
 import com.ovasta.logisticsapp.data.RemoteConstants
-import com.google.gson.Gson
 import com.ovasta.logisticsapp.base.exception.APIException
 import com.ovasta.logisticsapp.base.local.repository.ResourcesRepository
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNames
 import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -16,7 +21,7 @@ import java.nio.charset.Charset
 
 class ErrorMappingInterceptor(
     private val resourcesRepository: ResourcesRepository,
-    private val gsonPareser: Gson
+    private val json: Json
 ) : Interceptor {
 
     private val keyJson = "json"
@@ -50,9 +55,14 @@ class ErrorMappingInterceptor(
                         resourcesRepository.getSocketTimeoutExceptionMessage()
                     )
                 } else {
-                    val apiException = gsonPareser.fromJson(responseBody, APIException::class.java)
-                    apiException.code = response.code
-                    throw apiException
+                    val error = runCatching {
+                        json.decodeFromString<ApiErrorBody>(responseBody)
+                    }.getOrNull()
+                    throw APIException(
+                        code = response.code,
+                        errorMessage = error?.message ?: resourcesRepository.getGenericUnknownMessage(),
+                        data = error?.data
+                    )
                 }
             }
         } else {
@@ -68,4 +78,12 @@ class ErrorMappingInterceptor(
     private fun isJsonTypeResponse(body: ResponseBody?): Boolean {
         return body?.contentType() != null && body.contentType()!!.subtype.lowercase() == keyJson
     }
+
+    /** Error body of a failed request; the backend sends the text as "msg" or "message". */
+    @OptIn(ExperimentalSerializationApi::class)
+    @Serializable
+    private class ApiErrorBody(
+        @SerialName("msg") @JsonNames("message") val message: String? = null,
+        @SerialName("data") val data: JsonElement? = null
+    )
 }

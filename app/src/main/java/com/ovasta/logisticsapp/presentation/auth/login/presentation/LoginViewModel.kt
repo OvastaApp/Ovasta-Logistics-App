@@ -116,7 +116,7 @@ class LoginViewModel(
             runCatching {
                 loginRepository.login(phone, password, userType.typeId, fcmToken)
             }.onSuccess { response ->
-                val user = response.data
+                val user = requireNotNull(response.data) { "Login response has no user" }
                 user.token = response.token
                 settingsRepository.saveUserData(user)
                 settingsRepository.saveFcmToken(fcmToken ?: "")

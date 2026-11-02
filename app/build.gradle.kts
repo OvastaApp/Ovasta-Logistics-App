@@ -117,14 +117,13 @@ dependencies {
     implementation(libs.ssp)
 
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.google.gson)
 
     implementation(libs.androidx.datastore.preferences)
 
 
     // retrofit
     implementation(libs.squareup.retrofit)
-    implementation(libs.squareup.converter.gson)
+    implementation(libs.squareup.converter.kotlinx.serialization)
 
     //OKHTTP
     implementation(libs.squareup.okhttp)

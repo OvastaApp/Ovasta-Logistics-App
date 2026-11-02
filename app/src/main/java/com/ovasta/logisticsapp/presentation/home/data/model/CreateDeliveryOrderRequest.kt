@@ -1,10 +1,12 @@
 package com.ovasta.logisticsapp.presentation.home.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class CreateDeliveryOrderRequest(
-    @SerializedName("delivery_price") val deliveryPrice: Double,
-    @SerializedName("receiver_mobile") val receiverMobile: String? = null,
-    @SerializedName("to_address") val toAddress: String? = null,
-    @SerializedName("note") val note: String? = null,
+    @SerialName("delivery_price") val deliveryPrice: Double,
+    @SerialName("receiver_mobile") val receiverMobile: String? = null,
+    @SerialName("to_address") val toAddress: String? = null,
+    @SerialName("note") val note: String? = null,
 )

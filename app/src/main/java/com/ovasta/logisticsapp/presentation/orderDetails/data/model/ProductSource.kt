@@ -1,13 +1,15 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data.model
 
 import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Keep
+@Serializable
 data class ProductSource(
-    @SerializedName("id")
+    @SerialName("id")
     val id: Int? = null,
 
-    @SerializedName("name")
+    @SerialName("name")
     val name: String? = null,
 )

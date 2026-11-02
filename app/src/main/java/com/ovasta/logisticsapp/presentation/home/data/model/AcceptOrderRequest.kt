@@ -1,7 +1,9 @@
 package com.ovasta.logisticsapp.presentation.home.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class AcceptOrderRequest(
-    @SerializedName("id") val id: Int
+    @SerialName("id") val id: Int
 )

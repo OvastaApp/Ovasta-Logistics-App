@@ -1,7 +1,9 @@
 package com.ovasta.logisticsapp.presentation.home.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class UpdateFeesRequest(
-    @SerializedName("delivery_price") val deliveryPrice: String
+    @SerialName("delivery_price") val deliveryPrice: String
 )

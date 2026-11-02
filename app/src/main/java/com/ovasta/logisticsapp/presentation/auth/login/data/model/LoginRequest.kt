@@ -1,10 +1,12 @@
 package com.ovasta.logisticsapp.presentation.auth.login.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class LoginRequest(
-    @SerializedName("mobile") val mobile: String,
-    @SerializedName("password") val password: String,
-    @SerializedName("type_id") val userTypeId: Int,
-    @SerializedName("fcm_token") val fcmToken: String? = null
+    @SerialName("mobile") val mobile: String,
+    @SerialName("password") val password: String,
+    @SerialName("type_id") val userTypeId: Int,
+    @SerialName("fcm_token") val fcmToken: String? = null
 )

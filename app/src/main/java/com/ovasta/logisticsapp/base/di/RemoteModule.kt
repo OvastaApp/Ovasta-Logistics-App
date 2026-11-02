@@ -1,6 +1,5 @@
 package com.ovasta.logisticsapp.base.di
 
-import com.google.gson.GsonBuilder
 import com.ovasta.logisticsapp.base.interceptor.CacheProviderInterceptor
 import com.ovasta.logisticsapp.base.interceptor.ErrorMappingInterceptor
 import com.ovasta.logisticsapp.base.interceptor.HeadersInterceptor
@@ -9,13 +8,25 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.ovasta.logisticsapp.BuildConfig
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
+
+// Lenient like Gson was: unknown keys, nulls and missing fields fall back to defaults,
+// null fields are left out of request bodies
+val apiJson = Json {
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+    explicitNulls = false
+    encodeDefaults = true
+    isLenient = true
+}
 
 val remoteModule = module {
     single { HeadersInterceptor(get()) }
@@ -43,12 +54,12 @@ val remoteModule = module {
         builder.build()
     }
 
-    single { GsonBuilder().create() }
+    single { apiJson }
 
     single<Retrofit> {
         Retrofit.Builder()
             .baseUrl("http://167.172.209.252/api/logistics/")
-            .addConverterFactory(GsonConverterFactory.create(get()))
+            .addConverterFactory(get<Json>().asConverterFactory("application/json".toMediaType()))
             .client(get())
             .build()
     }

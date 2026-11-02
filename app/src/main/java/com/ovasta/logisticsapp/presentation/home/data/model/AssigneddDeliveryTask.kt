@@ -4,52 +4,54 @@ import android.os.Parcelable
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.IgnoreExtraProperties
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @IgnoreExtraProperties
 @Keep
-// All fields are nullable: Gson bypasses Kotlin defaults and writes null when the API returns null
+// All fields are nullable: the API returns null for some of them
+@Serializable
 data class AssignedDeliveryTask(
 
-    @SerializedName("order_id")
+    @SerialName("order_id")
     var orderId: Int? = null,
 
-    @SerializedName("status_id")
+    @SerialName("status_id")
     var statusId: Int? = null,
 
-    @SerializedName("status_name")
+    @SerialName("status_name")
     var statusName: String? = null,
 
-    @SerializedName("sender_mobile")
+    @SerialName("sender_mobile")
     var senderMobile: String? = null,
 
-    @SerializedName("from_address")
+    @SerialName("from_address")
     var fromAddress: String? = null,
 
-    @SerializedName("to_address")
+    @SerialName("to_address")
     var toAddress: String? = null,
 
-    @SerializedName("receiver_mobile")
+    @SerialName("receiver_mobile")
     var receiverMobile: String? = null,
 
-    @SerializedName("delivery_price")
+    @SerialName("delivery_price")
     var deliveryPrice: Double? = null,
 
-    @SerializedName("collection_amount")
+    @SerialName("collection_amount")
     var collectionAmount: Double? = null,
 
-    @SerializedName("note")
+    @SerialName("note")
     var note: String? = null,
 
-    @SerializedName("created_at")
+    @SerialName("created_at")
     var createdAt: String? = null,
 
-    @SerializedName("updated_at")
+    @SerialName("updated_at")
     var updatedAt: String? = null,
 
-    @SerializedName("assigned_at")
+    @SerialName("assigned_at")
     var assignedAt: String? = null
 
 ) : Parcelable

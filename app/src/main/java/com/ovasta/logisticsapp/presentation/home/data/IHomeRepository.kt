@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
+import kotlinx.serialization.json.JsonElement
 import android.content.Context
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
@@ -61,7 +62,7 @@ interface IHomeRepository {
     /** Marks an assigned (sales) order as started; called when the agent first opens it. */
     suspend fun startSalesOrder(orderId: Int)
 
-    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
+    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<JsonElement>
     suspend fun createDeliveryOrder(
         deliveryPrice: Double,
         receiverMobile: String?,

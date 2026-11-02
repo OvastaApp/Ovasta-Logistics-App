@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
+import kotlinx.serialization.json.JsonElement
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
 import com.ovasta.logisticsapp.presentation.home.data.model.CreateDeliveryOrderRequest
@@ -22,7 +23,7 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
 
     override suspend fun getHome() = homeApi.getHome()
 
-    override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit> {
+    override suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<JsonElement> {
         return when (status) {
             is OrderSteps.Assigned -> homeApi.acceptDeliveryOrder(orderId)
             is OrderSteps.Picked -> homeApi.pickDeliveryOrder(orderId)
@@ -30,7 +31,7 @@ class HomeServerRemoteDataSource(private val homeApi: HomeApi) : IHomeServerRemo
         }
     }
 
-    override suspend fun getAssignedDeliveryOrders() = homeApi.getDeliveryOrders().data
+    override suspend fun getAssignedDeliveryOrders() = homeApi.getDeliveryOrders().data.orEmpty()
     override suspend fun startSalesOrder(orderId: Int) {
         homeApi.startSalesOrder(orderId)
     }

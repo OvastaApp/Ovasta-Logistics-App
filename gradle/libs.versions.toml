@@ -2,12 +2,10 @@
 agp = "8.11.1"
 coilCompose = "3.3.0"
 coilComposeVersion = "2.7.0"
-converterGson = "3.0.0"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.7"
 exifinterface = "1.4.1"
 firebaseBom = "34.2.0"
-gson = "2.13.1"
 koinAndroid = "4.1.0"
 koinAndroidxScope = "2.2.3"
 kotlinxSerializationJson = "1.9.0"
@@ -68,8 +66,7 @@ koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", versi
 #koin-androidx-scope = { module = "io.insert-koin:koin-androidx-scope", version.ref = "koinAndroidxScope" }
 #koin-androidx-viewmodel = { module = "io.insert-koin:koin-androidx-viewmodel", version.ref = "koinAndroid" }
 security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
-squareup-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
-google-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+squareup-converter-kotlinx-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lifecycle-extensions = { module = "android.arch.lifecycle:extensions", version.ref = "lifecycleExtensions" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

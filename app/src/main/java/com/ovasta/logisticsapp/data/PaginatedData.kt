@@ -1,14 +1,16 @@
 package com.ovasta.logisticsapp.data
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /** One page of a paginated list, as sent inside [ApiResponse.data] by paginated endpoints. */
+@Serializable
 data class PaginatedData<T>(
-    @SerializedName("current_page") val currentPage: Int? = null,
-    @SerializedName("data") val data: List<T>? = null,
-    @SerializedName("last_page") val lastPage: Int? = null,
-    @SerializedName("per_page") val perPage: Int? = null,
-    @SerializedName("total") val total: Int? = null,
+    @SerialName("current_page") val currentPage: Int? = null,
+    @SerialName("data") val data: List<T>? = null,
+    @SerialName("last_page") val lastPage: Int? = null,
+    @SerialName("per_page") val perPage: Int? = null,
+    @SerialName("total") val total: Int? = null,
 ) {
     val hasNextPage: Boolean get() = (currentPage ?: 0) < (lastPage ?: 0)
 }

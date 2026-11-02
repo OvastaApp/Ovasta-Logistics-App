@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.profile.data
 
+import kotlinx.serialization.json.JsonElement
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.data.PaginatedData
 import com.ovasta.logisticsapp.presentation.profile.data.model.TopUpRequest
@@ -27,5 +28,5 @@ interface WalletApi {
     suspend fun createTopUpRequest(
         @Part("amount") amount: RequestBody,
         @Part proof: MultipartBody.Part
-    ): ApiResponse<Any>
+    ): ApiResponse<JsonElement>
 }

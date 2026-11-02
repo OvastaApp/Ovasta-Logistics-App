@@ -1,22 +1,26 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /** Body of `sales-orders/{id}/update`: new quantity and unit price for one product. */
+@Serializable
 data class UpdateSalesOrderProductRequest(
-    @SerializedName("catalog_product") val catalogProduct: Boolean,
-    @SerializedName("product") val product: ProductUpdate,
+    @SerialName("catalog_product") val catalogProduct: Boolean,
+    @SerialName("product") val product: ProductUpdate,
 ) {
     /** [quantity] and [price] can be fractional, e.g. 0.25 kg at 20.25. */
+    @Serializable
     data class ProductUpdate(
-        @SerializedName("id") val id: Int,
-        @SerializedName("quantity") val quantity: Double,
-        @SerializedName("price") val price: Double,
+        @SerialName("id") val id: Int,
+        @SerialName("quantity") val quantity: Double,
+        @SerialName("price") val price: Double,
     )
 }
 
 /** Body of `sales-orders/{id}/delete-product`. */
+@Serializable
 data class DeleteSalesOrderProductRequest(
-    @SerializedName("catalog_product") val catalogProduct: Boolean,
-    @SerializedName("product_id") val productId: Int,
+    @SerialName("catalog_product") val catalogProduct: Boolean,
+    @SerialName("product_id") val productId: Int,
 )

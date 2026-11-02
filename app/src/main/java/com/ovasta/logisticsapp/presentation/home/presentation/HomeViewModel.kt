@@ -615,7 +615,7 @@ class HomeViewModel(
                 homeRepository.getPartnerStatus()
             }.onSuccess { profileConfig ->
                 setComposeUILoading(false)
-                val isOnline = profileConfig.data.isOnline ?: false
+                val isOnline = profileConfig.data?.isOnline ?: false
                 if (isOnline && !isLocationEnabled()) {
                     // Backend says online but location is off — don't start tracking, set offline
                     updateUiState(_viewState.value.copy(isTracking = false))

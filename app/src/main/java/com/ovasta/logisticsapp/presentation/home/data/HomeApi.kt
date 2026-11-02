@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
+import kotlinx.serialization.json.JsonElement
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.ChangeStatusRequest
@@ -37,16 +38,16 @@ interface HomeApi {
 
     /** Marks an assigned (sales) order as started when the agent first opens it. */
     @POST("sales-orders/{id}/confirm-receive")
-    suspend fun startSalesOrder(@Path("id") orderId: Int): ApiResponse<Any>
+    suspend fun startSalesOrder(@Path("id") orderId: Int): ApiResponse<JsonElement>
 
     @POST("delivery-orders/{id}/accept")
-    suspend fun acceptDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
+    suspend fun acceptDeliveryOrder(@Path("id") orderId: Int): ApiResponse<JsonElement>
 
     @POST("delivery-orders/{id}/pick")
-    suspend fun pickDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
+    suspend fun pickDeliveryOrder(@Path("id") orderId: Int): ApiResponse<JsonElement>
 
     @POST("delivery-orders/{id}/deliver")
-    suspend fun deliverDeliveryOrder(@Path("id") orderId: Int): ApiResponse<Unit>
+    suspend fun deliverDeliveryOrder(@Path("id") orderId: Int): ApiResponse<JsonElement>
 
     @POST("delivery-orders")
     suspend fun createDeliveryOrder(@Body createDeliveryOrderRequest: CreateDeliveryOrderRequest)

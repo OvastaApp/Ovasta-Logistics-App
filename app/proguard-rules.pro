@@ -10,10 +10,6 @@
 -keep class com.ovasta.logisticsapp.presentation.nav.AvailableTasks { *; }
 -keep class com.ovasta.logisticsapp.presentation.nav.TaskDetails { *; }
 
-# ---- Gson: keep @SerializedName fields (Gson 2.11+ handles this, but explicit for safety) ----
-# APIException extends IOException and is deserialized via Gson
--keep class com.ovasta.logisticsapp.base.exception.APIException { <fields>; }
-
 # ---- kotlinx.serialization ----
 -keepattributes *Annotation*, InnerClasses
 -keepclassmembers class kotlinx.serialization.json.** { *** Companion; }

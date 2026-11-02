@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
+import kotlinx.serialization.json.JsonElement
 import com.ovasta.logisticsapp.data.ApiResponse
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeData
@@ -26,7 +27,7 @@ interface IHomeServerRemoteDataSource {
     /** Fetches the courier's account and wallet state. */
     suspend fun getHome(): ApiResponse<HomeData?>
 
-    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<Unit>
+    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<JsonElement>
 
     suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
 

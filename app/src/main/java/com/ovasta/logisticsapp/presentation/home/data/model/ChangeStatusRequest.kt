@@ -1,9 +1,11 @@
 package com.ovasta.logisticsapp.presentation.home.data.model
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ChangeStatusRequest(
-    @SerializedName("online") val isOnline: Boolean,
-    @SerializedName("lat") val lat: Double? = null,
-    @SerializedName("long") val long: Double? = null
+    @SerialName("online") val isOnline: Boolean,
+    @SerialName("lat") val lat: Double? = null,
+    @SerialName("long") val long: Double? = null
 )
