@@ -1,41 +1,43 @@
 package com.ovasta.logisticsapp.data.setting.data.datastore
 
+import android.content.Context
+import android.util.Base64
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
-import com.ovasta.logisticsapp.data.setting.model.Country
-import com.ovasta.logisticsapp.data.setting.model.RemoteConfigModel
-import com.ovasta.logisticsapp.base.constants.LocalConstants.LANGUAGE_AR_ISO
+import androidx.datastore.preferences.preferencesDataStoreFile
+import com.ovasta.logisticsapp.base.constants.SharedPreferenceConstants
 import com.ovasta.logisticsapp.base.encryption.Crypto
-import com.ovasta.logisticsapp.data.User
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
-import android.util.Base64
 
-@Serializable
-data class SessionPreferences(
-    val userLang: String = LANGUAGE_AR_ISO,
-    val user: User? = null,
-    val userCountry: Country? = null,
-    val remoteConfigModel: RemoteConfigModel? = null,
-    val isLoggedIn: Boolean = false,
-    val deviceRam: String = "",
-    val accessToken: String = "",
-    val deviceId: String = "",
-    val isTracking: Boolean = false,
-    val fcmToken: String = "",
-    val locationConsentShown: Boolean = false,
+/**
+ * The session in the same encrypted DataStore file the app has always used, so existing
+ * sessions survive the move to :shared. Create only one per process.
+ */
+fun createAndroidSessionStore(context: Context): SessionStore = DataStoreSessionStore(
+    DataStoreFactory.create(
+        serializer = SessionPreferencesSerializer,
+        produceFile = {
+            context.preferencesDataStoreFile(SharedPreferenceConstants.PREFERENCE_NAME)
+        }
+    )
 )
 
-object SessionPreferencesSerializer : Serializer<SessionPreferences> {
+private class DataStoreSessionStore(private val dataStore: DataStore<SessionPreferences>) : SessionStore {
+    override val data: Flow<SessionPreferences> = dataStore.data
+
+    override suspend fun update(transform: (SessionPreferences) -> SessionPreferences) =
+        dataStore.updateData { transform(it) }
+}
+
+/** JSON encrypted with the Android Keystore key ([Crypto]) and Base64-encoded. */
+private object SessionPreferencesSerializer : Serializer<SessionPreferences> {
     override val defaultValue: SessionPreferences
         get() = SessionPreferences()
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
 
     override suspend fun readFrom(input: InputStream): SessionPreferences {
         return try {
@@ -52,7 +54,7 @@ object SessionPreferencesSerializer : Serializer<SessionPreferences> {
                 encryptedBytes.decodeToString()
             }
 
-            json.decodeFromString(jsonString)
+            SessionJson.decode(jsonString)
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -65,8 +67,7 @@ object SessionPreferencesSerializer : Serializer<SessionPreferences> {
         t: SessionPreferences,
         output: OutputStream
     ) {
-        val json = Json.encodeToString(t)
-        val bytes = json.toByteArray()
+        val bytes = SessionJson.encode(t).toByteArray()
 
         val encryptedBytes = Crypto.encrypt(bytes)
 

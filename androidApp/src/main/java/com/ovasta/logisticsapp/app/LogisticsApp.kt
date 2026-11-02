@@ -7,7 +7,6 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
-import androidx.datastore.core.DataStore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.crashlyticsInfo.CrashlyticsUserInfoUseCase
@@ -16,7 +15,7 @@ import com.ovasta.logisticsapp.base.interceptor.SessionHeaderCache
 import com.ovasta.logisticsapp.base.local.LocaleHelper
 import com.ovasta.logisticsapp.base.services.LocationTrackerService
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
-import com.ovasta.logisticsapp.data.setting.data.datastore.SessionPreferences
+import com.ovasta.logisticsapp.data.setting.data.datastore.SessionStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,9 +32,9 @@ class LogisticsApp : Application() {
     override fun onCreate() {
         super.onCreate()
         startKoin(this@LogisticsApp)
-        val sessionDataStore: DataStore<SessionPreferences> by inject()
+        val sessionStore: SessionStore by inject()
         CoroutineScope(Dispatchers.IO).launch {
-            SessionHeaderCache.initialize(sessionDataStore)
+            SessionHeaderCache.initialize(sessionStore)
         }
 
         // Set user info for Crashlytics once per session

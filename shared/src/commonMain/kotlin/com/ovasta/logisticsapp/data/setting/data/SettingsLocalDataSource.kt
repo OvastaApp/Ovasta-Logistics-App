@@ -1,22 +1,21 @@
 package com.ovasta.logisticsapp.data.setting.data
 
-import androidx.datastore.core.DataStore
 import com.ovasta.logisticsapp.base.constants.LocalConstants.LANGUAGE_AR_ISO
-import com.ovasta.logisticsapp.data.setting.data.datastore.SessionPreferences
 import com.ovasta.logisticsapp.data.User
-import kotlinx.coroutines.flow.Flow
+import com.ovasta.logisticsapp.data.setting.data.datastore.SessionPreferences
+import com.ovasta.logisticsapp.data.setting.data.datastore.SessionStore
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 
-class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreferences>) :
+class SettingsLocalDataSource(private val sessionStore: SessionStore) :
     ISettingsLocalDataSource {
 
     override suspend fun getUseData(): User? {
-        return dataStore.data.first().user
+        return sessionStore.data.first().user
     }
+
     override suspend fun clearUserData() {
         val currentLang = LANGUAGE_AR_ISO
-        dataStore.updateData {
+        sessionStore.update {
             SessionPreferences(
                 userLang = currentLang
             )
@@ -24,7 +23,7 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
     }
 
     override suspend fun saveUserData(user: User) {
-        dataStore.updateData {
+        sessionStore.update {
             it.copy(
                 user = user,
                 accessToken = user.token ?: "",
@@ -33,20 +32,20 @@ class SettingsLocalDataSource(private val dataStore: DataStore<SessionPreference
     }
 
     override suspend fun saveFcmToken(token: String) {
-        dataStore.updateData {
+        sessionStore.update {
             it.copy(fcmToken = token)
         }
     }
 
     override suspend fun getFcmToken(): String {
-        return dataStore.data.first().fcmToken
+        return sessionStore.data.first().fcmToken
     }
 
     override suspend fun isLocationConsentShown(): Boolean {
-        return dataStore.data.first().locationConsentShown
+        return sessionStore.data.first().locationConsentShown
     }
 
     override suspend fun setLocationConsentShown(shown: Boolean) {
-        dataStore.updateData { it.copy(locationConsentShown = shown) }
+        sessionStore.update { it.copy(locationConsentShown = shown) }
     }
 }

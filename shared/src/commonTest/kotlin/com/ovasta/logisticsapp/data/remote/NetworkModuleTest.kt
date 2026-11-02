@@ -1,6 +1,10 @@
 package com.ovasta.logisticsapp.data.remote
 
+import com.ovasta.logisticsapp.data.setting.InMemorySessionStore
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRemoteDataSource
+import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
+import com.ovasta.logisticsapp.data.setting.data.datastore.SessionStore
+import com.ovasta.logisticsapp.data.setting.sessionModule
 import com.ovasta.logisticsapp.presentation.auth.login.data.LoginApi
 import com.ovasta.logisticsapp.presentation.home.data.HomeApi
 import com.ovasta.logisticsapp.presentation.home.data.IHomeServerRemoteDataSource
@@ -16,7 +20,7 @@ import kotlin.test.assertNotNull
 
 class NetworkModuleTest {
 
-    // What the app provides (remoteModule on Android)
+    // What the app provides (remoteModule and settingModule on Android)
     private val appModule = module {
         single<HttpClientEngine> { MockEngine { respondOk() } }
         single<NetworkErrorMessages> {
@@ -25,12 +29,15 @@ class NetworkModuleTest {
                 override fun genericUnknown() = "unknown"
             }
         }
-        single { AccessTokenProvider { "" } }
+        single<SessionStore> { InMemorySessionStore() }
     }
 
     @Test
     fun resolvesEveryApiAndDataSource() {
-        val koin = koinApplication { modules(appModule, networkModule) }.koin
+        val koin = koinApplication { modules(appModule, networkModule, sessionModule) }.koin
+
+        assertNotNull(koin.get<ISettingsRepository>())
+        assertNotNull(koin.get<AccessTokenProvider>())
 
         assertNotNull(koin.get<LoginApi>())
         assertNotNull(koin.get<HomeApi>())

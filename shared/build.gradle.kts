@@ -48,6 +48,8 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             // The engine keeps the app's OkHttp disk cache (createAndroidHttpEngine)
             implementation(libs.squareup.okhttp)
+            // The session's encrypted DataStore file (createAndroidSessionStore)
+            implementation(libs.androidx.datastore.preferences)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
