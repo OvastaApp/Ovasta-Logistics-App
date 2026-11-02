@@ -1,8 +1,7 @@
 package com.ovasta.logisticsapp.data
 
-import org.koin.core.component.KoinComponent
 
-object FirebaseConstants : KoinComponent {
+object FirebaseConstants {
     const val FIRESTORE_ROOT_ORDERS_NAME: String = "orders"
     const val FIRESTORE_ROOT_ONLINE_DRIVERS_NAME: String = "online_drivers"
     const val FIRESTORE_ROOT_PICKERS_NAME: String = "pickers"

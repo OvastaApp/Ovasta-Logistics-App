@@ -55,15 +55,23 @@ Library choices:
      - fastlane/match signing, done in Phase 6
 3. **Data layer to commonMain.**
    - ✅ REST on Ktor (`shared/.../data/remote/HttpClientFactory.kt`). It behaves like the old interceptors: same headers, `APIException` / `NetworkException` mapping, and the OkHttp disk cache plus HTTP/1.1 on Android. The 5 APIs are Ktor classes with the same methods; uploads take JPEG bytes. The REST models, response and exception types and the Home/Settings remote data sources are in `:shared`, wired by the shared Koin `networkModule`. Retrofit is gone. Covered by `HttpClientFactoryTest` (MockEngine) and `NetworkModuleTest`.
-   - Next, storage: `SessionStore` interface in commonMain.
-     - Android: wraps today's encrypted `DataStore<SessionPreferences>` (Keystore AES), so existing sessions are kept.
-     - iOS: stores the session JSON in the Keychain. CryptoKit is Swift-only, and the session is small.
-     - `SettingsRepository`, the local data source and `SessionHeaderCache` then move to `:shared`.
-   - Next, Firestore: GitLive `dev.gitlive:firebase-firestore` / `firebase-auth` **2.7.0**.
-     - Version choice: 2.7.0 is built on Firebase BOM 34.18, the same major as the app's 34.2. 2.4.0 matches Kotlin 2.2.20 but is on BOM 33.x.
-     - Effect: Android Firebase rises to 34.18, so regression-test Firestore, push and Crashlytics. Match the iOS pods to the Firebase iOS SDK that 2.7.0 expects.
-     - Work: move `HomeFirebaseRemoteDataSource` and the Firestore half of `OrderDetailsRemoteDataSource` (`snapshots` Flow, `set(merge = true)`, batch update, `FieldValue.serverTimestamp`), and replace `@PropertyName` / `toObject` with `@Serializable` models. Custom-token sign-in uses GitLive `signInWithCustomToken`.
-   - Stays in the app until Phase 4/5: `Uri` image compression, location, Geocoder and the Android string resources (behind `NetworkErrorMessages`).
+   - ✅ Storage: `SessionStore` in commonMain, wired by the shared `sessionModule`.
+     - Android (`createAndroidSessionStore`): the same encrypted DataStore file, Keystore AES serializer and JSON as before, so saved logins are kept.
+     - iOS (`FileSessionStore`): the JSON in Application Support with data protection "until first unlock". It stays readable for background tracking while the phone is locked and is deleted with the app. This replaces the Keychain idea: Keychain items survive a reinstall.
+     - The settings repository, the local data source, `SessionHeaderCache` and the constants are in `:shared`. Covered by `SessionStorageTest`, including reading a session stored before the move.
+   - ✅ Firestore and Auth on GitLive **2.7.0** (shared `firebaseModule`).
+     - Version: 2.7.0 is built on Firebase BOM 34.18, so the BOM is now 34.18.0, up from 34.2.0. 2.4.0 matches Kotlin 2.2.20 but is on BOM 33.x.
+     - `HomeTask`, `FirebaseProduct` and `DeliveryTask` are `@Serializable`, with the same field names and defaults and a GitLive `Timestamp`.
+     - `HomeFirebaseRemoteDataSource` and the login data source and repository are in `:shared`. The Firestore half of `OrderDetailsRemoteDataSource` uses GitLive but stays in the app until its `Uri` uploads move.
+     - Disk persistence is still off.
+     - Differences from the old Android mapper:
+       - a field stored as `null` for a non-null `String` decodes as the text `"null"` instead of a raw null
+       - a document that can't be decoded is skipped instead of crashing the listener
+       - a listener error ends the order-details flow quietly, as before; the Home flows end with the error, as before
+     - `received_at` presence uses an `expect` helper over the native snapshot.
+     - The dead `HomeAssignedTask` copies and the `orderDetails` `HomeTask` are removed.
+     - Still to do: pin the iOS Firebase pods to the Firebase iOS SDK version GitLive 2.7.0 was built against (see its release notes) when setting up the Mac build.
+   - Stays in the app until Phase 4/5: `Uri` image compression, location, Geocoder, Crashlytics, FCM and the Android string resources (behind `NetworkErrorMessages`).
 4. **UI to commonMain.** Move theme, components, the 8 screens, about 12 sheets and dialogs, and the ViewModels (KMP `lifecycle-viewmodel` + `koin-compose-viewmodel`). Replace `R.*` with `Res.*`. Move `LocaleHelper` to the seller app's `LanguageApplier` (Arabic default, RTL).
 5. **Platform features:** tracking and notifications, detailed below.
 6. **Thin apps.**

@@ -38,6 +38,9 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             api(libs.koin.core)
+            // Firestore and Auth on Android and iOS; iosApp links the Firebase pods
+            api(libs.gitlive.firebase.firestore)
+            api(libs.gitlive.firebase.auth)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

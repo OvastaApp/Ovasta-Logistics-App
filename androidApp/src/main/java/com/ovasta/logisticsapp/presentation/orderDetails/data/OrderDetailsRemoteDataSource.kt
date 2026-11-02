@@ -2,9 +2,6 @@ package com.ovasta.logisticsapp.presentation.orderDetails.data
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import com.ovasta.logisticsapp.base.ext.compressImageToJpeg
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_PRODUCTS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
@@ -15,12 +12,15 @@ import com.ovasta.logisticsapp.presentation.orderDetails.data.model.DeleteSalesO
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.DeliverSalesOrderRequest
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.UpdateSalesOrderProductRequest
+import dev.gitlive.firebase.firestore.FieldValue
+import dev.gitlive.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 
 class OrderDetailsRemoteDataSource(
@@ -29,53 +29,32 @@ class OrderDetailsRemoteDataSource(
     private val context: Context,
 ) : IOrderDetailsRemoteDataSource {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun listenToOrderChanges(
         districtId: Int,
         taskId: Int
-    ): Flow<HomeTask> = callbackFlow {
-
+    ): Flow<HomeTask> {
         val orderDocument =
             db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
                 .collection(FIRESTORE_ROOT_ORDERS_NAME).document(taskId.toString())
 
+        // A listener error stops updates quietly, as before
+        val task = orderDocument.snapshots()
+            .mapNotNull { snapshot ->
+                if (!snapshot.exists) null else runCatching { snapshot.data<HomeTask>() }.getOrNull()
+            }
+            .catch { }
+
         // Products live in a `products` subcollection of the order document rather than
         // as an inline array field, so they need their own listener merged into the task.
-        var latestTask: HomeTask? = null
-        var latestProducts: List<FirebaseProduct>? = null
-
-        fun emitIfReady() {
-            val task = latestTask ?: return
-            trySend(task.copy(products = latestProducts.orEmpty()))
-        }
-
-        val taskRegistration = orderDocument.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                Log.e("orderDocListener", "Error", error)
-                return@addSnapshotListener
+        val products = orderDocument.collection(FIRESTORE_PRODUCTS_NAME).snapshots
+            .map { snapshot ->
+                snapshot.documents.mapNotNull { runCatching { it.data<FirebaseProduct>() }.getOrNull() }
             }
-            snapshot?.toObject(HomeTask::class.java)?.let { task ->
-                latestTask = task
-                emitIfReady()
-            }
-        }
+            .catch { }
+            .onStart { emit(emptyList()) }
 
-        val productsRegistration =
-            orderDocument.collection(FIRESTORE_PRODUCTS_NAME)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) {
-                        Log.e("orderProductsListener", "Error", error)
-                        return@addSnapshotListener
-                    }
-                    latestProducts = snapshot?.documents?.mapNotNull {
-                        it.toObject(FirebaseProduct::class.java)
-                    }.orEmpty()
-                    emitIfReady()
-                }
-
-        awaitClose {
-            taskRegistration.remove()
-            productsRegistration.remove()
+        return combine(task, products) { latestTask, latestProducts ->
+            latestTask.copy(products = latestProducts)
         }
     }
 
@@ -94,17 +73,15 @@ class OrderDetailsRemoteDataSource(
             val productId = product.productId ?: return@forEach
             batch.update(
                 productsCollection.document(productId.toString()),
-                mapOf(
-                    "item_price" to product.itemPrice,
-                    "quantity" to product.quantity,
-                    "picked_quantity" to product.pickedQuantity,
-                    "source" to product.source,
-                    "total_price" to product.totalPrice,
-                    "updated_at" to product.updatedAt,
-                )
+                "item_price" to product.itemPrice,
+                "quantity" to product.quantity,
+                "picked_quantity" to product.pickedQuantity,
+                "source" to product.source,
+                "total_price" to product.totalPrice,
+                "updated_at" to product.updatedAt,
             )
         }
-        batch.commit().await()
+        batch.commit()
     }
 
     override suspend fun updateOrderStatus(
@@ -114,15 +91,15 @@ class OrderDetailsRemoteDataSource(
         statusName: String,
         receivedAmount: Double?
     ) {
-        val fields = buildMap {
-            put("status_id", statusId)
-            put("status_name", statusName)
-            put("updated_at", FieldValue.serverTimestamp())
-            receivedAmount?.let { put("received_amount", it) }
+        val fields = buildList {
+            add("status_id" to statusId)
+            add("status_name" to statusName)
+            add("updated_at" to FieldValue.serverTimestamp)
+            receivedAmount?.let { add("received_amount" to it) }
         }
         db.collection(FIRESTORE_ROOT_DISTRICT_NAME).document(districtId.toString())
             .collection(FIRESTORE_ROOT_ORDERS_NAME).document(taskId.toString())
-            .update(fields).await()
+            .update(*fields.toTypedArray())
     }
 
     override suspend fun getProductSources(productId: Int): List<ProductSource> =

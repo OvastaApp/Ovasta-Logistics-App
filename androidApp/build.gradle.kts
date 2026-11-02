@@ -121,9 +121,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
-    implementation(libs.firebase.firestore)
     implementation(libs.firebase.messaging)
-    implementation(libs.firebase.auth)
     // Reads photo rotation so uploaded images are re-encoded upright
     implementation(libs.androidx.exifinterface)
     implementation(libs.security.crypto)

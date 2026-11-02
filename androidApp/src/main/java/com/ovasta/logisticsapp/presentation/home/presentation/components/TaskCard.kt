@@ -33,7 +33,8 @@ import com.ovasta.logisticsapp.base.StatusDelivered
 import com.ovasta.logisticsapp.base.StatusPicked
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
-import com.google.firebase.Timestamp
+import dev.gitlive.firebase.firestore.Timestamp
+import dev.gitlive.firebase.firestore.toMilliseconds
 import kotlin.text.ifEmpty
 import com.ovasta.logisticsapp.base.ext.sdp
 
@@ -120,7 +121,7 @@ fun TaskCard(
                 Spacer(modifier = Modifier.height(8.sdp))
 
                 AssignedElapsedTime(
-                    assignedAtMillis = assignedAt.toDate().time,
+                    assignedAtMillis = assignedAt.toMilliseconds().toLong(),
                     modifier = Modifier.testTag("assignedElapsedTime")
                 )
             }
