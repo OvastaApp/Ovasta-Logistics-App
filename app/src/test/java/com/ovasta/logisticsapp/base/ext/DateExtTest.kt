@@ -55,4 +55,23 @@ class DateExtTest {
         assertNull("not a date".toEpochMillisOrNull())
         assertNull("".toEpochMillisOrNull())
     }
+
+    @Test
+    fun `formats display date and time in the device time zone`() {
+        val default = TimeZone.getDefault()
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+            assertEquals("18/10/2026", "2026-10-18T14:05:00Z".toDisplayDate())
+            assertEquals("⁦02:05 PM⁩", "2026-10-18T14:05:00Z".toDisplayTime())
+            assertEquals("⁦12:00 AM⁩", "2026-10-18T00:00:00Z".toDisplayTime())
+        } finally {
+            TimeZone.setDefault(default)
+        }
+    }
+
+    @Test
+    fun `display helpers fall back for unreadable dates`() {
+        assertEquals("not a date", "not a date".toDisplayDate())
+        assertNull("not a date".toDisplayTime())
+    }
 }

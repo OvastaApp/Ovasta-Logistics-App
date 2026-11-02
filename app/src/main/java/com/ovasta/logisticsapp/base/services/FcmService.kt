@@ -5,8 +5,6 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.ovasta.logisticsapp.R
@@ -54,31 +52,16 @@ class FcmService : FirebaseMessagingService() {
             this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val isAppInBackground = ProcessLifecycleOwner.get().lifecycle.currentState
-            .isAtLeast(Lifecycle.State.CREATED)
-
-        val channelId = if (isAppInBackground) {
-            LogisticsApp.DELIVERY_TASK_BACKGROUND_CHANNEL
-        } else {
-            LogisticsApp.DELIVERY_TASK_CHANNEL
-        }
-
-        val builder = NotificationCompat.Builder(this, channelId)
+        // On API 26+ the channel decides the sound; setSound only applies below that
+        val soundUri = Uri.parse("android.resource://${packageName}/${R.raw.new_order_alert}")
+        val builder = NotificationCompat.Builder(this, LogisticsApp.DELIVERY_TASK_CHANNEL)
             .setSmallIcon(R.drawable.logo)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-
-        if (isAppInBackground) {
-            // App in background - use system default sound
-            builder.setDefaults(NotificationCompat.DEFAULT_SOUND)
-        } else {
-            // App destroyed - use custom sound
-            val soundUri = Uri.parse("android.resource://${packageName}/${R.raw.new_order_alert}")
-            builder.setSound(soundUri)
-        }
+            .setSound(soundUri)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())

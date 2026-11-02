@@ -1,7 +1,5 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -62,18 +60,16 @@ import com.ovasta.logisticsapp.base.xsRegular
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
+import com.ovasta.logisticsapp.base.ext.today
+import kotlinx.datetime.number
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.time.LocalDate
-import java.time.Month
-import java.time.format.TextStyle
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PartnerStatisticsSection(
     statistics: PartnerStatistics,
-    selectedMonth: Int = LocalDate.now().monthValue,
-    selectedYear: Int = LocalDate.now().year,
+    selectedMonth: Int = today().month.number,
+    selectedYear: Int = today().year,
     onMonthYearChanged: (month: Int, year: Int) -> Unit = { _, _ -> }
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -216,7 +212,6 @@ fun PartnerStatisticsSection(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun MonthYearFilter(
     selectedMonth: Int,
@@ -237,9 +232,9 @@ private fun MonthYearFilter(
         label = "yearIconRotation"
     )
 
-    val today = LocalDate.now()
+    val today = today()
     val currentYear = today.year
-    val currentMonth = today.monthValue
+    val currentMonth = today.month.number
     val startYear = 2026
 
     // Years from 2026 up to current year (descending). Ensure at least 2026 is present.
@@ -254,9 +249,7 @@ private fun MonthYearFilter(
         else (1..12).toList()
     }
 
-    val monthName = remember(selectedMonth) {
-        String.format(Locale.ENGLISH, "%02d", selectedMonth)
-    }
+    val monthName = remember(selectedMonth) { selectedMonth.toString().padStart(2, '0') }
 
     Row(
         modifier = Modifier
@@ -301,7 +294,7 @@ private fun MonthYearFilter(
                 containerColor = Base_white
             ) {
                 availableMonths.forEach { month ->
-                    val name = String.format(Locale.ENGLISH, "%02d", month)
+                    val name = month.toString().padStart(2, '0')
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -735,58 +728,55 @@ private fun formatAmount(value: Double?): String {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true, locale = "ar")
 @Composable
 fun PartnerStatisticsSectionPreview() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        PartnerStatisticsSection(
-            statistics = PartnerStatistics(
-                withdrawTransactionsSum = 1500.0,
-                deliveryProfitSum = 750.0,
-                ordersCount = 45,
-                incentives = Incentives(
-                    month = "2026-04",
-                    completedOrders = 45,
-                    totalDeliveryValue = 5000.0,
-                    highestAchievedMilestone = "silver",
-                    currentBonusPercentage = 5.0,
-                    currentBonusAmount = 250.0,
-                    milestones = arrayListOf(
-                        Milestones(
-                            targetOrders = 30,
-                            bonusPercentage = 3.0,
-                            realPercentage = 3.0,
-                            isAchieved = true,
-                            remainingOrders = 0,
-                            progressPercentage = 100.0,
-                            bonusAmount = 150.0
-                        ),
-                        Milestones(
-                            targetOrders = 50,
-                            bonusPercentage = 5.0,
-                            realPercentage = 5.0,
-                            isAchieved = false,
-                            remainingOrders = 5,
-                            progressPercentage = 90.0,
-                            bonusAmount = 350.0
-                        ),
-                        Milestones(
-                            targetOrders = 100,
-                            bonusPercentage = 10.0,
-                            realPercentage = 10.0,
-                            isAchieved = false,
-                            remainingOrders = 55,
-                            progressPercentage = 45.0,
-                            bonusAmount = 800.0
-                        )
+    PartnerStatisticsSection(
+        statistics = PartnerStatistics(
+            withdrawTransactionsSum = 1500.0,
+            deliveryProfitSum = 750.0,
+            ordersCount = 45,
+            incentives = Incentives(
+                month = "2026-04",
+                completedOrders = 45,
+                totalDeliveryValue = 5000.0,
+                highestAchievedMilestone = "silver",
+                currentBonusPercentage = 5.0,
+                currentBonusAmount = 250.0,
+                milestones = arrayListOf(
+                    Milestones(
+                        targetOrders = 30,
+                        bonusPercentage = 3.0,
+                        realPercentage = 3.0,
+                        isAchieved = true,
+                        remainingOrders = 0,
+                        progressPercentage = 100.0,
+                        bonusAmount = 150.0
+                    ),
+                    Milestones(
+                        targetOrders = 50,
+                        bonusPercentage = 5.0,
+                        realPercentage = 5.0,
+                        isAchieved = false,
+                        remainingOrders = 5,
+                        progressPercentage = 90.0,
+                        bonusAmount = 350.0
+                    ),
+                    Milestones(
+                        targetOrders = 100,
+                        bonusPercentage = 10.0,
+                        realPercentage = 10.0,
+                        isAchieved = false,
+                        remainingOrders = 55,
+                        progressPercentage = 45.0,
+                        bonusAmount = 800.0
                     )
                 )
-            ),
-            selectedMonth = 4,
-            selectedYear = 2026
-        )
-    }
+            )
+        ),
+        selectedMonth = 4,
+        selectedYear = 2026
+    )
 }
 
 @Composable

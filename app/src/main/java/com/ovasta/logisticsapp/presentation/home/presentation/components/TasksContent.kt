@@ -1,6 +1,5 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -147,19 +146,17 @@ fun TasksContent(
                     if (partnerStatistics != null && viewState.isTracking) {
                         item(key = "statistics") {
                             Spacer(modifier = Modifier.height(dimensionResource(com.intuit.sdp.R.dimen._8sdp)))
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                PartnerStatisticsSection(
-                                    statistics = partnerStatistics,
-                                    selectedMonth = viewState.monthFilter,
-                                    selectedYear = viewState.yearFilter,
-                                    onMonthYearChanged = { month, year ->
-                                        onTasksScreenAction(
-                                            HomeScreenActions.OnMonthYearFilterChanged(
-                                                month, year
-                                            )
+                            PartnerStatisticsSection(
+                                statistics = partnerStatistics,
+                                selectedMonth = viewState.monthFilter,
+                                selectedYear = viewState.yearFilter,
+                                onMonthYearChanged = { month, year ->
+                                    onTasksScreenAction(
+                                        HomeScreenActions.OnMonthYearFilterChanged(
+                                            month, year
                                         )
-                                    })
-                            }
+                                    )
+                                })
                         }
                     } else if (!viewState.isTracking && viewState.isOutsource == false) {
                         item(key = "statistics_hint") {

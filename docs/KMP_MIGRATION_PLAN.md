@@ -1,101 +1,159 @@
-# LogisticsApp → Compose Multiplatform (Android + iOS) Migration Plan
+# LogisticsApp → Kotlin Multiplatform (Android + iOS)
 
-Modeled on the Ovasta-Seller-App migration (`C:\Users\m.farahat_maxab\StudioProjects\Ovasta-Seller-App`).
-Written 2026-07-16.
+Updated 2026-11-02, replacing the 2026-07-16 draft. Modeled on Ovasta-Seller-App (`StudioProjects/Ovasta-Seller-App`).
 
-## Current state
+## Context
+The driver app (single `:app` module, ~202 Kotlin files, 100% Jetpack Compose, Koin, MVVM/MVI) has to ship on iOS. This plan refines the 2026-07-16 draft, which was modeled on Ovasta-Seller-App, and adds the two areas the draft skipped: **iOS location tracking** and the **custom new-order sound**.
 
-Single Android `:app` module (~167 Kotlin files, 45 composable files, 8 ViewModels):
+Decisions made:
+- iOS tracking matches Android. It runs while the driver is online and the app is alive, including in the background. It needs "When In Use" permission only, and there is no relaunch after a force-quit.
+- The backend will send platform-specific FCM payloads, including the APNs sound.
 
-- **Networking:** Retrofit + Gson + OkHttp interceptors (`HeadersInterceptor`, `ErrorMappingInterceptor`, `CacheHandlerInterceptor`)
-- **DI:** Koin (android)
-- **Navigation:** Navigation3 (`NavDisplay`, `AppNavHost.kt`)
-- **Storage:** DataStore preferences, `security-crypto` encrypted prefs
-- **Firebase:** Auth, Firestore (Home/OrderDetails realtime data), Messaging (`FcmService`), Crashlytics, Analytics
-- **Location:** foreground `LocationTrackerService` + `play-services-location`
-- **UI:** Compose M3, Coil (OkHttp), sdp/ssp in ~24 files, 2 LiveData usages
-- **Features:** auth (splash/login), home, orderDetails, settings
+Gaps found in the existing plan:
+1. The seller app's iOS `FirebaseAuthProvider` and `FirestoreProvider` are **stubs** (`println` / TODO, and the Podfile has only Messaging and Crashlytics). Copying them "verbatim" would break Home and OrderDetails on iOS, because both run on Firestore snapshot listeners. Firestore therefore needs a real multiplatform solution.
+2. The sdp/ssp count is 32 files, not 24. Some `java.*` APIs block `commonMain`:
+   - `SimpleDateFormat` and `java.time` in `DateExt.kt` and `PartnerStatisticsSection.kt`
+   - `NumberFormat` in `PriceExt.kt`
+   - `String.format`
+3. There is an existing Android bug that the migration should fix. `FcmService` picks the background channel whenever `isAtLeast(CREATED)` is true, which is effectively always. As a result, the custom sound is never used for messages handled in code.
 
-## Target shape (same as seller app)
+## Target shape
+Keep the existing plan's layout: `:shared` (commonMain/androidMain/iosMain + composeResources), a thin `:androidApp`, and `iosApp/` (xcodegen `project.yml`, Podfile and fastlane copied from the seller app). Framework name `sharedKit`, iOS deployment target 15.0.
 
+Library choices:
+| Concern | Android today | Shared choice |
+|---|---|---|
+| HTTP | Retrofit + OkHttp + Gson | Ktor (OkHttp / Darwin engines) + kotlinx.serialization |
+| Firestore, Auth | Firebase Android SDK | **GitLive `dev.gitlive:firebase-firestore` / `firebase-auth`** in commonMain (already in the seller app's catalog, v2.1.0+). iOS links Firebase pods `FirebaseFirestore` and `FirebaseAuth`. |
+| Messaging, Crashlytics | Firebase Android | Native on each platform (Swift `AppDelegate` like the seller app), with token and user data bridged into Kotlin |
+| Dates, numbers | `SimpleDateFormat`, `java.time`, `NumberFormat` | kotlinx-datetime plus a small `expect fun formatDecimal()` |
+| Storage | DataStore + Keystore `Crypto.kt` + EncryptedSharedPreferences | DataStore-core (KMP) + seller app `SecureStorage` (Keychain on iOS) |
+| Images | Coil 2 and 3 | Coil 3 + `coil-network-ktor` (drop Coil 2) |
+| Navigation | Navigation3 | Use JetBrains' multiplatform Navigation3 artifact if it is stable for the chosen CMP version, which keeps `AppNavHost` almost unchanged. Otherwise fall back to the seller app's `NavHost.kt` / `AppScreens.kt`. |
+| Strings | `res/values`, `values-ar` (about 305 strings) | `composeResources/values{,-ar}`, generated `Res` |
+| Camera / gallery | `TakePicture` / `PickVisualMedia` + FileProvider | `expect` image picker that returns a `ByteArray`. iOS uses `PHPickerViewController` / `UIImagePickerController`. Multipart upload takes bytes instead of a `Uri`. |
+| Geocoder | `android.location.Geocoder` | `expect` reverse geocoder, `CLGeocoder` on iOS |
+
+## Phases
+1. **Pre-work on Android, still in `:app`, shipped as normal releases.** This lowers risk before any module move.
+   - Gson → kotlinx.serialization on all models. Watch the leniency of nullable fields.
+   - Replace `SimpleDateFormat`, `java.time`, `NumberFormat` and `String.format` with kotlinx-datetime and helpers. Keep `DateExtTest` green.
+   - Remove `LiveData` / `SingleLiveEvent` from `BaseViewModel`, plus Material 1, Coil 2 and `android.arch.lifecycle:extensions`.
+   - Remove sdp/ssp (32 files) and compare screenshots.
+   - Remove `@Parcelize` from models; it isn't needed with Nav3 keys.
+   - Fix the package declarations in `data/setting/model/*` (currently `com.maxab.basemodule...`).
+2. **Skeleton.**
+   - Add `:shared` and rename `:app` → `:androidApp` (keep `applicationId com.ovasta.logisticsapp`).
+   - Add catalog entries (kotlin-multiplatform, compose-multiplatform, ktor, koin-compose-viewmodel, gitlive, coil3, datastore-core, kotlinx-datetime).
+   - Create `iosApp/` from the seller app scaffold.
+3. **Data layer to commonMain.**
+   - Rewrite the Retrofit APIs as Ktor: Login, Home, Settings, OrderDetails, Wallet.
+   - Port interceptors to Ktor plugins (headers, error mapping, cache).
+   - Move the Firestore data sources (`HomeFirebaseRemoteDataSource`, `OrderDetailsRemoteDataSource`) to GitLive: `snapshots` Flow, `set(merge = true)`, `FieldValue.serverTimestamp`, `@Serializable` models instead of `@PropertyName` / `toObject`.
+   - Firebase custom-token sign-in uses GitLive `signInWithCustomToken`.
+4. **UI to commonMain.** Move theme, components, the 8 screens, about 12 sheets and dialogs, and the ViewModels (KMP `lifecycle-viewmodel` + `koin-compose-viewmodel`). Replace `R.*` with `Res.*`. Move `LocaleHelper` to the seller app's `LanguageApplier` (Arabic default, RTL).
+5. **Platform features:** tracking and notifications, detailed below.
+6. **Thin apps.**
+   - Android: Application, MainActivity, `FcmService`, `LocationTrackerService`, manifest.
+   - iOS: `AppDelegate`, `MainViewController`, capabilities.
+7. **Verification:** see the end of this plan.
+
+## Location tracking design
+Move the logic into common code and keep only the "location source + keep-alive" part per platform.
+
+**commonMain**
+- `interface LocationSource { fun updates(): Flow<GeoFix>; suspend fun current(): GeoFix?; fun permissionState(): LocationPermission; fun servicesEnabled(): Boolean }`
+- `LocationTracker` (common class, Koin singleton) takes over the logic in `LocationTrackerService.kt`:
+  - the 10 m distance filter with `lastLoggedLocation` updated only on success
+  - the Firestore write to `districts/{districtId}/online_drivers/{deliveryId}` (merge + serverTimestamp, 15 s timeout)
+  - reporting to the monitor
+- It exposes `start()` / `stop()`, which call into `expect class TrackingKeepAlive` (start or stop the platform mechanism).
+- `LocationTrackingMonitor` moves to common as is: `PERMISSION_DENIED`, `LOCATION_DISABLED`, `TRACKING_OFF`, `LOGGING_NOT_WORKING`, 60 s stale check, 2 s recheck. Its permission and provider checks go through `LocationSource`. `ensureLocationTracking()` in `BaseViewModel` stays unchanged for every order action.
+- `HomeViewModel` start/stop triggers (online toggle, consent dialog, restore on launch, logout) stay as they are.
+
+**Android actual.** `LocationSource` wraps the existing `FusedLocationProviderClient` code: HIGH_ACCURACY, 10 s interval, 7 s fastest. `TrackingKeepAlive` starts the existing foreground service (`START_STICKY`, `foregroundServiceType=location`). The service then only hosts the coroutine that collects `LocationTracker`.
+
+**iOS actual (`CLLocationManager` from Kotlin/Native, wrapped in `callbackFlow`)**
+- Manager settings:
+  - `desiredAccuracy = kCLLocationAccuracyBest`
+  - `distanceFilter = 10.0`, the native equivalent of the Android 10 m filter, which saves battery
+  - `activityType = CLActivityTypeAutomotiveNavigation`
+  - `allowsBackgroundLocationUpdates = true`
+  - `pausesLocationUpdatesAutomatically = false`, so iOS doesn't pause tracking while a driver waits at a pickup
+  - `showsBackgroundLocationIndicator = true`, the blue pill and the iOS counterpart of the Android foreground notification
+- **Start tracking only while the app is in the foreground**, from the online toggle or the restore on launch. iOS then keeps delivering fixes in the background with "When In Use" permission, the same rule Android enforces for foreground services.
+- `TrackingKeepAlive` on iOS = `startUpdatingLocation` / `stopUpdatingLocation`. On iOS 17+, optionally hold a `CLBackgroundActivitySession` through a small Swift helper; skip that on iOS 15–16.
+- Stationary drivers: iOS sends no fixes when nobody moves. The common monitor's 60 s stale rule would then wrongly block order actions. Fix: when the latest fix is older than 60 s but still accurate, the iOS source re-emits it (or calls `requestLocation()`). Alternatively, reset staleness on a heartbeat that `LocationTracker` sends every 30 s, a merge write of `timestamp` only. Apply the same behavior on both platforms so the backend sees one consistent signal.
+- Permissions:
+  - `requestWhenInUseAuthorization`, with `NSLocationWhenInUseUsageDescription` in Arabic and English (`ar.lproj` / `en.lproj` InfoPlist.strings)
+  - Also declare `NSLocationAlwaysAndWhenInUseUsageDescription`, which App Store review expects
+  - The "Open settings" button in `LocationBlockedDialog` → `UIApplicationOpenSettingsURLString`. iOS has no direct "location services" screen, so both buttons go to app settings on iOS.
+- Info.plist `UIBackgroundModes`: `location`, `remote-notification`.
+- App Store notes:
+  - Guideline 2.5.4 requires a clear driver-tracking justification in the review notes, plus a demo account that can go online.
+  - Firestore writes keep working in the background because location updates keep the process alive.
+- Accepted limitation (as decided): if the driver force-quits, tracking stops until the next launch, and `HomeViewModel` restores it if the server says online. Show a one-time hint: "Don't close the app while online."
+
+## Notifications and custom sound design
+**The sound file**
+- iOS cannot use MP3 for notification sounds. Convert once and commit:
+  `afconvert new_order_alert.mp3 new_order_alert.caf -d ima4 -f caff -v`
+  - The clip must be ≤ 30 s, or iOS plays the default sound instead. Since push sounds can't loop, consider padding or repeating the clip to about 25 s for an alarm-like effect.
+- Put `new_order_alert.caf` in the iOS app bundle root (the `iosApp/iosApp/Resources/` sources in `project.yml`).
+- Android keeps `res/raw/new_order_alert.mp3` in `:androidApp` or the `:shared` androidMain res.
+
+**Backend payload (FCM HTTP v1) for new-order pushes**
+```json
+{
+  "message": {
+    "token": "...",
+    "notification": { "title": "...", "body": "..." },
+    "data": { "type": "new_order", "order_id": "123" },
+    "android": { "priority": "HIGH", "notification": { "channel_id": "delivery_task_channel_v2", "sound": "new_order_alert" } },
+    "apns": {
+      "headers": { "apns-priority": "10", "apns-push-type": "alert" },
+      "payload": { "aps": { "sound": "new_order_alert.caf", "interruption-level": "time-sensitive" } }
+    }
+  }
+}
 ```
-LogisticsApp/
-├── shared/            # KMP module: androidTarget + iosX64/iosArm64/iosSimulatorArm64
-│   └── src/
-│       ├── commonMain/    # data, domain, di, ui (screens/components/theme), platform expects
-│       │   └── composeResources/  # drawable, font, values, values-ar, values-en
-│       ├── androidMain/   # actuals
-│       └── iosMain/       # actuals
-├── androidApp/        # thin: Application, MainActivity, FcmService, LocationTrackerService
-└── iosApp/            # Xcode project: xcodegen project.yml, Podfile, fastlane, Swift entry
-```
+- `time-sensitive` breaks through Focus modes. It needs the **Time Sensitive Notifications** capability, which Apple does not have to approve. Do not plan on Critical Alerts: that entitlement is Apple-approved and normally refused for delivery apps.
+- Also add `type` and `order_id` to `data` so a tap can deep-link to TaskDetails on both platforms (there is no deep link today).
+- The token upload (`POST fcm-token`) stays the same. Optionally add `platform: "ios" | "android"` so the backend can target payloads.
 
-Shared framework: `sharedKit`, bundleId `com.ovasta.logistics.shared`.
+**iOS app side (Swift `AppDelegate`, based on the seller app)**
+- `requestAuthorization([.alert, .sound, .badge])` and APNs → `Messaging.apnsToken`.
+- In `messaging(didReceiveRegistrationToken:)`, forward the token through a Kotlin bridge object, the way the seller app's `CrashlyticsBridge` works, so the shared `SettingsRepository.updateFcmToken` uploads it.
+- `willPresent`: in the foreground, return `[.banner, .sound]` so the custom sound plays. If Home is visible, the in-app alarm takes over: return `[.banner]` and let `AlarmPlayer` loop.
+- `didReceive` (tap): pass `order_id` to shared navigation.
+- Xcode capabilities: Push Notifications, Background Modes (location, remote notifications), Time Sensitive Notifications. Upload the APNs auth key to the Firebase console.
 
-## Phase 1 — Project skeleton
+**In-app looping alarm (foreground only, same as Android today)**
+- `expect class AlarmPlayer { fun start(); fun stop() }`
+  - Android: the existing `OrderAlarmSound` (MediaPlayer, `USAGE_ALARM`, looping).
+  - iOS: `AVAudioPlayer` with `numberOfLoops = -1` on the bundled `.caf`, and `AVAudioSession` category `.playback` so it plays even with the silent switch on.
+- `expect fun keepScreenOn(on: Boolean)`
+  - Android: the current `ScreenFlashOverlay` flags.
+  - iOS: `UIApplication.sharedApplication.idleTimerDisabled`. iOS cannot turn the screen on or show over the lock screen; the time-sensitive push covers that case.
+- The new-task queue logic (Firestore listener, 30 s countdown, seen-IDs store) moves to common unchanged. Seen IDs move from SharedPreferences to DataStore.
 
-1. Create `:shared`, rename `:app` → `:androidApp`; update `settings.gradle.kts` (copy seller app's).
-2. Version catalog: add kotlin-multiplatform, compose-multiplatform, ktor (core/content-negotiation/kotlinx-json/logging/okhttp/darwin), koin-core/koin-compose/koin-compose-viewmodel, coil3 + coil-network-ktor, datastore-preferences-core (KMP), lifecycle-viewmodel-compose (KMP). Copy versions from seller app catalog.
-3. `shared/build.gradle.kts`: clone from seller app (iOS framework targets, compose.resources config with `publicResClass`).
-4. Copy `iosApp/` scaffold from seller app (AppDelegate.swift, iOSApp.swift, ContentView, project.yml, Podfile, fastlane, ar.lproj/en.lproj); rebrand to Logistics; add this app's `GoogleService-Info.plist`.
+**Android fix included in the migration**
+- In `FcmService`, drop the broken `isAtLeast(CREATED)` branch and always post new-order messages to `delivery_task_channel_v2`.
+- Read `type` and `order_id` and add them to the tap `PendingIntent`.
+- Optionally wire the unused `OrderVibrator` into the in-app alarm.
 
-## Phase 2 — Platform abstraction (expect/actual)
+## Critical files
+- Tracking: `base/services/LocationTrackerService.kt`, `LocationManager.kt`, `LocationTrackingMonitor.kt`, `presentation/home/data/HomeRepository.kt`, `HomeFirebaseRemoteDataSource.kt`, `presentation/home/presentation/HomeViewModel.kt`, `components/LocationBlockedDialog.kt`
+- Notifications: `base/services/FcmService.kt`, `app/LogisticsApp.kt` (channels), `base/ext/OrderAlarmSound.kt`, `base/ext/OrderVibrator.kt`, `HomeScreen.kt` (`ScreenFlashOverlay`), `res/raw/new_order_alert.mp3`
+- Blockers: `base/ext/DateExt.kt`, `base/ext/PriceExt.kt`, `PartnerStatisticsSection.kt`, `base/encryption/Crypto.kt`, `base/ext/ImageExt.kt`, `base/di/RemoteModule.kt`, `firebaseModule.kt`
+- Reuse from the seller app (`Ovasta-Seller-App/shared/src/{android,ios}Main/.../data/platform/`): `DataStoreProvider`, `SecureStorage`, `PermissionManager` (extend with location), `HapticFeedback`, `HttpClientEngine`, `LanguageApplier`, `CrashlyticsLogger` + `CrashlyticsBridge`, `iosApp/project.yml`, `AppDelegate.swift`, Podfile (add `FirebaseFirestore` and `FirebaseAuth`)
 
-Copy from seller app nearly verbatim:
-
-| Provider | Notes |
-|---|---|
-| DataStoreProvider | |
-| DeviceInfoProvider | |
-| SecureStorage | replaces `security-crypto`; Keychain on iOS |
-| FirebaseAuthProvider | |
-| FirestoreProvider | verify it covers Home's query/listener shapes |
-| FirebaseMessagingProvider | |
-| PermissionManager | add location-always permission for this app |
-| HapticFeedback | |
-| HttpClientEngine | OkHttp / Darwin |
-| AppConfig, CrashlyticsLogger, LanguageApplier | |
-| PlatformActions, PlatformBackHandler, PlatformModule | |
-
-**New for this app:**
-
-- `LocationTracker` (expect): `startTracking()`, `stopTracking()`, location `Flow`.
-  - Android actual: existing foreground `LocationTrackerService` + play-services-location (service stays in `:androidApp`).
-  - iOS actual: `CLLocationManager`, `allowsBackgroundLocationUpdates`, Info.plist `UIBackgroundModes: location` + `NSLocationAlwaysAndWhenInUseUsageDescription` / `NSLocationWhenInUseUsageDescription`.
-- Push: FCM on Android as-is; iOS APNs → FCM through FirebaseMessagingProvider.
-
-## Phase 3 — Data layer (Retrofit → Ktor)
-
-1. Convert Retrofit interfaces to Ktor calls: `LoginApi`, `HomeApi`, `SettingsApi`, `OrderDetailsApi`, remote data sources.
-2. Gson → kotlinx.serialization on all models: `@SerializedName` → `@SerialName`, add `@Serializable`. Firestore document mapping must not rely on Gson reflection — map explicitly or via serializers.
-3. Interceptors → Ktor `defaultRequest` / response validation / logging plugins (seller app pattern).
-4. Move repositories, `ApiResponse`, exception types to `commonMain` (already Flow/coroutine based).
-
-## Phase 4 — UI to commonMain
-
-1. Move theme, shared composables, screens (Splash, Login, Home, OrderDetails + bottom sheets) to `shared/commonMain/.../ui/screens`.
-2. **Navigation3 → seller-app navigator:** Nav3 is Android-only; replace `AppNavHost`/`NavDisplay` with seller app's `NavHost.kt` + `AppScreens.kt` (data object/class routes, custom back stack).
-3. **Remove sdp/ssp (~24 files):** replace with plain `dp`/`sp` (or seller app's scaling helper). Visual-regression risk — compare screens before/after.
-4. LiveData (2 usages) → StateFlow / `collectAsState`. ViewModels → KMP `lifecycle-viewmodel-compose` + `koin-compose-viewmodel`.
-5. Resources: `values/strings.xml` + `values-ar/strings.xml` → `commonMain/composeResources/values{,-ar,-en}`; `R.string` → generated Res class; `generateLocaleConfig` → `LanguageApplier`.
-
-## Phase 5 — Thin platform apps
-
-- `:androidApp`: Application + Koin startup, MainActivity hosting shared `App()`, FcmService, LocationTrackerService, manifest, google-services + crashlytics plugins.
-- iOS: Koin init in `Main.ios.kt` / MainViewController, Firebase pods, APNs capability, background-location capability, fastlane from seller app.
-
-## Phase 6 — Verification
-
-1. Android first: build `:androidApp`; regression-test login → home → order details (picking/receiving) → background location. Must match pre-migration behavior before iOS work.
-2. iOS: `xcodegen` + `pod install`, simulator build; then real-device tests for Firebase auth/Firestore streams, push, and background location (neither push nor background location fully works on simulator).
-
-## Risk items
-
-1. **iOS background location** — real-device testing; App Store review needs justification for the background mode.
-2. **Firestore listeners on iOS** — confirm seller app's FirestoreProvider supports the snapshot-listener shapes used by Home/OrderDetails.
-3. **sdp/ssp removal** — 24 UI files touched; screenshot-compare.
-4. **Gson→kotlinx.serialization** — watch for models depending on Gson leniency (missing fields, type coercion).
-
-## Pre-work
-
-Finish and merge the in-flight `order_details` branch changes (OrderDetailsScreen, EditProductBottomSheet, ReceiveAmountBottomSheet) before Phase 4 moves those files.
+## Verification
+1. **After each phase:** build Android and run `./gradlew :androidApp:assembleDebug test`. Regression-test login → go online → accept task → order details (pick, edit, deliver, photo upload) → wallet → go offline → logout. Behavior must match production before any iOS work.
+2. **Android tracking:** with the app backgrounded and the screen off for 10 minutes, confirm the `online_drivers` doc `timestamp` keeps advancing while driving and the heartbeat fires while stationary. Kill location services and confirm `LocationBlockedDialog` appears.
+3. **iOS simulator:** `xcodegen && pod install`, build, then run login plus the Firestore Home and OrderDetails streams. Use Simulator ▸ Features ▸ Location ▸ "Freeway Drive" for tracking.
+4. **iOS real device (required for push and background location):**
+   - Go online, lock the phone, drive or walk for 15 minutes, and check that Firestore updates continue and the blue pill shows.
+   - Send the FCM v1 payload above with the app killed, in the background, in the foreground, with the silent switch on, and in a Focus mode. Confirm the custom sound plays and a tap opens the order.
+   - Confirm the in-app alarm loops on Home.
+5. **TestFlight beta** with a few drivers before App Store submission. Include review notes about background location.

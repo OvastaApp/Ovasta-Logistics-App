@@ -5,7 +5,8 @@ import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
-import java.time.LocalDate
+import com.ovasta.logisticsapp.base.ext.today
+import kotlinx.datetime.number
 
 data class HomeViewState(
     val userName: String = "",
@@ -23,8 +24,8 @@ data class HomeViewState(
     /** Message about the courier's wallet from `home`, shown above the orders; null for none. */
     val walletWarning: String? = null,
     val partnerStatistics: PartnerStatistics? = null,
-    val monthFilter: Int = LocalDate.now().monthValue,
-    val yearFilter: Int = LocalDate.now().year,
+    val monthFilter: Int = today().month.number,
+    val yearFilter: Int = today().year,
     val isTasksLoading: Boolean = true,
     val isAvailableTasksLoading: Boolean = true,
     val isLocationConsentDialogVisible: Boolean = false,

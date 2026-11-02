@@ -37,6 +37,8 @@ ssp = "1.1.1"
 googleServices = "4.4.3"
 firebaseCrashlytics = "3.0.7"
 playServicesLocation = "21.2.0"
+kotlinxDatetime = "0.7.1"
+desugarJdkLibs = "2.1.5"
 nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.11.0-alpha03"
 kotlinSerialization = "2.2.21"
@@ -97,6 +99,8 @@ constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayou
 sdp = { module = "com.intuit.sdp:sdp-android", version.ref = "sdp" }
 ssp = { module = "com.intuit.ssp:ssp-android", version.ref = "ssp" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 
