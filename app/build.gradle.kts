@@ -69,6 +69,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.process)
 //    implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -96,7 +97,6 @@ dependencies {
 
 
     //Jetpack
-    implementation(libs.lifecycle.extensions)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -106,12 +106,10 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling)
     implementation(libs.compose.material3)
-    implementation(libs.compose.runtime.livedata)
-    implementation(libs.compose.material)
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.constraintlayout.compose)
     implementation(libs.lifecycle.viewmodel.compose)
 
-    implementation(libs.coil.compose)
 
     implementation(libs.sdp)
     implementation(libs.ssp)
@@ -132,14 +130,12 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.coil.compose)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.auth)
-    implementation(libs.coil.kt.coil.compose)
     // Reads photo rotation so uploaded images are re-encoded upright
     implementation(libs.androidx.exifinterface)
     implementation(libs.security.crypto)

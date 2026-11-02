@@ -1,7 +1,6 @@
 package com.ovasta.logisticsapp.base
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.exception.ComposeUIException
@@ -22,9 +21,6 @@ typealias ContextEvent = (Context) -> Unit
 
 open class BaseViewModel : ViewModel(), KoinComponent {
     val dispatcher: CoroutineDispatcher = Dispatchers.Main
-
-    protected val error = SingleLiveEvent<Throwable>()
-    protected val loading = MutableLiveData<Boolean>()
 
     private val _toastEvent = MutableSharedFlow<ToastEvent?>()
     val toastEvent = _toastEvent.asSharedFlow()

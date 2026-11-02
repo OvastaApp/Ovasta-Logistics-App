@@ -1,9 +1,11 @@
 package com.ovasta.logisticsapp.presentation.nav
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import com.ovasta.logisticsapp.base.Base_white
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -89,7 +91,8 @@ fun AppNavHost(modifier: Modifier = Modifier) {
     val currentRoute = backStack.lastOrNull()
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
-        Scaffold(bottomBar = {
+        // Screens handle their own insets; white like the Material 1 Scaffold this replaced
+        Scaffold(containerColor = Base_white, contentWindowInsets = WindowInsets(0), bottomBar = {
             if (BottomNavTab.isTopLevel(currentRoute)) {
                 AppBottomNavigation(
                     currentRoute = currentRoute,

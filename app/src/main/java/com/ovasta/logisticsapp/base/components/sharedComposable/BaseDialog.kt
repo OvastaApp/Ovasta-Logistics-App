@@ -4,9 +4,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import com.ovasta.logisticsapp.R
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +29,9 @@ import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.lgMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
+
+// Material 1's button padding, which keeps the two buttons' labels from wrapping
+private val DialogButtonPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
 
 @Composable
 fun BaseDialog(
@@ -105,7 +108,8 @@ fun BaseDialog(
                             border = BorderStroke(
                                 width = dimensionResource(com.intuit.sdp.R.dimen._1sdp),
                                 color = Primary
-                            )
+                            ),
+                            contentPadding = DialogButtonPadding
                         ) {
                             Text(
                                 text = it,
@@ -133,11 +137,11 @@ fun BaseDialog(
                             onClick = {
                                 onPrimaryClick?.invoke()
                             },
-                            elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
                             shape = RoundedCornerShape(dimensionResource(com.intuit.sdp.R.dimen._8sdp)),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Primary,
+                                containerColor = Primary,
                             ),
+                            contentPadding = DialogButtonPadding
                         ) {
                             Text(
                                 text = it,
