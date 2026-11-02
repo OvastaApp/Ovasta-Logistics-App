@@ -22,9 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.toRequestBody
 
 class OrderDetailsRemoteDataSource(
     private val db: FirebaseFirestore,
@@ -160,20 +157,14 @@ class OrderDetailsRemoteDataSource(
     }
 
     override suspend fun requestOrderEdit(orderId: Int, image: Uri) {
-        api.requestOrderEdit(orderId, image.toImagePart())
+        api.requestOrderEdit(orderId, image.toJpeg())
     }
 
     override suspend fun uploadOrderImage(orderId: Int, image: Uri) {
-        api.uploadOrderImage(orderId, image.toImagePart())
+        api.uploadOrderImage(orderId, image.toJpeg())
     }
 
-    /** Compresses the image off the main thread into the multipart `image` field. */
-    private suspend fun Uri.toImagePart(): MultipartBody.Part {
-        val bytes = withContext(Dispatchers.IO) { context.compressImageToJpeg(this@toImagePart) }
-        return MultipartBody.Part.createFormData(
-            "image",
-            "image.jpg",
-            bytes.toRequestBody("image/jpeg".toMediaType())
-        )
-    }
+    /** Compresses the image to JPEG off the main thread. */
+    private suspend fun Uri.toJpeg(): ByteArray =
+        withContext(Dispatchers.IO) { context.compressImageToJpeg(this@toJpeg) }
 }

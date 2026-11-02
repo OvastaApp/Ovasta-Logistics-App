@@ -115,15 +115,6 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
 
-
-    // retrofit
-    implementation(libs.squareup.retrofit)
-    implementation(libs.squareup.converter.kotlinx.serialization)
-
-    //OKHTTP
-    implementation(libs.squareup.okhttp)
-    implementation(libs.logging.interceptor)
-
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

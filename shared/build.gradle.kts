@@ -31,9 +31,26 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             // In the API of DateExt (today() returns a LocalDate)
             api(libs.kotlinx.datetime)
+            // In the API of the models (JsonElement) and of createHttpClient (HttpClient, Logger)
+            api(libs.kotlinx.serialization.json)
+            api(libs.ktor.client.core)
+            api(libs.ktor.client.logging)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            api(libs.koin.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.ktor.client.mock)
+            implementation(libs.kotlinx.coroutines.test)
+        }
+        androidMain.dependencies {
+            implementation(libs.ktor.client.okhttp)
+            // The engine keeps the app's OkHttp disk cache (createAndroidHttpEngine)
+            implementation(libs.squareup.okhttp)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
         // Tests that change the JVM default time zone
         androidUnitTest.dependencies {

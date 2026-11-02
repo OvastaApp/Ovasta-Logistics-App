@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.base.di
 
+import com.ovasta.logisticsapp.data.remote.networkModule
 import android.app.Application
 import com.ovasta.logisticsapp.base.crashlyticsInfo.di.crashlyticsInfoModule
 import com.ovasta.logisticsapp.base.local.di.resourcesModule
@@ -21,6 +22,7 @@ fun startKoin(application: Application) {
             listOf(
                 localModule,
                 remoteModule,
+                networkModule,
                 settingModule,
                 firebaseModule,
                 resourcesModule,
