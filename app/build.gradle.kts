@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.serialization)
     alias(libs.plugins.gms.google.service)
-    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.firebase.crashlytics)
 
 }

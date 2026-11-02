@@ -1,14 +1,11 @@
 package com.ovasta.logisticsapp.presentation.home.data.model
 
-import android.os.Parcelable
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.IgnoreExtraProperties
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.parcelize.Parcelize
 
-@Parcelize
 @IgnoreExtraProperties
 @Keep
 // All fields are nullable: the API returns null for some of them
@@ -54,4 +51,4 @@ data class AssignedDeliveryTask(
     @SerialName("assigned_at")
     var assignedAt: String? = null
 
-) : Parcelable
+)

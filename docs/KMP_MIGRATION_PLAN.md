@@ -40,8 +40,8 @@ Library choices:
    - ✅ Dates moved to kotlinx-datetime. Still left: `NumberFormat`, `String.format` and the localized month name. They become an `expect` formatter in Phase 4.
    - ✅ Removed `LiveData` / `SingleLiveEvent`, Material 1, Coil 2 and `android.arch.lifecycle:extensions`.
    - ✅ sdp/ssp replaced by `Int.sdp` / `Int.ssp` in `base/ext/DimensExt.kt`, which use the same scaling and are covered by `DimensExtTest`. In Phase 4 only the smallest-width lookup becomes `expect`, since `LocalConfiguration` is Android-only; iOS uses the screen's smallest width in points.
-   - Remove `@Parcelize` from models; it isn't needed with Nav3 keys.
-   - Fix the package declarations in `data/setting/model/*` (currently `com.maxab.basemodule...`).
+   - ✅ Removed `@Parcelize` and the parcelize plugin. No model went through a Bundle or `rememberSaveable`.
+   - ✅ Fixed the `com.maxab.basemodule...` package declarations (`Country`, `RemoteConfigModel`, `LogoutListener`).
 2. **Skeleton.**
    - Add `:shared` and rename `:app` → `:androidApp` (keep `applicationId com.ovasta.logisticsapp`).
    - Add catalog entries (kotlin-multiplatform, compose-multiplatform, ktor, koin-compose-viewmodel, gitlive, coil3, datastore-core, kotlinx-datetime).

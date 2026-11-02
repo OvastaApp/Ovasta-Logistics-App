@@ -1,4 +1,4 @@
-package com.maxab.basemodule.listener
+package com.ovasta.logisticsapp.listener
 
 interface LogoutListener {
     fun onUnauthorized()

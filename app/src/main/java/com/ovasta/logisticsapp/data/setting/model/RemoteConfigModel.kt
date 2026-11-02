@@ -1,11 +1,8 @@
-package com.maxab.basemodule.core.setting.model
+package com.ovasta.logisticsapp.data.setting.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Parcelize
 data class RemoteConfigModel(
     val forceUpdateMessage: String = "",
     val forceUpdateTitle: String = "",
@@ -14,4 +11,4 @@ data class RemoteConfigModel(
     val update: String = "",
     val updateSandBox: String = "",
     val collectionAmountUpTo: String = "1"
-) : Parcelable
+)

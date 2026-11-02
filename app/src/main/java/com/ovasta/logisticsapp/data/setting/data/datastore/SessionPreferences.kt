@@ -1,8 +1,8 @@
 package com.ovasta.logisticsapp.data.setting.data.datastore
 
 import androidx.datastore.core.Serializer
-import com.maxab.basemodule.core.setting.model.Country
-import com.maxab.basemodule.core.setting.model.RemoteConfigModel
+import com.ovasta.logisticsapp.data.setting.model.Country
+import com.ovasta.logisticsapp.data.setting.model.RemoteConfigModel
 import com.ovasta.logisticsapp.base.constants.LocalConstants.LANGUAGE_AR_ISO
 import com.ovasta.logisticsapp.base.encryption.Crypto
 import com.ovasta.logisticsapp.data.User

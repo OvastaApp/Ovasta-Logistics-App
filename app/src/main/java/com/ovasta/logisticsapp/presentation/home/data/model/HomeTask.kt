@@ -1,14 +1,11 @@
 package com.ovasta.logisticsapp.presentation.home.data.model
 
-import android.os.Parcelable
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.PropertyName
-import kotlinx.parcelize.Parcelize
 
-@Parcelize
 @IgnoreExtraProperties
 @Keep
 data class HomeTask(
@@ -85,10 +82,9 @@ data class HomeTask(
     @get:Exclude
     @Exclude
     val isReceived: Boolean = false
-) : Parcelable
+)
 
 
-@Parcelize
 @Keep
 data class FirebaseProduct(
     @get:PropertyName("catalog_product")
@@ -138,4 +134,4 @@ data class FirebaseProduct(
     @get:PropertyName("updated_at")
     @PropertyName("updated_at")
     val updatedAt: Timestamp? = null
-) : Parcelable
+)

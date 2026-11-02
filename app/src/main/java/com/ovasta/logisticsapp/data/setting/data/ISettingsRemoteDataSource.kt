@@ -1,7 +1,7 @@
 package com.ovasta.logisticsapp.data.setting.data
 
-import com.maxab.basemodule.core.setting.model.Country
-import com.maxab.basemodule.core.setting.model.RemoteConfigModel
+import com.ovasta.logisticsapp.data.setting.model.Country
+import com.ovasta.logisticsapp.data.setting.model.RemoteConfigModel
 
 interface ISettingsRemoteDataSource {
     suspend fun logout()

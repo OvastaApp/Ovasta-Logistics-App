@@ -1,11 +1,8 @@
-package com.maxab.basemodule.core.setting.model
+package com.ovasta.logisticsapp.data.setting.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Parcelize
 data class Country(
     val appsMainSystemBaseUrl: String = "max-ab.com",
     val backendBaseUrl: String = "api.maxab.info",
@@ -20,4 +17,4 @@ data class Country(
     val nameAr: String = "مصر",
     val nameEn: String = "Egypt",
     val name: String = "Egypt"
-) : Parcelable
+)

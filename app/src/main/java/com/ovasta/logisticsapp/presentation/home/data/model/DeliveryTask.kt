@@ -1,13 +1,10 @@
 package com.ovasta.logisticsapp.presentation.home.data.model
 
-import android.os.Parcelable
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.PropertyName
-import kotlinx.parcelize.Parcelize
 
-@Parcelize
 @IgnoreExtraProperties
 @Keep
 data class DeliveryTask(
@@ -60,4 +57,4 @@ data class DeliveryTask(
     @set:PropertyName("updated_at")
     var updatedAt: Timestamp? = null
 
-) : Parcelable
+)
