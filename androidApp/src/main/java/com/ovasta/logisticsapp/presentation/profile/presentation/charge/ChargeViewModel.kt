@@ -1,8 +1,10 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation.charge
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.top_up_request_sent
+
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.ext.ToastEvent
@@ -84,7 +86,7 @@ class ChargeViewModel(
             }.onSuccess {
                 setComposeUILoading(false)
                 _viewState.update { it.copy(isTopUpSent = true) }
-                emitToastEvent(ToastEvent.ResourceToastEvent(R.string.top_up_request_sent))
+                emitToastEvent(ToastEvent.ResourceToastEvent(Res.string.top_up_request_sent))
                 loadTopUpRequests()
             }.onFailure {
                 setComposeUILoading(false)

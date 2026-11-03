@@ -1,9 +1,16 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.edit_request_sent
+import com.ovasta.logisticsapp.shared.resources.order_delivered_successfully
+import com.ovasta.logisticsapp.shared.resources.order_status_updated_successfully
+import com.ovasta.logisticsapp.shared.resources.product_deleted_successfully
+import com.ovasta.logisticsapp.shared.resources.product_updated_successfully
+import com.ovasta.logisticsapp.shared.resources.receipt_uploaded
+
 import android.net.Uri
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
 import androidx.lifecycle.viewModelScope
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.ext.ToastEvent
@@ -112,7 +119,7 @@ class TaskDetailsViewModel(
                 }
             }.onSuccess {
                 setComposeUILoading(false)
-                emitToastEvent(ToastEvent.ResourceToastEvent(R.string.product_updated_successfully))
+                emitToastEvent(ToastEvent.ResourceToastEvent(Res.string.product_updated_successfully))
             }.onFailure {
                 updateViewStateWithFail(it)
             }
@@ -151,7 +158,7 @@ class TaskDetailsViewModel(
                 }
             }.onSuccess {
                 setComposeUILoading(false)
-                emitToastEvent(ToastEvent.ResourceToastEvent(R.string.product_deleted_successfully))
+                emitToastEvent(ToastEvent.ResourceToastEvent(Res.string.product_deleted_successfully))
             }.onFailure {
                 updateViewStateWithFail(it)
             }
@@ -227,7 +234,7 @@ class TaskDetailsViewModel(
                 )
             }.onSuccess {
                 setComposeUILoading(false)
-                emitToastEvent(ToastEvent.ResourceToastEvent(R.string.order_status_updated_successfully))
+                emitToastEvent(ToastEvent.ResourceToastEvent(Res.string.order_status_updated_successfully))
             }.onFailure {
                 updateViewStateWithFail(it)
             }
@@ -250,7 +257,7 @@ class TaskDetailsViewModel(
                 )
             }.onSuccess {
                 setComposeUILoading(false)
-                emitToastEvent(ToastEvent.ResourceToastEvent(R.string.order_delivered_successfully))
+                emitToastEvent(ToastEvent.ResourceToastEvent(Res.string.order_delivered_successfully))
                 _viewState.update { it.copy(isOrderDelivered = true) }
             }.onFailure {
                 updateViewStateWithFail(it)
@@ -259,16 +266,16 @@ class TaskDetailsViewModel(
     }
 
     /** Asks the backend to make the order editable, attaching [image] (picked or captured). */
-    fun requestOrderEdit(image: Uri) = uploadOrderImage(R.string.edit_request_sent) {
+    fun requestOrderEdit(image: Uri) = uploadOrderImage(Res.string.edit_request_sent) {
         orderDetailsRepository.requestOrderEdit(orderId = taskId, image = image)
     }
 
     /** Uploads the order's receipt [image] (picked or captured). */
-    fun uploadOrderReceipt(image: Uri) = uploadOrderImage(R.string.receipt_uploaded) {
+    fun uploadOrderReceipt(image: Uri) = uploadOrderImage(Res.string.receipt_uploaded) {
         orderDetailsRepository.uploadOrderImage(orderId = taskId, image = image)
     }
 
-    private fun uploadOrderImage(@StringRes successMessage: Int, upload: suspend () -> Unit) {
+    private fun uploadOrderImage(successMessage: StringResource, upload: suspend () -> Unit) {
         if (!ensureLocationTracking()) return
         viewModelScope.launch {
             setComposeUILoading(true)

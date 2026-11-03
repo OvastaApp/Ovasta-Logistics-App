@@ -1,18 +1,14 @@
 package com.ovasta.logisticsapp.base.ext
 
-import android.widget.Toast
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
 
 sealed class ToastEvent {
-
     class StringToastEvent(
         val message: String,
-        val duration: Int = Toast.LENGTH_SHORT
     ) : ToastEvent()
 
     class ResourceToastEvent(
-        @StringRes val resId: Int,
+        val resource: StringResource,
         vararg val args: Any,
-        val duration: Int = Toast.LENGTH_SHORT
     ) : ToastEvent()
 }

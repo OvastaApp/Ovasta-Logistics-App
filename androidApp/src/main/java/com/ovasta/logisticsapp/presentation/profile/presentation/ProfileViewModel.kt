@@ -1,10 +1,9 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.BaseViewModel
+import com.ovasta.logisticsapp.base.PlatformAction
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.local.AppLanguage
@@ -50,7 +49,7 @@ class ProfileViewModel(
         LocaleHelper.setLanguage(context, language.code)
         _viewState.update { it.copy(language = language) }
         // Recreating the Activity reloads every screen in the new language and layout direction
-        emitContextEvent { it.findActivity()?.recreate() }
+        emitPlatformAction(PlatformAction.LanguageChanged)
     }
 
     fun logout() {
@@ -70,11 +69,5 @@ class ProfileViewModel(
                 emitComposeUIExceptionEvent(it.toComposeUIException())
             }
         }
-    }
-
-    private tailrec fun Context.findActivity(): Activity? = when (this) {
-        is Activity -> this
-        is ContextWrapper -> baseContext.findActivity()
-        else -> null
     }
 }

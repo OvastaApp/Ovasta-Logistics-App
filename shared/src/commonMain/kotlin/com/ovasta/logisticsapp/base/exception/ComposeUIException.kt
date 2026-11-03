@@ -1,25 +1,25 @@
 package com.ovasta.logisticsapp.base.exception
 
-import android.content.Context
-import androidx.annotation.StringRes
-import com.ovasta.logisticsapp.R
-import java.io.IOException
+import androidx.compose.runtime.Composable
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.generic_unknown_error
+import kotlinx.io.IOException
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 data class ComposeUIException(
-    @StringRes val exceptionTitleResource: Int? = null,
+    val exceptionTitleResource: StringResource? = null,
     var errorMessage: String?,
-    @StringRes val exceptionMessageResource: Int? = null,
+    val exceptionMessageResource: StringResource? = null,
     var code: Int?,
     val data: Any? = null,
     val actions: List<(() -> Unit)> = listOf(),
 ) : IOException() {
 
-    fun getUIMessage(context: Context): String {
-        return if (exceptionMessageResource != null) {
-            context.getString(exceptionMessageResource)
-        } else {
-            errorMessage ?: context.getString(R.string.generic_unknown_error)
-        }
+    @Composable
+    fun uiMessage(): String = when {
+        exceptionMessageResource != null -> stringResource(exceptionMessageResource)
+        else -> errorMessage ?: stringResource(Res.string.generic_unknown_error)
     }
 
 }
@@ -53,7 +53,7 @@ fun Throwable.toComposeUIException(vararg actions: () -> Unit): ComposeUIExcepti
                 code = 0,
                 errorMessage = null,
                 actions = actions.toList(),
-                exceptionMessageResource = R.string.generic_unknown_error
+                exceptionMessageResource = Res.string.generic_unknown_error
             )
         }
 

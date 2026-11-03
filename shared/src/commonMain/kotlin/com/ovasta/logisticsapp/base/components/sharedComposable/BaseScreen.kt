@@ -1,27 +1,28 @@
 package com.ovasta.logisticsapp.base.components.sharedComposable
 
-import androidx.activity.compose.LocalActivity
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.an_error_occurred
+import com.ovasta.logisticsapp.shared.resources.dismiss
+import com.ovasta.logisticsapp.shared.resources.ic_error
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
-import com.ovasta.logisticsapp.listener.LogoutListener
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
+import com.ovasta.logisticsapp.base.PlatformActionHandler
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.ScreenDirectionEventHandler
 import com.ovasta.logisticsapp.base.ext.ToastEventHandler
 import com.ovasta.logisticsapp.data.RemoteConstants
+import com.ovasta.logisticsapp.listener.LocalLogoutListener
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BaseScreen(
@@ -31,34 +32,27 @@ fun BaseScreen(
     ScreenDirectionEventHandler(
         viewModel = viewModel
     )
-
-    val logoutListener = LocalActivity.current as? LogoutListener
+    val logoutListener = LocalLogoutListener.current
     ToastEventHandler(viewModel)
 
     /** Handling Base Exception **/
     val exceptionState by viewModel.composeUIExceptionEvent.collectAsState(null)
-    exceptionState?.let {
-        if (exceptionState?.code == RemoteConstants.UNAUTHORIZED_CODE) {
+    exceptionState?.let { exception ->
+        if (exception.code == RemoteConstants.UNAUTHORIZED_CODE) {
             logoutListener?.onUnauthorized()
         } else {
-
             BaseDialog(
-                icon = painterResource(R.drawable.ic_error),
-                title = stringResource(
-                    exceptionState?.exceptionTitleResource
-                        ?: R.string.an_error_occurred
-                ),
-                message = exceptionState?.getUIMessage(LocalContext.current)
-                    ?: stringResource(R.string.generic_unknown_error),
+                icon = painterResource(Res.drawable.ic_error),
+                title = stringResource(exception.exceptionTitleResource ?: Res.string.an_error_occurred),
+                message = exception.uiMessage(),
                 dismissOnClickOutside = true,
-                primaryButtonText = stringResource(R.string.dismiss),
+                primaryButtonText = stringResource(Res.string.dismiss),
                 onPrimaryClick = {
-                    exceptionState?.actions?.forEach { it.invoke() }
+                    exception.actions.forEach { it.invoke() }
                     viewModel.emitComposeUIExceptionEvent(null)
                 },
                 onDismiss = { viewModel.emitComposeUIExceptionEvent(null) }
             )
-
         }
     }
 
@@ -72,16 +66,13 @@ fun BaseScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-
                 CircularProgressIndicator(
                     color = Primary
                 )
-
             }
         }
     }
 
-    ContextEventHandler(viewModel)
-
+    PlatformActionHandler(viewModel)
     content()
 }

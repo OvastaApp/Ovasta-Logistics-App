@@ -1,5 +1,6 @@
 package com.ovasta.logisticsapp.base.services
 
+
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -53,7 +54,7 @@ enum class LocationBlockReason(
  * order actions call [ensureLocationTracking] first, which raises [blockedActionReason] for the
  * dialog that explains a refusal.
  */
-class LocationTrackingMonitor(private val context: Context) {
+class LocationTrackingMonitor(private val context: Context) : LocationTrackingGuard {
 
     private data class TrackerState(
         val isRunning: Boolean = false,
@@ -90,7 +91,7 @@ class LocationTrackingMonitor(private val context: Context) {
      * Returns whether an order action may run now. When it may not, tells the driver why through
      * [blockedActionReason].
      */
-    fun ensureLocationTracking(): Boolean {
+    override fun ensureLocationTracking(): Boolean {
         val reason = currentBlockReason() ?: return true
         _blockedActionReason.value = reason
         return false

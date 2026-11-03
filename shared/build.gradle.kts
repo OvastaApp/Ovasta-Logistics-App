@@ -33,6 +33,8 @@ kotlin {
             // Res is used by :androidApp too while its screens move here
             api(libs.compose.mp.components.resources)
             implementation(libs.compose.mp.ui.tooling.preview)
+            // BaseViewModel; the app's ViewModels extend it
+            api(libs.jetbrains.lifecycle.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
             // In the API of DateExt (today() returns a LocalDate)
             api(libs.kotlinx.datetime)

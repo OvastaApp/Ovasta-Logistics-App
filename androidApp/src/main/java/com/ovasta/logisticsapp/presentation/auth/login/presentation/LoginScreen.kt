@@ -55,7 +55,6 @@ import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
-import com.ovasta.logisticsapp.base.components.sharedComposable.ContextEventHandler
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.mdRegular
 import com.ovasta.logisticsapp.base.smMedium
@@ -93,7 +92,6 @@ fun LoginScreen(
             onAction = viewModel::onAction
         )
     }
-    ContextEventHandler(viewModel)
 }
 
 @Composable
