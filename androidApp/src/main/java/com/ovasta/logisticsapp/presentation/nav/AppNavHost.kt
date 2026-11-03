@@ -45,16 +45,7 @@ import com.ovasta.logisticsapp.presentation.profile.presentation.charge.ChargeVi
 import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletScreen
 import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletViewModel
 import org.koin.androidx.compose.koinViewModel
-
-data object Splash
-data object Login
-data object Home
-data object Profile
-data object Charge
-data object Wallet
-data object AvailableTasks
-data class TaskDetails(val taskId: Int)
-
+
 
 @Composable
 fun AppNavHost(modifier: Modifier = Modifier) {

@@ -14,7 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray800
@@ -25,7 +26,7 @@ import com.ovasta.logisticsapp.base.ext.sdp
 @Composable
 fun UserTypeOption(
     modifier: Modifier = Modifier,
-    icon: Int,
+    icon: DrawableResource,
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit

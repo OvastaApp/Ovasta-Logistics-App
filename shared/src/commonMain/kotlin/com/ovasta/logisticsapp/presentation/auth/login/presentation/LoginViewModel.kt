@@ -4,25 +4,22 @@ import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.UserType
-import com.ovasta.logisticsapp.base.exception.APIException
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
-import com.ovasta.logisticsapp.base.ext.ToastHelper
 import com.ovasta.logisticsapp.data.RemoteConstants
+import com.ovasta.logisticsapp.data.remote.PushTokenProvider
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.auth.login.data.ILoginRepository
-import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
 import com.ovasta.logisticsapp.presentation.nav.Home
 import kotlinx.coroutines.CoroutineExceptionHandler
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val loginRepository: ILoginRepository,
-    private val settingsRepository: ISettingsRepository
+    private val settingsRepository: ISettingsRepository,
+    private val pushTokenProvider: PushTokenProvider,
 ) : BaseViewModel() {
 
     private val _viewState = MutableStateFlow(LoginViewState())
@@ -109,7 +106,7 @@ class LoginViewModel(
         viewModelScope.launch(dispatcher + coroutineExceptionHandler) {
             setComposeUILoading(true)
             val fcmToken = try {
-                FirebaseMessaging.getInstance().token.await()
+                pushTokenProvider.pushToken()
             } catch (e: Exception) {
                 null
             }

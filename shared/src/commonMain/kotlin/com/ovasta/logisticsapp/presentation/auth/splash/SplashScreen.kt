@@ -1,5 +1,8 @@
 package com.ovasta.logisticsapp.presentation.auth.splash
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.logo
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,10 +11,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.ScreenDirectionEventHandler
 import com.ovasta.logisticsapp.base.White
 
@@ -39,7 +41,7 @@ private fun SplashContent() {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(Res.drawable.logo),
             contentDescription = "App Logo",
             modifier = Modifier
                 .size(250.dp)

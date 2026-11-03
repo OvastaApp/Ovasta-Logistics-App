@@ -1,5 +1,22 @@
 package com.ovasta.logisticsapp.presentation.auth.login.presentation
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.admin
+import com.ovasta.logisticsapp.shared.resources.agent_type
+import com.ovasta.logisticsapp.shared.resources.courier
+import com.ovasta.logisticsapp.shared.resources.enter_password
+import com.ovasta.logisticsapp.shared.resources.enter_your_phone_number
+import com.ovasta.logisticsapp.shared.resources.ic_admin
+import com.ovasta.logisticsapp.shared.resources.ic_delivery_agent
+import com.ovasta.logisticsapp.shared.resources.ic_picker
+import com.ovasta.logisticsapp.shared.resources.ic_visibility_off
+import com.ovasta.logisticsapp.shared.resources.ic_visibility_on
+import com.ovasta.logisticsapp.shared.resources.invalid_password
+import com.ovasta.logisticsapp.shared.resources.invalid_phone_number
+import com.ovasta.logisticsapp.shared.resources.login
+import com.ovasta.logisticsapp.shared.resources.password
+import com.ovasta.logisticsapp.shared.resources.picker
+
 import com.ovasta.logisticsapp.base.UserType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,14 +57,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
@@ -108,7 +124,7 @@ private fun LoginContent(
             .fillMaxSize(),
         topBar = {
             CenteredTextAppBar(
-                title = stringResource(R.string.login),
+                title = stringResource(Res.string.login),
                 showBackButton = false
             ) {}
         }
@@ -131,7 +147,7 @@ private fun LoginContent(
                 // Phone Number Field
                 Text(
                     modifier = Modifier.padding(top = 24.sdp),
-                    text = stringResource(R.string.enter_your_phone_number),
+                    text = stringResource(Res.string.enter_your_phone_number),
                     style = smMedium
                 )
 
@@ -176,7 +192,7 @@ private fun LoginContent(
 
                 if (!viewState.isPhoneValid) {
                     Text(
-                        text = stringResource(R.string.invalid_phone_number),
+                        text = stringResource(Res.string.invalid_phone_number),
                         color = Primary,
                         modifier = Modifier
                             .testTag(LoginContentTestTag.TXT_INVALID_PHONE)
@@ -187,7 +203,7 @@ private fun LoginContent(
                 // Password Field
                 Text(
                     modifier = Modifier.padding(top = 16.sdp),
-                    text = stringResource(R.string.password),
+                    text = stringResource(Res.string.password),
                     style = smMedium
                 )
 
@@ -224,7 +240,7 @@ private fun LoginContent(
                     ),
                     placeholder = {
                         Text(
-                            text = stringResource(R.string.enter_password),
+                            text = stringResource(Res.string.enter_password),
                             style = mdRegular
                         )
                     },
@@ -237,9 +253,9 @@ private fun LoginContent(
                                 modifier = Modifier.padding(end = 4.sdp),
                                 painter = painterResource(
                                     if (passwordVisible)
-                                        R.drawable.ic_visibility_on
+                                        Res.drawable.ic_visibility_on
                                     else
-                                        R.drawable.ic_visibility_off
+                                        Res.drawable.ic_visibility_off
                                 ),
                                 contentDescription = if (passwordVisible) "Hide password" else "Show password",
                                 tint = Gray800
@@ -259,7 +275,7 @@ private fun LoginContent(
 
                 if (!viewState.isPasswordValid) {
                     Text(
-                        text = stringResource(R.string.invalid_password),
+                        text = stringResource(Res.string.invalid_password),
                         color = Primary,
                         modifier = Modifier
                             .testTag(LoginContentTestTag.TXT_INVALID_PASSWORD)
@@ -270,7 +286,7 @@ private fun LoginContent(
                 // User Type Selection
                 Text(
                     modifier = Modifier.padding(top = 16.sdp),
-                    text = stringResource(R.string.agent_type),
+                    text = stringResource(Res.string.agent_type),
                     style = smMedium
                 )
 
@@ -289,8 +305,8 @@ private fun LoginContent(
                         modifier = Modifier
                             .weight(1f)
                             .testTag(LoginContentTestTag.BTN_DELIVERY_AGENT),
-                        icon = R.drawable.ic_delivery_agent,
-                        label = stringResource(R.string.courier),
+                        icon = Res.drawable.ic_delivery_agent,
+                        label = stringResource(Res.string.courier),
                         isSelected = viewState.selectedUserType == UserType.COURIER,
                         onClick = { onAction(LoginAction.UserTypeChanged(UserType.COURIER)) }
                     )
@@ -300,8 +316,8 @@ private fun LoginContent(
                         modifier = Modifier
                             .weight(1f)
                             .testTag(LoginContentTestTag.BTN_PICKER),
-                        icon = R.drawable.ic_picker,
-                        label = stringResource(R.string.picker),
+                        icon = Res.drawable.ic_picker,
+                        label = stringResource(Res.string.picker),
                         isSelected = viewState.selectedUserType == UserType.WORKER,
                         onClick = { onAction(LoginAction.UserTypeChanged(UserType.WORKER)) }
                     )
@@ -310,8 +326,8 @@ private fun LoginContent(
                         modifier = Modifier
                             .weight(1f)
                             .testTag(LoginContentTestTag.BTN_DELIVERY_AGENT),
-                        icon = R.drawable.ic_admin,
-                        label = stringResource(R.string.admin),
+                        icon = Res.drawable.ic_admin,
+                        label = stringResource(Res.string.admin),
                         isSelected = viewState.selectedUserType == UserType.ADMIN,
                         onClick = { onAction(LoginAction.UserTypeChanged(UserType.ADMIN)) }
                     )
@@ -349,7 +365,7 @@ private fun LoginContent(
                     enabled = viewState.isLoginButtonEnabled
                 ) {
                     Text(
-                        text = stringResource(R.string.login),
+                        text = stringResource(Res.string.login),
                         style = mdMedium.copy(color = Base_white)
                     )
                 }
