@@ -76,11 +76,12 @@ Library choices:
    - ✅ Dependencies: CMP material3 1.9.0, which lifts the app's androidx material3 from 1.3.1 to 1.4.0, plus icons, resources and tooling-preview.
    - ✅ Resources: strings (en default, ar), drawables and fonts are in `shared/.../composeResources`. Strings were converted to numbered placeholders, `%.2f` became a pre-formatted `%1$s`, and `%%` became `%`. `Res` is public, so the app can use it while screens move. The app's own `res` copies are deleted once unused; the fonts already are.
    - ✅ Theme, typography, styles and 20 shared components are in `:shared`. Three `expect` helpers: click-guard clock, sdp screen width (still `LocalConfiguration` on Android) and dynamic color.
-   - Next: ViewModels.
-     - `BaseViewModel` in common: replace the `ContextEvent` lambdas (`(Context) -> Unit`) with typed platform actions (open settings or a dialer, share, toast).
-     - Replace `ToastEvent`'s `@StringRes Int` with `StringResource`.
-     - Koin `viewModel {}` → `koin-compose-viewmodel`.
-   - Then: the screens, one feature per commit (Splash, Login, Profile/Wallet/Charge, AvailableTasks, Home, TaskDetails).
+   - ✅ `BaseViewModel`, `BaseScreen`, `ScreenDirection`, `ComposeUIException` and the toast and platform-action handlers are in `:shared`.
+     - Typed `PlatformAction` replaces the `Context` lambdas (only the language change used them).
+     - `LocationTrackingGuard` stands in front of the Android tracking monitor.
+     - Toasts carry a `StringResource`. iOS only logs them until Phase 5.
+   - ✅ Splash and Login are in `:shared`. The back-stack keys are in a shared `NavKeys.kt`, and the FCM token comes from a `PushTokenProvider`; iOS gets its provider with the push work.
+   - Next: the remaining screens, one feature per commit: Profile/Wallet/Charge, then AvailableTasks and Home, then TaskDetails.
      - Each screen needs an `expect` image picker or camera returning bytes, permission requests, and the `String.format` calls rewritten as resource arguments.
    - Then: `AppNavHost` on JetBrains Navigation3 1.1.x, `App()` hosting it on both platforms, and `MainActivity` reduced to `setContent { App() }`.
 5. **Platform features:** tracking and notifications, detailed below.
