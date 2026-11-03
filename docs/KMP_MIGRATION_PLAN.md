@@ -73,6 +73,16 @@ Library choices:
      - Still to do: pin the iOS Firebase pods to the Firebase iOS SDK version GitLive 2.7.0 was built against (see its release notes) when setting up the Mac build.
    - Stays in the app until Phase 4/5: `Uri` image compression, location, Geocoder, Crashlytics, FCM and the Android string resources (behind `NetworkErrorMessages`).
 4. **UI to commonMain.** Move theme, components, the 8 screens, about 12 sheets and dialogs, and the ViewModels (KMP `lifecycle-viewmodel` + `koin-compose-viewmodel`). Replace `R.*` with `Res.*`. Move `LocaleHelper` to the seller app's `LanguageApplier` (Arabic default, RTL).
+   - ✅ Dependencies: CMP material3 1.9.0, which lifts the app's androidx material3 from 1.3.1 to 1.4.0, plus icons, resources and tooling-preview.
+   - ✅ Resources: strings (en default, ar), drawables and fonts are in `shared/.../composeResources`. Strings were converted to numbered placeholders, `%.2f` became a pre-formatted `%1$s`, and `%%` became `%`. `Res` is public, so the app can use it while screens move. The app's own `res` copies are deleted once unused; the fonts already are.
+   - ✅ Theme, typography, styles and 20 shared components are in `:shared`. Three `expect` helpers: click-guard clock, sdp screen width (still `LocalConfiguration` on Android) and dynamic color.
+   - Next: ViewModels.
+     - `BaseViewModel` in common: replace the `ContextEvent` lambdas (`(Context) -> Unit`) with typed platform actions (open settings or a dialer, share, toast).
+     - Replace `ToastEvent`'s `@StringRes Int` with `StringResource`.
+     - Koin `viewModel {}` → `koin-compose-viewmodel`.
+   - Then: the screens, one feature per commit (Splash, Login, Profile/Wallet/Charge, AvailableTasks, Home, TaskDetails).
+     - Each screen needs an `expect` image picker or camera returning bytes, permission requests, and the `String.format` calls rewritten as resource arguments.
+   - Then: `AppNavHost` on JetBrains Navigation3 1.1.x, `App()` hosting it on both platforms, and `MainActivity` reduced to `setContent { App() }`.
 5. **Platform features:** tracking and notifications, detailed below.
 6. **Thin apps.**
    - Android: Application, MainActivity, `FcmService`, `LocationTrackerService`, manifest.
