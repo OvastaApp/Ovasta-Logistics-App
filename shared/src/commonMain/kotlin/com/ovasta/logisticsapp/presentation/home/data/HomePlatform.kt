@@ -18,6 +18,9 @@ interface DeviceLocation {
 
     /** Whether location (GPS or network) is turned on. */
     fun isLocationEnabled(): Boolean
+
+    /** Whether the app may read the device location (precise or approximate). */
+    fun hasLocationPermission(): Boolean
 }
 
 /** Delivery orders the courier has already been alerted about, kept across app restarts. */

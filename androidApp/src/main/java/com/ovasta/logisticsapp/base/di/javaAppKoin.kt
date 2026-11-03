@@ -4,6 +4,7 @@ import com.ovasta.logisticsapp.data.remote.networkModule
 import com.ovasta.logisticsapp.data.remote.firebaseModule
 import com.ovasta.logisticsapp.data.setting.sessionModule
 import com.ovasta.logisticsapp.presentation.viewModelModule
+import com.ovasta.logisticsapp.base.services.trackingModule
 import android.app.Application
 import com.ovasta.logisticsapp.base.crashlyticsInfo.di.crashlyticsInfoModule
 import com.ovasta.logisticsapp.base.local.di.resourcesModule
@@ -26,6 +27,7 @@ val appModules = listOf(
     hapticsModule,
     homeModule,
     profileModule,
+    trackingModule,
     viewModelModule,
     crashlyticsInfoModule,
 )

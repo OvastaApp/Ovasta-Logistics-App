@@ -9,7 +9,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import com.ovasta.logisticsapp.base.local.LocaleHelper
-import com.ovasta.logisticsapp.presentation.home.presentation.components.LocationBlockedDialogHost
 import com.ovasta.logisticsapp.shared.App
 
 class MainActivity : ComponentActivity() {
@@ -34,7 +33,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            App(locationBlockedDialog = { onRestoreTracking -> LocationBlockedDialogHost(onRestoreTracking) })
+            App()
         }
     }
 }

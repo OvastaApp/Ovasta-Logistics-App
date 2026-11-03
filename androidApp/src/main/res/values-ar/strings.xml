@@ -3,18 +3,5 @@
     <string name="no_internet_connection">لا يوجد اتصال بالإنترنت</string>
     <string name="timeout_error_message">حدث خطأ، يرجى المحاولة لاحقًا</string>
     <string name="generic_unknown_error">حدث خطأ غير معروف</string>
-    <string name="try_again">حاول مرة أخرى</string>
     <string name="new_delivery_tasks">طلبات توصيل جديدة</string>
-    <string name="location_blocked_permission_title">مطلوب إذن الوصول إلى الموقع</string>
-    <string name="location_blocked_permission_message">اسمح لـ OvaStar بالوصول إلى موقعك لتتمكن من العمل على الطلبات.</string>
-    <string name="location_blocked_permission_action">فتح الإعدادات</string>
-    <string name="location_blocked_disabled_title">الموقع غير مفعّل</string>
-    <string name="location_blocked_disabled_message">فعّل الموقع في هاتفك لتتمكن من العمل على الطلبات.</string>
-    <string name="location_blocked_disabled_action">تفعيل الموقع</string>
-    <string name="location_blocked_tracking_title">التتبع غير مفعّل</string>
-    <string name="location_blocked_tracking_message">أنت غير متاح حاليًا. فعّل التتبع لتتمكن من العمل على الطلبات.</string>
-    <string name="location_blocked_tracking_action">تفعيل التتبع</string>
-    <string name="location_blocked_logging_title">لا يتم تسجيل موقعك</string>
-    <string name="location_blocked_logging_message">تعذّر تسجيل موقعك مؤخرًا. تحقق من اتصالك بالإنترنت ومن الـ GPS ثم حاول مرة أخرى.</string>
-    <string name="cancel">إلغاء</string>
 </resources>

@@ -35,6 +35,7 @@ import com.ovasta.logisticsapp.presentation.home.presentation.ScreenFlashOverlay
 import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksScreen
 import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksViewModel
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
+import com.ovasta.logisticsapp.presentation.home.presentation.components.LocationBlockedDialogHost
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.DropOfOrderDetailsScreen
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.TaskDetailsViewModel
 import com.ovasta.logisticsapp.presentation.profile.presentation.ProfileScreen
@@ -47,11 +48,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
-fun AppNavHost(
-    modifier: Modifier = Modifier,
-    // Explains refused order actions; Android passes its LocationBlockedDialogHost (Phase 5 shares it)
-    locationBlockedDialog: @Composable (onRestoreTracking: () -> Unit) -> Unit = {},
-) {
+fun AppNavHost(modifier: Modifier = Modifier) {
     val backStack = viewModel { NavBackStackViewModel() }.backStack
     val navigator = remember(backStack) { Navigator(backStack) }
     
@@ -188,9 +185,11 @@ fun AppNavHost(
 
                     // Explains order actions refused while the location isn't tracked, on any
                     // screen after login (composed last so it shows above the new-order sheet)
-                    locationBlockedDialog {
-                        homeViewModel.onTasksScreenAction(HomeScreenActions.RestoreTracking)
-                    }
+                    LocationBlockedDialogHost(
+                        onRestoreTracking = {
+                            homeViewModel.onTasksScreenAction(HomeScreenActions.RestoreTracking)
+                        }
+                    )
                 }
             }
         }

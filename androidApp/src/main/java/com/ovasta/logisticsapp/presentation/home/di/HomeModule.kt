@@ -1,22 +1,21 @@
 package com.ovasta.logisticsapp.presentation.home.di
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import com.ovasta.logisticsapp.base.services.LocationManager
-import com.ovasta.logisticsapp.base.services.LocationTrackingGuard
-import com.ovasta.logisticsapp.base.services.LocationTrackingMonitor
 import com.ovasta.logisticsapp.presentation.home.data.DeviceLocation
 import com.ovasta.logisticsapp.presentation.home.data.GeoPoint
 import com.ovasta.logisticsapp.presentation.home.data.HomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.SeenTaskStore
 import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val homeModule = module {
     single<IHomeRepository> { HomeRepository(get(), get(), get(), androidContext()) }
     single { LocationManager(androidContext()) }
-    single { LocationTrackingMonitor(androidContext()) } bind LocationTrackingGuard::class
     single<DeviceLocation> { AndroidDeviceLocation(androidContext(), get()) }
     single<SeenTaskStore> { SharedPreferencesSeenTaskStore(androidContext()) }
 }
@@ -34,6 +33,10 @@ private class AndroidDeviceLocation(
         return manager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
             manager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
     }
+
+    override fun hasLocationPermission(): Boolean =
+        listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            .any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
 }
 
 /** The same SharedPreferences file and key as before the move, so seen orders carry over. */

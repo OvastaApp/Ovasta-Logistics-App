@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
+import platform.UIKit.UIApplicationOpenSettingsURLString
 
 /** Posted on a language change; iosApp's ContentView recreates the Compose view for it. */
 const val LANGUAGE_CHANGED_NOTIFICATION = "com.ovasta.logisticsapp.LanguageChanged"
@@ -33,6 +34,9 @@ internal actual fun rememberPlatformActionPerformer(): (PlatformAction) -> Unit 
             is PlatformAction.OpenWhatsApp ->
                 action.phone.orEmpty().filter { it.isDigit() }.takeIf { it.isNotEmpty() }
                     ?.let { open("https://wa.me/$it") }
+            // iOS has no direct link to the location settings; the app's page has its permission
+            PlatformAction.OpenAppSettings, PlatformAction.OpenLocationSettings ->
+                open(UIApplicationOpenSettingsURLString)
         }
     }
 }

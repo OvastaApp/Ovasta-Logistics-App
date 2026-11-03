@@ -16,6 +16,12 @@ sealed interface PlatformAction {
 
     /** Opens a WhatsApp chat with [phone]; tells the user when there is no number. */
     data class OpenWhatsApp(val phone: String?) : PlatformAction
+
+    /** Opens this app's page in the system settings, e.g. to grant the location permission. */
+    data object OpenAppSettings : PlatformAction
+
+    /** Opens the device's location settings (the app's settings where there are none). */
+    data object OpenLocationSettings : PlatformAction
 }
 
 /** Performs [PlatformAction]s directly, for screens that don't route them through a ViewModel. */

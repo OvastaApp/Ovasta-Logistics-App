@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.compose.runtime.Composable
@@ -37,6 +38,18 @@ internal actual fun rememberPlatformActionPerformer(): (PlatformAction) -> Unit 
                 is PlatformAction.OpenMaps ->
                     context.navigateTo(action.latitude, action.longitude, messages)
                 is PlatformAction.OpenWhatsApp -> context.openWhatsApp(action.phone, messages)
+                // Some devices don't ship every settings screen; nothing happens then
+                PlatformAction.OpenAppSettings -> runCatching {
+                    context.startActivity(
+                        Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", context.packageName, null)
+                        )
+                    )
+                }
+                PlatformAction.OpenLocationSettings -> runCatching {
+                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
             }
         }
     }

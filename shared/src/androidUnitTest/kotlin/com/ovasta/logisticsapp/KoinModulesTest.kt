@@ -1,7 +1,7 @@
 package com.ovasta.logisticsapp
 
 import com.ovasta.logisticsapp.base.local.AppLanguageStore
-import com.ovasta.logisticsapp.base.services.LocationTrackingGuard
+import com.ovasta.logisticsapp.base.services.trackingModule
 import com.ovasta.logisticsapp.base.services.LocationTrackingSwitch
 import com.ovasta.logisticsapp.data.remote.NetworkErrorMessages
 import com.ovasta.logisticsapp.data.remote.PushTokenProvider
@@ -38,7 +38,6 @@ class KoinModulesTest {
         OrderAlarm::class,
         DeviceLocation::class,
         SeenTaskStore::class,
-        LocationTrackingGuard::class,
         LocationTrackingSwitch::class,
         AppLanguageStore::class,
     )
@@ -46,7 +45,7 @@ class KoinModulesTest {
     @OptIn(KoinExperimentalAPI::class)
     @Test
     fun `shared modules resolve with the platform bindings`() {
-        module { includes(networkModule, sessionModule, firebaseModule, viewModelModule) }
+        module { includes(networkModule, sessionModule, firebaseModule, trackingModule, viewModelModule) }
             .verify(extraTypes = platformBindings)
     }
 }
