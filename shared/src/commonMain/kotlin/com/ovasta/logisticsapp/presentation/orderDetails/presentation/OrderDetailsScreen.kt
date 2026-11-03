@@ -1,11 +1,57 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation
 
-import android.net.Uri
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.StringRes
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.add_image
+import com.ovasta.logisticsapp.shared.resources.call
+import com.ovasta.logisticsapp.shared.resources.camera
+import com.ovasta.logisticsapp.shared.resources.change_order_status
+import com.ovasta.logisticsapp.shared.resources.change_status_locked_hint
+import com.ovasta.logisticsapp.shared.resources.client_information
+import com.ovasta.logisticsapp.shared.resources.confirm_change_status_message
+import com.ovasta.logisticsapp.shared.resources.delete_product
+import com.ovasta.logisticsapp.shared.resources.delete_product_message
+import com.ovasta.logisticsapp.shared.resources.deliver_order
+import com.ovasta.logisticsapp.shared.resources.delivery_fees
+import com.ovasta.logisticsapp.shared.resources.directions
+import com.ovasta.logisticsapp.shared.resources.edit
+import com.ovasta.logisticsapp.shared.resources.edit_order
+import com.ovasta.logisticsapp.shared.resources.edit_product
+import com.ovasta.logisticsapp.shared.resources.filter_all
+import com.ovasta.logisticsapp.shared.resources.filter_not_picked
+import com.ovasta.logisticsapp.shared.resources.filter_partially_picked
+import com.ovasta.logisticsapp.shared.resources.gallery
+import com.ovasta.logisticsapp.shared.resources.ic_address
+import com.ovasta.logisticsapp.shared.resources.ic_call
+import com.ovasta.logisticsapp.shared.resources.ic_camera
+import com.ovasta.logisticsapp.shared.resources.ic_count
+import com.ovasta.logisticsapp.shared.resources.ic_delete
+import com.ovasta.logisticsapp.shared.resources.ic_edit_task
+import com.ovasta.logisticsapp.shared.resources.ic_image
+import com.ovasta.logisticsapp.shared.resources.ic_navigation
+import com.ovasta.logisticsapp.shared.resources.ic_profile
+import com.ovasta.logisticsapp.shared.resources.item_total_price
+import com.ovasta.logisticsapp.shared.resources.mark_picked
+import com.ovasta.logisticsapp.shared.resources.no_address
+import com.ovasta.logisticsapp.shared.resources.no_products_available
+import com.ovasta.logisticsapp.shared.resources.no_products_match_filter
+import com.ovasta.logisticsapp.shared.resources.not_available
+import com.ovasta.logisticsapp.shared.resources.order_details
+import com.ovasta.logisticsapp.shared.resources.other_products
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.products_list
+import com.ovasta.logisticsapp.shared.resources.request_edit
+import com.ovasta.logisticsapp.shared.resources.required_qty
+import com.ovasta.logisticsapp.shared.resources.status_picked_full
+import com.ovasta.logisticsapp.shared.resources.status_picked_missing
+import com.ovasta.logisticsapp.shared.resources.total_price
+import com.ovasta.logisticsapp.shared.resources.total_products
+import com.ovasta.logisticsapp.shared.resources.unknown_product
+import com.ovasta.logisticsapp.shared.resources.upload_receipt
+
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,14 +95,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.rememberAsyncImagePainter
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Error500
@@ -72,10 +116,11 @@ import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.constants.LocalConstants
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
-import com.ovasta.logisticsapp.base.ext.createImageCaptureUri
+import com.ovasta.logisticsapp.base.platform.MAX_UPLOAD_IMAGE_BYTES
+import com.ovasta.logisticsapp.base.platform.rememberImagePicker
 import com.ovasta.logisticsapp.base.ext.formatDecimal
-import com.ovasta.logisticsapp.base.ext.makePhoneCall
-import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
+import com.ovasta.logisticsapp.base.PlatformAction
+import com.ovasta.logisticsapp.base.rememberPlatformActions
 import com.ovasta.logisticsapp.base.ext.orDefault
 import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.mdMedium
@@ -95,6 +140,7 @@ import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components
 import com.ovasta.logisticsapp.presentation.orderDetails.presentation.components.ReceiveAmountBottomSheet
 import com.ovasta.logisticsapp.base.ext.sdp
 
+@OptIn(ExperimentalComposeUiApi::class) // BackHandler
 @Composable
 fun DropOfOrderDetailsScreen(
     viewModel: TaskDetailsViewModel, taskId: Int
@@ -116,14 +162,11 @@ fun DropOfOrderDetailsScreen(
     var showEditOptionsSheet by remember { mutableStateOf(false) }
     // Whether the image-source (camera / gallery) sheet is showing.
     var showImageSourceSheet by remember { mutableStateOf(false) }
-    // What the image being picked / captured is for (null = not picking). Saveable, like the
-    // camera file below, because the camera / gallery app can push this screen out of memory.
+    // What the image being picked / captured is for (null = not picking). Saveable because the
+    // camera / gallery app can push this screen out of memory.
     var pendingImageUpload by rememberSaveable { mutableStateOf<OrderImageUpload?>(null) }
-    // File the camera app writes the captured photo into.
-    var cameraImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
-    val context = LocalContext.current
 
-    fun uploadImage(image: Uri) {
+    val imagePicker = rememberImagePicker(maxBytes = MAX_UPLOAD_IMAGE_BYTES) { image ->
         when (pendingImageUpload) {
             OrderImageUpload.EDIT_REQUEST -> viewModel.requestOrderEdit(image)
             OrderImageUpload.RECEIPT -> viewModel.uploadOrderReceipt(image)
@@ -131,16 +174,6 @@ fun DropOfOrderDetailsScreen(
         }
         pendingImageUpload = null
     }
-
-    val galleryLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { image ->
-            if (image != null) uploadImage(image) else pendingImageUpload = null
-        }
-    val cameraLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
-            val image = cameraImageUri
-            if (saved && image != null) uploadImage(image) else pendingImageUpload = null
-        }
 
     BackHandler(enabled = true, onBack = { navigator.pop() })
 
@@ -174,15 +207,15 @@ fun DropOfOrderDetailsScreen(
                 showImageSourceSheet = true
             }
             OptionsBottomSheet(
-                title = R.string.edit_order,
+                title = Res.string.edit_order,
                 options = buildList {
                     // Already editable (edit request approved): nothing left to request
                     if (!viewState.task.isEditable) {
-                        add(SheetOption(R.drawable.ic_edit_task, R.string.request_edit) {
+                        add(SheetOption(Res.drawable.ic_edit_task, Res.string.request_edit) {
                             chooseImageFor(OrderImageUpload.EDIT_REQUEST)
                         })
                     }
-                    add(SheetOption(R.drawable.ic_image, R.string.upload_receipt) {
+                    add(SheetOption(Res.drawable.ic_image, Res.string.upload_receipt) {
                         chooseImageFor(OrderImageUpload.RECEIPT)
                     })
                 },
@@ -192,21 +225,15 @@ fun DropOfOrderDetailsScreen(
 
         if (showImageSourceSheet) {
             OptionsBottomSheet(
-                title = R.string.add_image,
+                title = Res.string.add_image,
                 options = listOf(
-                    SheetOption(R.drawable.ic_camera, R.string.camera) {
+                    SheetOption(Res.drawable.ic_camera, Res.string.camera) {
                         showImageSourceSheet = false
-                        val captureUri = context.createImageCaptureUri()
-                        cameraImageUri = captureUri
-                        // No camera app on the device: drop the pending upload
-                        runCatching { cameraLauncher.launch(captureUri) }
-                            .onFailure { pendingImageUpload = null }
+                        imagePicker.capturePhoto()
                     },
-                    SheetOption(R.drawable.ic_image, R.string.gallery) {
+                    SheetOption(Res.drawable.ic_image, Res.string.gallery) {
                         showImageSourceSheet = false
-                        galleryLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
+                        imagePicker.pickFromGallery()
                     },
                 ),
                 onDismiss = {
@@ -229,8 +256,8 @@ fun DropOfOrderDetailsScreen(
 
         if (showChangeStatusDialog) {
             ConfirmDialog(
-                title = stringResource(R.string.change_order_status),
-                message = stringResource(R.string.confirm_change_status_message),
+                title = stringResource(Res.string.change_order_status),
+                message = stringResource(Res.string.confirm_change_status_message),
                 onPrimaryClick = {
                     viewModel.changeOrderStatusToOnTheWay()
                     showChangeStatusDialog = false
@@ -276,10 +303,10 @@ fun DropOfOrderDetailsScreen(
             val product = viewState.task.products.getOrNull(index)
             if (product != null) {
                 ConfirmDialog(
-                    title = stringResource(R.string.delete_product),
+                    title = stringResource(Res.string.delete_product),
                     message = stringResource(
-                        R.string.delete_product_message,
-                        product.name.orDefault(stringResource(R.string.unknown_product)),
+                        Res.string.delete_product_message,
+                        product.name.orDefault(stringResource(Res.string.unknown_product)),
                         (product.quantity ?: 0.0).formatDecimal()
                     ),
                     onPrimaryClick = {
@@ -303,10 +330,10 @@ private enum class OrderImageUpload {
 }
 
 /** Pick-status filter applied to the products list. */
-private enum class ProductPickFilter(@StringRes val labelRes: Int) {
-    ALL(R.string.filter_all),
-    NOT_PICKED(R.string.filter_not_picked),
-    PARTIALLY_PICKED(R.string.filter_partially_picked);
+private enum class ProductPickFilter(val labelRes: StringResource) {
+    ALL(Res.string.filter_all),
+    NOT_PICKED(Res.string.filter_not_picked),
+    PARTIALLY_PICKED(Res.string.filter_partially_picked);
 
     fun matches(product: FirebaseProduct): Boolean = when (this) {
         ALL -> true
@@ -351,7 +378,7 @@ private fun OrderDetailsContent(
             .background(Gray100),
         topBar = {
             CenteredTextAppBar(
-                title = stringResource(R.string.order_details),
+                title = stringResource(Res.string.order_details),
                 onBackButtonPressed = onBackClick
             )
         }
@@ -398,7 +425,7 @@ private fun OrderDetailsContent(
                         .filter { selectedFilter.matches(it.value) }
 
                     if (filtered.isEmpty()) {
-                        item { EmptyProductsCard(messageRes = R.string.no_products_match_filter) }
+                        item { EmptyProductsCard(messageRes = Res.string.no_products_match_filter) }
                     } else {
                         // Group products by source.
                         val groups = filtered
@@ -453,7 +480,7 @@ private fun OrderDetailsContent(
                     )
                     if (!isDeliverStep && !canChangeStatus) {
                         Text(
-                            text = stringResource(R.string.change_status_locked_hint),
+                            text = stringResource(Res.string.change_status_locked_hint),
                             style = xsMedium.copy(color = Gray500),
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -492,7 +519,7 @@ private fun OrderDetailsContent(
                         ) {
                             Text(
                                 text = stringResource(
-                                    if (isDeliverStep) R.string.deliver_order else R.string.change_order_status
+                                    if (isDeliverStep) Res.string.deliver_order else Res.string.change_order_status
                                 ),
                                 style = mdMedium.copy(color = if (buttonEnabled) Base_white else Gray500),
                                 maxLines = 1,
@@ -509,7 +536,7 @@ private fun OrderDetailsContent(
                                 contentPadding = buttonPadding
                             ) {
                                 Text(
-                                    text = stringResource(R.string.edit),
+                                    text = stringResource(Res.string.edit),
                                     style = mdMedium.copy(color = Primary),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -545,7 +572,7 @@ private fun formatPrice(value: Double): String = value.formatDecimal(maxDecimals
 private fun ProductsSectionHeader(count: Int) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = stringResource(R.string.products_list),
+            text = stringResource(Res.string.products_list),
             style = mdSemiBold
         )
         if (count > 0) {
@@ -580,14 +607,14 @@ private fun CategoryHeader(source: String?, count: Int) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_count),
+            painter = painterResource(Res.drawable.ic_count),
             contentDescription = null,
             tint = Gray500,
             modifier = Modifier.size(16.sdp)
         )
         Spacer(modifier = Modifier.width(6.sdp))
         Text(
-            text = source ?: stringResource(R.string.other_products),
+            text = source ?: stringResource(Res.string.other_products),
             style = smSemiBold.copy(color = Gray800),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -649,7 +676,7 @@ private fun ProductFilterRow(
 }
 
 @Composable
-private fun EmptyProductsCard(@StringRes messageRes: Int = R.string.no_products_available) {
+private fun EmptyProductsCard(messageRes: StringResource = Res.string.no_products_available) {
     Column(
         modifier = Modifier
             .cardSurface()
@@ -657,7 +684,7 @@ private fun EmptyProductsCard(@StringRes messageRes: Int = R.string.no_products_
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_count),
+            painter = painterResource(Res.drawable.ic_count),
             contentDescription = null,
             tint = Gray500,
             modifier = Modifier.size(28.sdp)
@@ -673,7 +700,7 @@ private fun EmptyProductsCard(@StringRes messageRes: Int = R.string.no_products_
 
 @Composable
 private fun OrderHeader(task: HomeTask) {
-    val context = LocalContext.current
+    val platformActions = rememberPlatformActions()
     Column(
         modifier = Modifier
             .cardSurface()
@@ -695,11 +722,11 @@ private fun OrderHeader(task: HomeTask) {
         HeaderDivider()
 
         // Client data
-        Text(text = stringResource(R.string.client_information), style = smMedium.copy(color = Gray500))
+        Text(text = stringResource(Res.string.client_information), style = smMedium.copy(color = Gray500))
         Spacer(modifier = Modifier.height(4.sdp))
-        HeaderInfoRow(R.drawable.ic_profile, task.customerName.orDefault(stringResource(R.string.not_available)))
+        HeaderInfoRow(Res.drawable.ic_profile, task.customerName.orDefault(stringResource(Res.string.not_available)))
         Spacer(modifier = Modifier.height(4.sdp))
-        HeaderInfoRow(R.drawable.ic_address, task.customerAddress.orDefault(stringResource(R.string.no_address)))
+        HeaderInfoRow(Res.drawable.ic_address, task.customerAddress.orDefault(stringResource(Res.string.no_address)))
 
         Spacer(modifier = Modifier.height(10.sdp))
 
@@ -710,15 +737,15 @@ private fun OrderHeader(task: HomeTask) {
         ) {
             HeaderActionButton(
                 modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_call,
-                label = stringResource(R.string.call),
-                onClick = { context.makePhoneCall(task.clientPhone) }
+                icon = Res.drawable.ic_call,
+                label = stringResource(Res.string.call),
+                onClick = { platformActions(PlatformAction.Call(task.clientPhone)) }
             )
             HeaderActionButton(
                 modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_navigation,
-                label = stringResource(R.string.directions),
-                onClick = { context.navigateToLocationClick(task.clientLat, task.clientLang) }
+                icon = Res.drawable.ic_navigation,
+                label = stringResource(Res.string.directions),
+                onClick = { platformActions(PlatformAction.OpenMaps(task.clientLat, task.clientLang)) }
             )
         }
 
@@ -726,24 +753,24 @@ private fun OrderHeader(task: HomeTask) {
 
         // Order summary
         SummaryRow(
-            label = stringResource(R.string.total_products),
+            label = stringResource(Res.string.total_products),
             value = (task.itemsCount.takeIf { it > 0 } ?: task.products.size).toString()
         )
         if (task.deliveryFees > 0f) {
             Spacer(modifier = Modifier.height(6.sdp))
             SummaryRow(
-                label = stringResource(R.string.delivery_fees),
+                label = stringResource(Res.string.delivery_fees),
                 value = stringResource(
-                    R.string.price_currency,
+                    Res.string.price_currency,
                     formatPrice(task.deliveryFees.toDouble())
                 )
             )
         }
         Spacer(modifier = Modifier.height(6.sdp))
         SummaryRow(
-            label = stringResource(R.string.total_price),
+            label = stringResource(Res.string.total_price),
             value = stringResource(
-                R.string.price_currency,
+                Res.string.price_currency,
                 formatPrice(task.totalPrice.toDouble())
             ),
             emphasized = true
@@ -780,7 +807,7 @@ private fun HeaderDivider() {
 
 @Composable
 private fun HeaderActionButton(
-    icon: Int,
+    icon: DrawableResource,
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -807,7 +834,7 @@ private fun HeaderActionButton(
 }
 
 @Composable
-private fun HeaderInfoRow(icon: Int, label: String) {
+private fun HeaderInfoRow(icon: DrawableResource, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             painter = painterResource(icon),
@@ -860,7 +887,7 @@ private fun ProductCard(
                     .padding(horizontal = 10.sdp)
             ) {
                 Text(
-                    text = product.name.orDefault(stringResource(R.string.unknown_product)),
+                    text = product.name.orDefault(stringResource(Res.string.unknown_product)),
                     style = smMedium.copy(color = Gray800),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -869,7 +896,7 @@ private fun ProductCard(
                 // Unit price on its own line.
                 Text(
                     text = stringResource(
-                        R.string.price_currency,
+                        Res.string.price_currency,
                         formatPrice(product.itemPrice ?: 0.0)
                     ),
                     style = xsMedium.copy(color = Gray600)
@@ -877,7 +904,7 @@ private fun ProductCard(
                 Spacer(modifier = Modifier.height(4.sdp))
                 // Quantity highlighted on its own line for visibility.
                 Text(
-                    text = stringResource(R.string.required_qty, requiredQuantity.formatDecimal()),
+                    text = stringResource(Res.string.required_qty, requiredQuantity.formatDecimal()),
                     style = smMedium.copy(color = Gray800)
                 )
             }
@@ -890,8 +917,8 @@ private fun ProductCard(
                         modifier = Modifier.size(32.sdp)
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_edit_task),
-                            contentDescription = stringResource(R.string.edit_product),
+                            painter = painterResource(Res.drawable.ic_edit_task),
+                            contentDescription = stringResource(Res.string.edit_product),
                             tint = Primary,
                             modifier = Modifier.size(18.sdp)
                         )
@@ -902,8 +929,8 @@ private fun ProductCard(
                         modifier = Modifier.size(32.sdp)
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_delete),
-                            contentDescription = stringResource(R.string.delete_product),
+                            painter = painterResource(Res.drawable.ic_delete),
+                            contentDescription = stringResource(Res.string.delete_product),
                             tint = Error500,
                             modifier = Modifier.size(18.sdp)
                         )
@@ -932,11 +959,11 @@ private fun ProductCard(
         ) {
             Column {
                 Text(
-                    text = stringResource(R.string.item_total_price),
+                    text = stringResource(Res.string.item_total_price),
                     style = xsMedium.copy(color = Gray500)
                 )
                 Text(
-                    text = stringResource(R.string.price_currency, formatPrice(lineTotal)),
+                    text = stringResource(Res.string.price_currency, formatPrice(lineTotal)),
                     style = smMedium.copy(color = Gray800)
                 )
             }
@@ -949,7 +976,7 @@ private fun ProductCard(
                     vertical = 6.sdp
                 )
             ) {
-                Text(text = stringResource(R.string.mark_picked), style = xsMedium.copy(color = Primary))
+                Text(text = stringResource(Res.string.mark_picked), style = xsMedium.copy(color = Primary))
             }
         }
     }
@@ -961,10 +988,10 @@ private fun PickedStatusBadge(requiredQuantity: Double, foundQuantity: Double?) 
     val isFull = foundQuantity >= requiredQuantity
     val color = if (isFull) StatusDelivered else StatusPending
     val label = if (isFull) {
-        stringResource(R.string.status_picked_full)
+        stringResource(Res.string.status_picked_full)
     } else {
         stringResource(
-            R.string.status_picked_missing,
+            Res.string.status_picked_missing,
             (requiredQuantity - foundQuantity).formatDecimal()
         )
     }

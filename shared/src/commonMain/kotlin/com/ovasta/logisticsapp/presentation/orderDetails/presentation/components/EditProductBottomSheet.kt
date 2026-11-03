@@ -1,5 +1,15 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.cancel
+import com.ovasta.logisticsapp.shared.resources.edit_product
+import com.ovasta.logisticsapp.shared.resources.loading_sources
+import com.ovasta.logisticsapp.shared.resources.no_sources_available
+import com.ovasta.logisticsapp.shared.resources.price
+import com.ovasta.logisticsapp.shared.resources.quantity
+import com.ovasta.logisticsapp.shared.resources.save_changes
+import com.ovasta.logisticsapp.shared.resources.source
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,11 +44,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray900
@@ -110,7 +119,7 @@ fun EditProductBottomSheet(
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.edit_product),
+                text = stringResource(Res.string.edit_product),
                 style = lgMedium.copy(color = Gray900),
                 textAlign = TextAlign.Center,
             )
@@ -132,7 +141,7 @@ fun EditProductBottomSheet(
                 onValueChange = { input ->
                     if (isValidDecimalInput(input, PRICE_DIGITS, PRICE_DECIMALS)) priceText = input
                 },
-                label = { Text(stringResource(R.string.price), style = xsMedium) },
+                label = { Text(stringResource(Res.string.price), style = xsMedium) },
                 singleLine = true,
                 isError = priceText.isNotEmpty() && !isPriceValid,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -149,7 +158,7 @@ fun EditProductBottomSheet(
                         quantityText = input
                     }
                 },
-                label = { Text(stringResource(R.string.quantity), style = xsMedium) },
+                label = { Text(stringResource(Res.string.quantity), style = xsMedium) },
                 singleLine = true,
                 isError = quantityText.isNotEmpty() && !isQuantityValid,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -177,7 +186,7 @@ fun EditProductBottomSheet(
                         onValueChange = {},
                         readOnly = true,
                         textStyle = mdMedium,
-                        label = { Text(stringResource(R.string.source), style = xsMedium) },
+                        label = { Text(stringResource(Res.string.source), style = xsMedium) },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
                         },
@@ -200,7 +209,7 @@ fun EditProductBottomSheet(
                                             color = Primary
                                         )
                                         Text(
-                                            text = stringResource(R.string.loading_sources),
+                                            text = stringResource(Res.string.loading_sources),
                                             style = smNormal.copy(color = Gray500),
                                             modifier = Modifier.padding(
                                                 start = 8.sdp
@@ -214,7 +223,7 @@ fun EditProductBottomSheet(
                             availableSources.isEmpty() -> DropdownMenuItem(
                                 text = {
                                     Text(
-                                        text = stringResource(R.string.no_sources_available),
+                                        text = stringResource(Res.string.no_sources_available),
                                         style = smNormal.copy(color = Gray500)
                                     )
                                 },
@@ -248,7 +257,7 @@ fun EditProductBottomSheet(
                     shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
+                        text = stringResource(Res.string.cancel),
                         style = xsMedium.copy(color = Primary)
                     )
                 }
@@ -270,7 +279,7 @@ fun EditProductBottomSheet(
                     ),
                 ) {
                     Text(
-                        text = stringResource(R.string.save_changes),
+                        text = stringResource(Res.string.save_changes),
                         style = xsMedium.copy(
                             color = if (isValid) Base_white else Base_white.copy(alpha = 0.7f)
                         )

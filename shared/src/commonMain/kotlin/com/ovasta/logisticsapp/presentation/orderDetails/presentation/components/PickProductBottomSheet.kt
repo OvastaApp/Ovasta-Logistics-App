@@ -1,5 +1,13 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.cancel
+import com.ovasta.logisticsapp.shared.resources.confirm_pick
+import com.ovasta.logisticsapp.shared.resources.found_quantity
+import com.ovasta.logisticsapp.shared.resources.pick_all_found
+import com.ovasta.logisticsapp.shared.resources.pick_product
+import com.ovasta.logisticsapp.shared.resources.required_qty
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,40 +36,52 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray500
-import com.ovasta.logisticsapp.base.Gray800
 import com.ovasta.logisticsapp.base.Gray900
 import com.ovasta.logisticsapp.base.Primary
+import com.ovasta.logisticsapp.base.StatusDelivered
+import com.ovasta.logisticsapp.base.StatusPending
+import com.ovasta.logisticsapp.base.ext.formatDecimal
+import com.ovasta.logisticsapp.base.ext.isValidDecimalInput
 import com.ovasta.logisticsapp.base.lgMedium
-import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.base.ext.sdp
 
 /**
- * Bottom sheet shown when delivering an order: the agent enters the cash amount collected from
- * the client. [totalAmount] is shown for reference only — the collected amount may be less or
- * more than it; Confirm is enabled once any amount is entered.
+ * Bottom sheet that lets the user mark a product as picked, either fully (found == required)
+ * or with a missing amount (found < required).
+ *
+ * The found-quantity field is pre-filled with the product's previously picked amount, or the
+ * required quantity when picking for the first time. "All found" sets it to the required amount.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReceiveAmountBottomSheet(
-    totalAmount: Double,
-    onConfirm: (receivedAmount: Double) -> Unit,
+fun PickProductBottomSheet(
+    product: FirebaseProduct,
+    onConfirm: (foundQuantity: Double) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    var amountText by remember { mutableStateOf("") }
-    val parsedAmount = amountText.toDoubleOrNull()
-    val isValid = parsedAmount != null
+    val requiredQuantity = product.quantity ?: 0.0
+    val initialFound = product.pickedQuantity ?: requiredQuantity
+
+    var foundText by remember { mutableStateOf(initialFound.formatDecimal()) }
+    val parsedFound = foundText.toDoubleOrNull()
+
+    val isFoundValid = parsedFound != null && parsedFound in 0.0..requiredQuantity
+    val statusColor = when {
+        parsedFound == requiredQuantity -> StatusDelivered
+        else -> StatusPending
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -79,39 +99,58 @@ fun ReceiveAmountBottomSheet(
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.deliver_order),
+                text = stringResource(Res.string.pick_product),
                 style = lgMedium.copy(color = Gray900),
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(16.sdp))
+            Spacer(modifier = Modifier.height(4.sdp))
 
-            Row(
+            Text(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.total_price),
-                    style = smNormal.copy(color = Gray800)
-                )
-                Text(
-                    text = stringResource(R.string.price_currency, formatAmount(totalAmount)),
-                    style = lgSemiBold.copy(color = Primary)
-                )
-            }
+                text = product.name.orEmpty(),
+                style = smNormal.copy(color = Gray500),
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(8.sdp))
+
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.required_qty, requiredQuantity.formatDecimal()),
+                style = mdMedium.copy(color = Gray900),
+                textAlign = TextAlign.Center,
+            )
 
             Spacer(modifier = Modifier.height(12.sdp))
 
             OutlinedTextField(
-                value = amountText,
+                value = foundText,
                 textStyle = mdMedium,
-                onValueChange = { input -> if (isValidAmountInput(input)) amountText = input },
-                label = { Text(stringResource(R.string.received_amount), style = xsMedium) },
+                onValueChange = { input ->
+                    if (isValidDecimalInput(input, maxIntegerDigits = 6, maxDecimals = 3)) {
+                        foundText = input
+                    }
+                },
+                label = { Text(stringResource(Res.string.found_quantity), style = xsMedium) },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = foundText.isNotEmpty() && !isFoundValid,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(8.sdp))
+
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { foundText = requiredQuantity.formatDecimal() },
+                shape = RoundedCornerShape(8.sdp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.pick_all_found, requiredQuantity.formatDecimal()),
+                    style = xsMedium.copy(color = StatusDelivered)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.sdp))
 
@@ -126,30 +165,30 @@ fun ReceiveAmountBottomSheet(
                     shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
+                        text = stringResource(Res.string.cancel),
                         style = xsMedium.copy(color = Primary)
                     )
                 }
 
                 Button(
                     modifier = Modifier.weight(1f),
-                    enabled = isValid,
+                    enabled = isFoundValid,
                     onClick = {
-                        val amount = parsedAmount ?: return@Button
-                        onConfirm(amount)
+                        val found = parsedFound ?: return@Button
+                        onConfirm(found)
                     },
                     shape = RoundedCornerShape(8.sdp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Primary,
+                        containerColor = statusColor,
                         contentColor = Base_white,
-                        disabledContainerColor = Primary.copy(alpha = 0.4f),
+                        disabledContainerColor = statusColor.copy(alpha = 0.4f),
                         disabledContentColor = Base_white.copy(alpha = 0.7f)
                     ),
                 ) {
                     Text(
-                        text = stringResource(R.string.confirm_collect_money),
+                        text = stringResource(Res.string.confirm_pick),
                         style = xsMedium.copy(
-                            color = if (isValid) Base_white else Base_white.copy(alpha = 0.7f)
+                            color = if (isFoundValid) Base_white else Base_white.copy(alpha = 0.7f)
                         )
                     )
                 }
@@ -158,21 +197,11 @@ fun ReceiveAmountBottomSheet(
     }
 }
 
-/** Accepts an empty string or up to 7 digits with an optional 2-decimal fraction. */
-private fun isValidAmountInput(input: String): Boolean {
-    if (input.isEmpty()) return true
-    return input.matches(Regex("^\\d{0,7}(\\.\\d{0,2})?$"))
-}
-
-/** Formats an amount without a trailing ".0" for whole numbers (e.g. 250.0 -> "250"). */
-private fun formatAmount(value: Double): String =
-    if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
-
 @Preview(showBackground = true, locale = "ar")
 @Composable
-private fun ReceiveAmountBottomSheetPreview() {
-    ReceiveAmountBottomSheet(
-        totalAmount = 265.0,
+private fun PickProductBottomSheetPreview() {
+    PickProductBottomSheet(
+        product = FirebaseProduct(name = "Pepsi 1L", itemPrice = 20.0, quantity = 2.0),
         onConfirm = {},
         onDismiss = {}
     )

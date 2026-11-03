@@ -8,7 +8,7 @@ import com.ovasta.logisticsapp.shared.resources.product_deleted_successfully
 import com.ovasta.logisticsapp.shared.resources.product_updated_successfully
 import com.ovasta.logisticsapp.shared.resources.receipt_uploaded
 
-import android.net.Uri
+import com.ovasta.logisticsapp.base.platform.PickedImage
 import org.jetbrains.compose.resources.StringResource
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.BaseViewModel
@@ -266,13 +266,13 @@ class TaskDetailsViewModel(
     }
 
     /** Asks the backend to make the order editable, attaching [image] (picked or captured). */
-    fun requestOrderEdit(image: Uri) = uploadOrderImage(Res.string.edit_request_sent) {
-        orderDetailsRepository.requestOrderEdit(orderId = taskId, image = image)
+    fun requestOrderEdit(image: PickedImage) = uploadOrderImage(Res.string.edit_request_sent) {
+        orderDetailsRepository.requestOrderEdit(orderId = taskId, image = image.jpeg)
     }
 
     /** Uploads the order's receipt [image] (picked or captured). */
-    fun uploadOrderReceipt(image: Uri) = uploadOrderImage(Res.string.receipt_uploaded) {
-        orderDetailsRepository.uploadOrderImage(orderId = taskId, image = image)
+    fun uploadOrderReceipt(image: PickedImage) = uploadOrderImage(Res.string.receipt_uploaded) {
+        orderDetailsRepository.uploadOrderImage(orderId = taskId, image = image.jpeg)
     }
 
     private fun uploadOrderImage(successMessage: StringResource, upload: suspend () -> Unit) {

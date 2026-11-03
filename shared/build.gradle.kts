@@ -33,6 +33,8 @@ kotlin {
             // Res is used by :androidApp too while its screens move here
             api(libs.compose.mp.components.resources)
             implementation(libs.compose.mp.ui.tooling.preview)
+            // BackHandler in common code (system back on Android, swipe-back on iOS)
+            implementation(libs.compose.mp.ui.backhandler)
             // BaseViewModel; the app's ViewModels extend it
             api(libs.jetbrains.lifecycle.viewmodel)
             // LocalLifecycleOwner for screens that react to resume/pause

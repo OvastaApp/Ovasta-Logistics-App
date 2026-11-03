@@ -3,6 +3,9 @@ package com.ovasta.logisticsapp.base.platform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 
+/** Default size limit for uploaded photos (order images, receipts). */
+const val MAX_UPLOAD_IMAGE_BYTES = 200_000
+
 /** A photo the user picked or took, already compressed to JPEG for upload. */
 class PickedImage(val jpeg: ByteArray) {
     companion object {

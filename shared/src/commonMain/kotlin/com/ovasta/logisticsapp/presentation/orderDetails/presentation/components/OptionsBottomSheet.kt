@@ -1,7 +1,14 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.presentation.components
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.edit_order
+import com.ovasta.logisticsapp.shared.resources.ic_edit_task
+import com.ovasta.logisticsapp.shared.resources.ic_image
+import com.ovasta.logisticsapp.shared.resources.request_edit
+import com.ovasta.logisticsapp.shared.resources.upload_receipt
+
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,11 +31,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray900
@@ -39,8 +45,8 @@ import com.ovasta.logisticsapp.base.ext.sdp
 
 /** One tappable row in an [OptionsBottomSheet]. */
 data class SheetOption(
-    @DrawableRes val icon: Int,
-    @StringRes val label: Int,
+    val icon: DrawableResource,
+    val label: StringResource,
     val onClick: () -> Unit,
 )
 
@@ -51,7 +57,7 @@ data class SheetOption(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OptionsBottomSheet(
-    @StringRes title: Int,
+    title: StringResource,
     options: List<SheetOption>,
     onDismiss: () -> Unit,
 ) {
@@ -119,10 +125,10 @@ private fun OptionRow(option: SheetOption) {
 @Composable
 private fun OptionsBottomSheetPreview() {
     OptionsBottomSheet(
-        title = R.string.edit_order,
+        title = Res.string.edit_order,
         options = listOf(
-            SheetOption(R.drawable.ic_edit_task, R.string.request_edit) {},
-            SheetOption(R.drawable.ic_image, R.string.upload_receipt) {},
+            SheetOption(Res.drawable.ic_edit_task, Res.string.request_edit) {},
+            SheetOption(Res.drawable.ic_image, Res.string.upload_receipt) {},
         ),
         onDismiss = {}
     )

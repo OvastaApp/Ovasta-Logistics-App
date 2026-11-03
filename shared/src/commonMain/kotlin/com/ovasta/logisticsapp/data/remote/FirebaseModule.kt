@@ -6,6 +6,10 @@ import com.ovasta.logisticsapp.presentation.auth.login.data.LoginRemoteDataSourc
 import com.ovasta.logisticsapp.presentation.auth.login.data.LoginRepository
 import com.ovasta.logisticsapp.presentation.home.data.HomeFirebaseRemoteDataSource
 import com.ovasta.logisticsapp.presentation.home.data.IHomeFirebaseRemoteDataSource
+import com.ovasta.logisticsapp.presentation.orderDetails.data.IOrderDetailsRemoteDataSource
+import com.ovasta.logisticsapp.presentation.orderDetails.data.IOrderDetailsRepository
+import com.ovasta.logisticsapp.presentation.orderDetails.data.OrderDetailsRemoteDataSource
+import com.ovasta.logisticsapp.presentation.orderDetails.data.OrderDetailsRepository
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.firestore.FirebaseFirestore
@@ -21,6 +25,8 @@ val firebaseModule = module {
     single { Firebase.auth }
 
     single<IHomeFirebaseRemoteDataSource> { HomeFirebaseRemoteDataSource(get()) }
+    single<IOrderDetailsRemoteDataSource> { OrderDetailsRemoteDataSource(get(), get()) }
+    single<IOrderDetailsRepository> { OrderDetailsRepository(get()) }
     single<ILoginRemoteDataSource> { LoginRemoteDataSource(get(), get()) }
     single<ILoginRepository> { LoginRepository(get()) }
 }

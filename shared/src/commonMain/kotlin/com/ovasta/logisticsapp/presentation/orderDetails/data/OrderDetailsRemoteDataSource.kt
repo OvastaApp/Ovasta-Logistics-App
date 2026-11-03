@@ -1,8 +1,5 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
-import android.content.Context
-import android.net.Uri
-import com.ovasta.logisticsapp.base.ext.compressImageToJpeg
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_PRODUCTS_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_DISTRICT_NAME
 import com.ovasta.logisticsapp.data.FirebaseConstants.FIRESTORE_ROOT_ORDERS_NAME
@@ -14,19 +11,16 @@ import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSourc
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.UpdateSalesOrderProductRequest
 import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.withContext
 
 class OrderDetailsRemoteDataSource(
     private val db: FirebaseFirestore,
     private val api: OrderDetailsApi,
-    private val context: Context,
 ) : IOrderDetailsRemoteDataSource {
 
     override suspend fun listenToOrderChanges(
@@ -133,15 +127,11 @@ class OrderDetailsRemoteDataSource(
         api.deleteSalesOrderProduct(orderId, DeleteSalesOrderProductRequest(catalogProduct, productId))
     }
 
-    override suspend fun requestOrderEdit(orderId: Int, image: Uri) {
-        api.requestOrderEdit(orderId, image.toJpeg())
+    override suspend fun requestOrderEdit(orderId: Int, image: ByteArray) {
+        api.requestOrderEdit(orderId, image)
     }
 
-    override suspend fun uploadOrderImage(orderId: Int, image: Uri) {
-        api.uploadOrderImage(orderId, image.toJpeg())
+    override suspend fun uploadOrderImage(orderId: Int, image: ByteArray) {
+        api.uploadOrderImage(orderId, image)
     }
-
-    /** Compresses the image to JPEG off the main thread. */
-    private suspend fun Uri.toJpeg(): ByteArray =
-        withContext(Dispatchers.IO) { context.compressImageToJpeg(this@toJpeg) }
 }

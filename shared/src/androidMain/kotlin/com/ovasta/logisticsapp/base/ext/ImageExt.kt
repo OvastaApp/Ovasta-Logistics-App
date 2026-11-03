@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import com.ovasta.logisticsapp.base.platform.MAX_UPLOAD_IMAGE_BYTES
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import java.io.ByteArrayOutputStream
@@ -16,7 +17,6 @@ import kotlin.math.min
 private const val CAPTURED_IMAGES_DIR = "images"
 
 /** Largest image file we upload: 200 KB (200,000 bytes, so it fits either KB definition). */
-const val MAX_UPLOAD_IMAGE_BYTES = 200_000
 
 // Below this, JPEG artifacts start blurring receipt text, so shrink the image instead
 private const val MIN_JPEG_QUALITY = 60

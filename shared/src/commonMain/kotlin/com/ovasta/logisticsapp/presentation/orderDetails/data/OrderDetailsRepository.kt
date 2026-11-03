@@ -1,6 +1,5 @@
 package com.ovasta.logisticsapp.presentation.orderDetails.data
 
-import android.net.Uri
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.orderDetails.data.model.ProductSource
@@ -52,9 +51,9 @@ class OrderDetailsRepository(
         productId: Int
     ) = taskDetailsRemoteDataSource.deleteSalesOrderProduct(orderId, catalogProduct, productId)
 
-    override suspend fun requestOrderEdit(orderId: Int, image: Uri) =
+    override suspend fun requestOrderEdit(orderId: Int, image: ByteArray) =
         taskDetailsRemoteDataSource.requestOrderEdit(orderId, image)
 
-    override suspend fun uploadOrderImage(orderId: Int, image: Uri) =
+    override suspend fun uploadOrderImage(orderId: Int, image: ByteArray) =
         taskDetailsRemoteDataSource.uploadOrderImage(orderId, image)
 }
