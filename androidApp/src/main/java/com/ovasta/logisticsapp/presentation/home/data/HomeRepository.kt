@@ -15,7 +15,8 @@ import kotlinx.coroutines.withContext
 class HomeRepository(
     private val homeFirebaseRemoteDataSource: IHomeFirebaseRemoteDataSource,
     private val homeServerRemoteDataSource: IHomeServerRemoteDataSource,
-    val settingsRepository: ISettingsRepository
+    val settingsRepository: ISettingsRepository,
+    private val context: Context,
 ) : IHomeRepository {
     override suspend fun getAssignedOrders(
         userId: Int,
@@ -31,7 +32,7 @@ class HomeRepository(
         districtId = districtId
     )
 
-    override suspend fun startLocationTracking(context: Context) {
+    override suspend fun startLocationTracking() {
         withContext(Dispatchers.Main) {
             try {
                 val intent = Intent(context, LocationTrackerService::class.java).apply {
@@ -62,7 +63,7 @@ class HomeRepository(
         }
     }
 
-    override suspend fun stopLocationTracking(context: Context) {
+    override suspend fun stopLocationTracking() {
         withContext(Dispatchers.Main) {
             try {
                 val intent = Intent(context, LocationTrackerService::class.java).apply {

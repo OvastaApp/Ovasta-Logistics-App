@@ -1,5 +1,16 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.base.ext.currentTimeMillis
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.accept_order
+import com.ovasta.logisticsapp.shared.resources.delivery_fees
+import com.ovasta.logisticsapp.shared.resources.ic_delivery_fees
+import com.ovasta.logisticsapp.shared.resources.ic_total_price
+import com.ovasta.logisticsapp.shared.resources.new_delivery_tasks
+import com.ovasta.logisticsapp.shared.resources.notes
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.total_price
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +33,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalBottomSheetDefaults
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -36,12 +46,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Primary
@@ -72,9 +81,7 @@ fun NewDeliveryTaskBottomSheet(
     ModalBottomSheet(
         onDismissRequest = {},
         sheetState = sheetState,
-        properties = ModalBottomSheetDefaults.properties(
-            shouldDismissOnBackPress = false
-        ),
+        properties = ModalBottomSheetProperties(shouldDismissOnBackPress = false),
         dragHandle = null,
         containerColor = Color.White
     ) {
@@ -89,7 +96,7 @@ fun NewDeliveryTaskBottomSheet(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(R.string.new_delivery_tasks),
+                        text = stringResource(Res.string.new_delivery_tasks),
                         style = mdSemiBold
                     )
                     Text(
@@ -106,7 +113,7 @@ fun NewDeliveryTaskBottomSheet(
                 }
             }
 
-            val startTime = taskAlertTimestamps[task.orderId] ?: System.currentTimeMillis()
+            val startTime = taskAlertTimestamps[task.orderId] ?: currentTimeMillis()
             DeliveryTaskAlertCard(
                 task = task,
                 currency = currency,
@@ -125,14 +132,14 @@ private fun DeliveryTaskAlertCard(
     onAccept: () -> Unit
 ) {
     var progress by remember(task.orderId) {
-        val elapsed = (System.currentTimeMillis() - alertStartTime) / 1000f
+        val elapsed = (currentTimeMillis() - alertStartTime) / 1000f
         mutableFloatStateOf(((30f - elapsed) / 30f).coerceIn(0f, 1f))
     }
 
     LaunchedEffect(task.orderId) {
         while (progress > 0f) {
             delay(500)
-            val elapsed = (System.currentTimeMillis() - alertStartTime) / 1000f
+            val elapsed = (currentTimeMillis() - alertStartTime) / 1000f
             progress = ((30f - elapsed) / 30f).coerceIn(0f, 1f)
         }
     }
@@ -194,7 +201,7 @@ private fun DeliveryTaskAlertCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_delivery_fees),
+                        painter = painterResource(Res.drawable.ic_delivery_fees),
                         contentDescription = null,
                         tint = Gray500,
                         modifier = Modifier.size(16.dp)
@@ -202,18 +209,18 @@ private fun DeliveryTaskAlertCard(
                     Spacer(Modifier.width(4.dp))
                     Column {
                         Text(
-                            text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
+                            text = stringResource(Res.string.price_currency, task.deliveryPrice ?: 0.0),
                             style = lgSemiBold
                         )
                         Text(
-                            text = stringResource(R.string.delivery_fees),
+                            text = stringResource(Res.string.delivery_fees),
                             style = xsMedium.copy(color = Gray500)
                         )
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_total_price),
+                        painter = painterResource(Res.drawable.ic_total_price),
                         contentDescription = null,
                         tint = Gray500,
                         modifier = Modifier.size(16.dp)
@@ -223,12 +230,12 @@ private fun DeliveryTaskAlertCard(
                     Column {
                         Text(
                             text = stringResource(
-                                R.string.price_currency,
+                                Res.string.price_currency,
                                 totalPrice
                             ), style = lgSemiBold
                         )
                         Text(
-                            text = stringResource(R.string.total_price),
+                            text = stringResource(Res.string.total_price),
                             style = xsMedium.copy(color = Gray500)
                         )
                     }
@@ -237,7 +244,7 @@ private fun DeliveryTaskAlertCard(
             Spacer(Modifier.height(8.dp))
             if (task.note.isNotBlank()) {
                 Text(
-                    text = "${stringResource(R.string.notes)}: ${task.note}",
+                    text = "${stringResource(Res.string.notes)}: ${task.note}",
                     style = smNormal
                 )
             }
@@ -261,7 +268,7 @@ private fun DeliveryTaskAlertCard(
                         .background(Primary)
                 )
                 Text(
-                    stringResource(R.string.accept_order),
+                    stringResource(Res.string.accept_order),
                     style = smMedium.copy(color = Base_white),
                 )
             }
@@ -276,7 +283,7 @@ fun PreviewDeliveryTaskBottomSheet() {
         currency = "EGP",
         onAccept = {},
         onMinimize = {},
-        taskAlertTimestamps = mapOf(1 to System.currentTimeMillis() - 10_000),
+        taskAlertTimestamps = mapOf(1 to currentTimeMillis() - 10_000),
         task = DeliveryTask(
             orderId = 1,
             statusId = 1,

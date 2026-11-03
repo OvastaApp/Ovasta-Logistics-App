@@ -6,8 +6,9 @@ import android.media.MediaPlayer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.ovasta.logisticsapp.R
+import com.ovasta.logisticsapp.presentation.home.data.OrderAlarm
 
-class OrderAlarmSound(private val context: Context) {
+class OrderAlarmSound(private val context: Context) : OrderAlarm {
 
     private var mediaPlayer: MediaPlayer? = null
 
@@ -15,7 +16,7 @@ class OrderAlarmSound(private val context: Context) {
         get() = ProcessLifecycleOwner.get().lifecycle.currentState
             .isAtLeast(Lifecycle.State.RESUMED)
 
-    fun startAlarm() {
+    override fun startAlarm() {
         if (!isAppInForeground) return
         if (mediaPlayer?.isPlaying == true) return
 
@@ -31,7 +32,7 @@ class OrderAlarmSound(private val context: Context) {
         }
     }
 
-    fun stopAlarm() {
+    override fun stopAlarm() {
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()

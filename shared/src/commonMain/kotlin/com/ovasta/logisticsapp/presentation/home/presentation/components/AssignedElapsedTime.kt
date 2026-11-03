@@ -1,11 +1,15 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.base.ext.currentTimeMillis
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.ic_history
+import com.ovasta.logisticsapp.shared.resources.order_minutes_with_you
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import com.ovasta.logisticsapp.R
+import org.jetbrains.compose.resources.stringResource
 import com.ovasta.logisticsapp.base.Error600
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray800
@@ -18,7 +22,7 @@ private const val LATE_ORDER_MINUTES = 30
 @Composable
 fun AssignedElapsedTime(assignedAtMillis: Long, modifier: Modifier = Modifier) {
     // Clamp at zero in case the device clock is behind the server time
-    fun elapsedMillis() = (System.currentTimeMillis() - assignedAtMillis).coerceAtLeast(0)
+    fun elapsedMillis() = (currentTimeMillis() - assignedAtMillis).coerceAtLeast(0)
 
     val elapsedMinutes by produceState(elapsedMillis() / 60_000, assignedAtMillis) {
         while (true) {
@@ -31,8 +35,8 @@ fun AssignedElapsedTime(assignedAtMillis: Long, modifier: Modifier = Modifier) {
     val isLate = elapsedMinutes > LATE_ORDER_MINUTES
 
     InfoRow(
-        icon = R.drawable.ic_history,
-        label = stringResource(R.string.order_minutes_with_you, elapsedMinutes.toString()),
+        icon = Res.drawable.ic_history,
+        label = stringResource(Res.string.order_minutes_with_you, elapsedMinutes.toString()),
         textStyle = mdMedium.copy(color = if (isLate) Error600 else Gray800),
         iconTint = if (isLate) Error600 else Gray500,
         modifier = modifier

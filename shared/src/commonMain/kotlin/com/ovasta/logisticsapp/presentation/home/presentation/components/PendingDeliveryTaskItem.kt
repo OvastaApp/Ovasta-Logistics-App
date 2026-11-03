@@ -1,5 +1,14 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.accept_order
+import com.ovasta.logisticsapp.shared.resources.delivery_fees
+import com.ovasta.logisticsapp.shared.resources.ic_delivery_fees
+import com.ovasta.logisticsapp.shared.resources.ic_total_price
+import com.ovasta.logisticsapp.shared.resources.notes
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.total_price
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,12 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.*
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
 
@@ -92,7 +100,7 @@ fun PendingDeliveryTaskItem(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_delivery_fees),
+                        painter = painterResource(Res.drawable.ic_delivery_fees),
                         contentDescription = null,
                         tint = Gray500,
                         modifier = Modifier.size(16.dp)
@@ -100,18 +108,18 @@ fun PendingDeliveryTaskItem(
                     Spacer(modifier = Modifier.width(4.dp))
                     Column {
                         Text(
-                            text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
+                            text = stringResource(Res.string.price_currency, task.deliveryPrice ?: 0.0),
                             style = lgSemiBold
                         )
                         Text(
-                            text = stringResource(R.string.delivery_fees),
+                            text = stringResource(Res.string.delivery_fees),
                             style = xsMedium.copy(color = Gray500)
                         )
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_total_price),
+                        painter = painterResource(Res.drawable.ic_total_price),
                         contentDescription = null,
                         tint = Gray500,
                         modifier = Modifier.size(16.dp)
@@ -122,12 +130,12 @@ fun PendingDeliveryTaskItem(
                     Column {
                         Text(
                             text = stringResource(
-                                R.string.price_currency,
+                                Res.string.price_currency,
                                 totalPrice
                             ), style = lgSemiBold
                         )
                         Text(
-                            text = stringResource(R.string.total_price),
+                            text = stringResource(Res.string.total_price),
                             style = xsMedium.copy(color = Gray500)
                         )
                     }
@@ -139,7 +147,7 @@ fun PendingDeliveryTaskItem(
             // Notes
             if (task.note.isNotBlank()) {
                 Text(
-                    text = "${stringResource(R.string.notes)}: ${task.note}",
+                    text = "${stringResource(Res.string.notes)}: ${task.note}",
                     style = smNormal
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -158,7 +166,7 @@ fun PendingDeliveryTaskItem(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.accept_order),
+                    text = stringResource(Res.string.accept_order),
                     style = smMedium.copy(color = Base_white)
                 )
             }

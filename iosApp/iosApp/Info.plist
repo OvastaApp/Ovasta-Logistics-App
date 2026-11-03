@@ -35,6 +35,11 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Lets the app check for Google Maps before falling back to Apple Maps -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+	</array>
 	<!-- The logistics backend is plain HTTP -->
 	<key>NSAppTransportSecurity</key>
 	<dict>

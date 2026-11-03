@@ -1,5 +1,16 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.confirm
+import com.ovasta.logisticsapp.shared.resources.create_delivery_order
+import com.ovasta.logisticsapp.shared.resources.home
+import com.ovasta.logisticsapp.shared.resources.ic_add
+import com.ovasta.logisticsapp.shared.resources.no_tasks_available
+import com.ovasta.logisticsapp.shared.resources.sender_info
+import com.ovasta.logisticsapp.shared.resources.tasks
+import com.ovasta.logisticsapp.shared.resources.update_delivery_fees_message
+import com.ovasta.logisticsapp.shared.resources.update_delivery_fees_title
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,12 +34,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.constants.LocalConstants
@@ -84,7 +94,7 @@ fun TasksContent(
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0), topBar = {
                 CenteredTextAppBar(
-                    title = viewState.userName.ifBlank { stringResource(R.string.home) },
+                    title = viewState.userName.ifBlank { stringResource(Res.string.home) },
                     showBackButton = false
                 )
             },
@@ -97,8 +107,8 @@ fun TasksContent(
                         contentColor = Base_white
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_add),
-                            contentDescription = stringResource(R.string.create_delivery_order)
+                            painter = painterResource(Res.drawable.ic_add),
+                            contentDescription = stringResource(Res.string.create_delivery_order)
                         )
                     }
                 }
@@ -199,7 +209,7 @@ fun TasksContent(
                             item(key = "tasks_header") {
                                 Spacer(modifier = Modifier.height(8.sdp))
                                 Text(
-                                    text = stringResource(R.string.tasks),
+                                    text = stringResource(Res.string.tasks),
                                     style = lgSemiBold,
                                     modifier = Modifier.padding(vertical = 8.dp)
                                 )
@@ -260,7 +270,7 @@ fun TasksContent(
                                     contentAlignment = Alignment.TopCenter
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.no_tasks_available),
+                                        text = stringResource(Res.string.no_tasks_available),
                                         style = mdRegular.copy(color = Gray500)
                                     )
                                 }
@@ -300,14 +310,14 @@ fun TasksContent(
             // The edit button is hidden for tasks without an order id, so this is only a type guard
             val orderId = task.orderId ?: return@let
             DeliveryFeesDialog(
-                title = stringResource(R.string.update_delivery_fees_title),
+                title = stringResource(Res.string.update_delivery_fees_title),
                 message = stringResource(
-                    R.string.update_delivery_fees_message,
+                    Res.string.update_delivery_fees_message,
                     orderId,
-                    task.fromAddress.orEmpty().ifBlank { stringResource(R.string.sender_info) }
+                    task.fromAddress.orEmpty().ifBlank { stringResource(Res.string.sender_info) }
                 ),
                 maxValue = 9999.0,
-                confirmText = stringResource(R.string.confirm),
+                confirmText = stringResource(Res.string.confirm),
                 initialValue = task.deliveryPrice,
                 onConfirm = { fees ->
                     onTaskItemAction(HomeItemActions.UpdateDeliveryFees(orderId, fees))

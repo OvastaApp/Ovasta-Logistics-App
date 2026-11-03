@@ -1,5 +1,8 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.orders_available_to_take
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,10 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Primary
 import com.ovasta.logisticsapp.base.mdSemiBold
@@ -42,7 +44,7 @@ fun AvailableOrdersSummaryCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.orders_available_to_take, count),
+                text = stringResource(Res.string.orders_available_to_take, count),
                 style = mdSemiBold.copy(color = Base_white)
             )
             Icon(

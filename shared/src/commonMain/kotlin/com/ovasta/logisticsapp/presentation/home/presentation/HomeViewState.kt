@@ -1,6 +1,7 @@
 package com.ovasta.logisticsapp.presentation.home.presentation
 
 import com.ovasta.logisticsapp.base.exception.ComposeUIException
+import org.jetbrains.compose.resources.StringResource
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
@@ -17,7 +18,7 @@ data class HomeViewState(
     val alertQueue: List<DeliveryTask> = emptyList(),
     val bottomSheetMinimized: Boolean = false,
     val error: ComposeUIException? = null,
-    val showToastMessage: Int? = null,
+    val showToastMessage: StringResource? = null,
     val isTracking: Boolean = false,
     /** From the logged-in user; null until read. Outsource agents don't see the partner statistics. */
     val isOutsource: Boolean? = null,

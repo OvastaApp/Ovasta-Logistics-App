@@ -35,6 +35,8 @@ kotlin {
             implementation(libs.compose.mp.ui.tooling.preview)
             // BaseViewModel; the app's ViewModels extend it
             api(libs.jetbrains.lifecycle.viewmodel)
+            // LocalLifecycleOwner for screens that react to resume/pause
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
             // Image previews (picked photos as bytes; product images in later screens)
             implementation(libs.coil.compose)
             implementation(libs.kotlinx.coroutines.core)

@@ -1,5 +1,10 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.cancel
+import com.ovasta.logisticsapp.shared.resources.delivery_fees_hint
+import com.ovasta.logisticsapp.shared.resources.ic_delivery_truck
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,14 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray900
@@ -74,7 +78,7 @@ fun DeliveryFeesDialog(
             Column(modifier = Modifier.padding(16.sdp)) {
 
                 Icon(
-                    painter = painterResource(R.drawable.ic_delivery_truck),
+                    painter = painterResource(Res.drawable.ic_delivery_truck),
                     contentDescription = null,
                     tint = Color.Unspecified,
                     modifier = Modifier
@@ -108,7 +112,7 @@ fun DeliveryFeesDialog(
                     onValueChange = { input ->
                         if (isValidFeesInput(input)) text = input
                     },
-                    label = { Text(stringResource(R.string.delivery_fees_hint), style = xsMedium) },
+                    label = { Text(stringResource(Res.string.delivery_fees_hint), style = xsMedium) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
@@ -128,7 +132,7 @@ fun DeliveryFeesDialog(
                         shape = RoundedCornerShape(8.sdp),
                     ) {
                         Text(
-                            text = stringResource(R.string.cancel),
+                            text = stringResource(Res.string.cancel),
                             style = xsMedium.copy(color = Primary)
                         )
                     }

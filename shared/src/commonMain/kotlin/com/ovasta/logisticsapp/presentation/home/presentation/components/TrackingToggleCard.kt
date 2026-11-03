@@ -1,5 +1,11 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.ic_start_tracking
+import com.ovasta.logisticsapp.shared.resources.ic_stop_tracking
+import com.ovasta.logisticsapp.shared.resources.tracking_active
+import com.ovasta.logisticsapp.shared.resources.tracking_inactive
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -17,9 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import com.ovasta.logisticsapp.R
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import com.ovasta.logisticsapp.base.smNormal
 import com.ovasta.logisticsapp.base.ext.sdp
 
@@ -56,8 +61,7 @@ fun TrackingToggleCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    painter = painterResource(
-                        id = if (isTracking) R.drawable.ic_start_tracking else R.drawable.ic_stop_tracking
+                    painter = painterResource(if (isTracking) Res.drawable.ic_start_tracking else Res.drawable.ic_stop_tracking
                     ),
                     contentDescription = null,
                     tint = accentColor,
@@ -65,8 +69,8 @@ fun TrackingToggleCard(
                 )
                 Spacer(modifier = Modifier.width(8.sdp))
                 Text(
-                    text = if (isTracking) stringResource(R.string.tracking_active)
-                    else stringResource(R.string.tracking_inactive),
+                    text = if (isTracking) stringResource(Res.string.tracking_active)
+                    else stringResource(Res.string.tracking_inactive),
                     style = smNormal.copy(color = accentColor)
                 )
             }

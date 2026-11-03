@@ -1,5 +1,25 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.achieved
+import com.ovasta.logisticsapp.shared.resources.bonus_percentage
+import com.ovasta.logisticsapp.shared.resources.current_bonus
+import com.ovasta.logisticsapp.shared.resources.delivery_profit
+import com.ovasta.logisticsapp.shared.resources.ic_black_arrow_down
+import com.ovasta.logisticsapp.shared.resources.ic_delivery_fees
+import com.ovasta.logisticsapp.shared.resources.ic_delivery_truck
+import com.ovasta.logisticsapp.shared.resources.ic_price
+import com.ovasta.logisticsapp.shared.resources.incentives
+import com.ovasta.logisticsapp.shared.resources.milestone_bonus
+import com.ovasta.logisticsapp.shared.resources.milestone_target
+import com.ovasta.logisticsapp.shared.resources.orders
+import com.ovasta.logisticsapp.shared.resources.orders_progress_count
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.remaining_orders
+import com.ovasta.logisticsapp.shared.resources.statistics
+import com.ovasta.logisticsapp.shared.resources.statistics_tracking_hint
+import com.ovasta.logisticsapp.shared.resources.total_withdrawals
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -40,12 +60,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
@@ -61,8 +81,8 @@ import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.base.ext.today
 import kotlinx.datetime.number
-import java.text.SimpleDateFormat
-import java.util.Locale
+import com.ovasta.logisticsapp.base.ext.formatGrouped
+import com.ovasta.logisticsapp.base.ext.formatMonthYear
 import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
@@ -106,7 +126,7 @@ fun PartnerStatisticsSection(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_price),
+                        painter = painterResource(Res.drawable.ic_price),
                         contentDescription = null,
                         tint = Primary,
                         modifier = Modifier.size(18.sdp)
@@ -114,7 +134,7 @@ fun PartnerStatisticsSection(
                     Spacer(modifier = Modifier.width(8.sdp))
                     Column {
                         Text(
-                            text = stringResource(R.string.statistics),
+                            text = stringResource(Res.string.statistics),
                             style = smNormal.copy(color = Gray800, fontWeight = FontWeight.SemiBold)
                         )
                         // Collapsed summary - show net profit (profit - withdrawals)
@@ -124,10 +144,7 @@ fun PartnerStatisticsSection(
                             val netColor =
                                 if (netProfit >= 0.0) Color(0xFF4CAF50) else Color(0xFFE57373)
                             Text(
-                                text = String.format(
-                                    stringResource(R.string.price_currency),
-                                    formatAmount(netProfit)
-                                ),
+                                text = stringResource(Res.string.price_currency, formatAmount(netProfit)),
                                 style = xsMedium.copy(color = netColor)
                             )
                         }
@@ -135,7 +152,7 @@ fun PartnerStatisticsSection(
                 }
 
                 Icon(
-                    painter = painterResource(R.drawable.ic_black_arrow_down),
+                    painter = painterResource(Res.drawable.ic_black_arrow_down),
                     contentDescription = if (isExpanded) "Collapse" else "Expand",
                     tint = Gray500,
                     modifier = Modifier
@@ -176,26 +193,20 @@ fun PartnerStatisticsSection(
                     ) {
                         StatCard(
                             modifier = Modifier.weight(1f),
-                            icon = R.drawable.ic_delivery_fees,
+                            icon = Res.drawable.ic_delivery_fees,
                             iconTint = Color(0xFF4CAF50),
-                            label = stringResource(R.string.delivery_profit),
-                            value = String.format(
-                                stringResource(R.string.price_currency),
-                                formatAmount(statistics.deliveryProfitSum)
-                            ),
+                            label = stringResource(Res.string.delivery_profit),
+                            value = stringResource(Res.string.price_currency, formatAmount(statistics.deliveryProfitSum)),
                             containerColor = Color(0xFFF0F9F0),
                             borderColor = Color(0xFFC8E6C9)
                         )
 
                         StatCard(
                             modifier = Modifier.weight(1f),
-                            icon = R.drawable.ic_price,
+                            icon = Res.drawable.ic_price,
                             iconTint = Color(0xFFE57373),
-                            label = stringResource(R.string.total_withdrawals),
-                            value = String.format(
-                                stringResource(R.string.price_currency),
-                                formatAmount(statistics.withdrawTransactionsSum)
-                            ),
+                            label = stringResource(Res.string.total_withdrawals),
+                            value = stringResource(Res.string.price_currency, formatAmount(statistics.withdrawTransactionsSum)),
                             containerColor = Color(0xFFFFF8F0),
                             borderColor = Color(0xFFFFE0B2)
                         )
@@ -280,7 +291,7 @@ private fun MonthYearFilter(
                 )
                 Spacer(modifier = Modifier.width(4.sdp))
                 Icon(
-                    painter = painterResource(R.drawable.ic_black_arrow_down),
+                    painter = painterResource(Res.drawable.ic_black_arrow_down),
                     contentDescription = "Change month",
                     tint = Gray500,
                     modifier = Modifier
@@ -330,7 +341,7 @@ private fun MonthYearFilter(
                 )
                 Spacer(modifier = Modifier.width(4.sdp))
                 Icon(
-                    painter = painterResource(R.drawable.ic_black_arrow_down),
+                    painter = painterResource(Res.drawable.ic_black_arrow_down),
                     contentDescription = "Change year",
                     tint = Gray500,
                     modifier = Modifier
@@ -374,7 +385,7 @@ private fun MonthYearFilter(
 @Composable
 private fun StatCard(
     modifier: Modifier = Modifier,
-    icon: Int,
+    icon: DrawableResource,
     iconTint: Color,
     label: String,
     value: String,
@@ -455,7 +466,7 @@ private fun IncentivesProgressCard(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_delivery_truck),
+                        painter = painterResource(Res.drawable.ic_delivery_truck),
                         contentDescription = null,
                         tint = Primary,
                         modifier = Modifier.size(18.sdp)
@@ -463,11 +474,11 @@ private fun IncentivesProgressCard(
                     Spacer(modifier = Modifier.width(8.sdp))
                     Text(
                         text = if (!incentives.month.isNullOrBlank()) {
-                            stringResource(R.string.incentives) + " (" + formatMonthDisplay(
+                            stringResource(Res.string.incentives) + " (" + formatMonthDisplay(
                                 incentives.month!!
                             ) + ")"
                         } else {
-                            stringResource(R.string.incentives)
+                            stringResource(Res.string.incentives)
                         },
                         style = smNormal.copy(color = Gray800, fontWeight = FontWeight.SemiBold),
                         maxLines = 1,
@@ -476,11 +487,7 @@ private fun IncentivesProgressCard(
                 }
                 // Show completed orders count
                 Text(
-                    text = String.format(
-                        Locale.ENGLISH,
-                        "%,d",
-                        completedOrders
-                    ) + " " + stringResource(R.string.orders),
+                    text = (completedOrders).toDouble().formatGrouped(0) + " " + stringResource(Res.string.orders),
                     style = xsMedium.copy(color = Primary, fontWeight = FontWeight.SemiBold),
                     maxLines = 1
                 )
@@ -498,18 +505,14 @@ private fun IncentivesProgressCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.current_bonus),
+                        text = stringResource(Res.string.current_bonus),
                         style = xsMedium.copy(color = Gray500),
                         maxLines = 1
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (bonusPercentage > 0.0) {
                             Text(
-                                text = String.format(
-                                    Locale.ENGLISH,
-                                    stringResource(R.string.bonus_percentage),
-                                    bonusPercentage.toInt()
-                                ),
+                                text = stringResource(Res.string.bonus_percentage, bonusPercentage.toInt()),
                                 style = xsMedium.copy(
                                     color = Color(0xFF4CAF50),
                                     fontWeight = FontWeight.SemiBold
@@ -527,10 +530,7 @@ private fun IncentivesProgressCard(
                         }
                         if (bonusAmount > 0.0) {
                             Text(
-                                text = String.format(
-                                    stringResource(R.string.price_currency),
-                                    formatAmount(bonusAmount)
-                                ),
+                                text = stringResource(Res.string.price_currency, formatAmount(bonusAmount)),
                                 style = xsMedium.copy(
                                     color = Color(0xFF4CAF50),
                                     fontWeight = FontWeight.SemiBold
@@ -615,12 +615,7 @@ private fun MilestoneRow(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = String.format(
-                        Locale.ENGLISH,
-                        stringResource(R.string.milestone_target),
-                        targetOrders,
-                        bonusPercentage.toInt()
-                    ),
+                    text = stringResource(Res.string.milestone_target, targetOrders, bonusPercentage.toInt()),
                     style = xsMedium.copy(
                         color = if (isAchieved) Color(0xFF2E7D32) else Gray800,
                         fontWeight = if (isAchieved) FontWeight.SemiBold else FontWeight.Normal
@@ -633,13 +628,9 @@ private fun MilestoneRow(
             // Status badge
             Text(
                 text = if (isAchieved) {
-                    stringResource(R.string.achieved)
+                    stringResource(Res.string.achieved)
                 } else {
-                    String.format(
-                        Locale.ENGLISH,
-                        stringResource(R.string.remaining_orders),
-                        remaining
-                    )
+                    stringResource(Res.string.remaining_orders, remaining)
                 },
                 style = xsMedium.copy(
                     color = progressColor,
@@ -676,12 +667,7 @@ private fun MilestoneRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = String.format(
-                    Locale.ENGLISH,
-                    stringResource(R.string.orders_progress_count),
-                    completedOrders.coerceAtMost(targetOrders),
-                    targetOrders
-                ),
+                text = stringResource(Res.string.orders_progress_count, completedOrders.coerceAtMost(targetOrders), targetOrders),
                 style = xsMedium.copy(
                     color = progressColor,
                     fontWeight = FontWeight.Normal
@@ -690,13 +676,7 @@ private fun MilestoneRow(
             )
             if (bonusAmount > 0.0) {
                 Text(
-                    text = String.format(
-                        stringResource(R.string.milestone_bonus),
-                        String.format(
-                            stringResource(R.string.price_currency),
-                            formatAmount(bonusAmount)
-                        )
-                    ),
+                    text = stringResource(Res.string.milestone_bonus, stringResource(Res.string.price_currency, formatAmount(bonusAmount))),
                     style = xsMedium.copy(
                         color = if (isAchieved) Color(0xFF2E7D32) else Color(0xFFFFA726),
                         fontWeight = FontWeight.SemiBold
@@ -708,23 +688,20 @@ private fun MilestoneRow(
     }
 }
 
+/** "2026-04" as "April 2026" in the device's language, or unchanged if it isn't that format. */
 private fun formatMonthDisplay(monthString: String): String {
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM", Locale.ENGLISH)
-        val outputFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-        val date = inputFormat.parse(monthString) ?: return monthString
-        outputFormat.format(date)
-    } catch (_: Exception) {
-        monthString
-    }
+    val parts = monthString.trim().split("-")
+    val year = parts.getOrNull(0)?.toIntOrNull()
+    val month = parts.getOrNull(1)?.toIntOrNull()?.takeIf { it in 1..12 }
+    return if (parts.size >= 2 && year != null && month != null) formatMonthYear(year, month) else monthString
 }
 
 private fun formatAmount(value: Double?): String {
     if (value == null) return "0"
     return if (value == value.toLong().toDouble()) {
-        String.format(Locale.ENGLISH, "%,d", value.toLong())
+        (value.toLong()).toDouble().formatGrouped(0)
     } else {
-        String.format(Locale.ENGLISH, "%,.2f", value)
+        (value).formatGrouped(2)
     }
 }
 
@@ -797,14 +774,14 @@ fun StatisticsTrackingHint() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_price),
+                painter = painterResource(Res.drawable.ic_price),
                 contentDescription = null,
                 tint = Color(0xFFF9A825),
                 modifier = Modifier.size(20.sdp)
             )
             Spacer(modifier = Modifier.width(10.sdp))
             Text(
-                text = stringResource(R.string.statistics_tracking_hint),
+                text = stringResource(Res.string.statistics_tracking_hint),
                 style = xsMedium.copy(color = Color(0xFF795548))
             )
         }

@@ -1,5 +1,8 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.ic_location
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import com.ovasta.logisticsapp.base.Gray500
@@ -21,7 +25,7 @@ import com.ovasta.logisticsapp.base.ext.sdp
 
 @Composable
 fun InfoRow(
-    icon: Int,
+    icon: DrawableResource,
     label: String,
     modifier: Modifier = Modifier,
     textStyle: androidx.compose.ui.text.TextStyle = smNormal.copy(color = Gray500),
@@ -57,7 +61,7 @@ fun InfoRow(
 @Composable
 fun InfoRowPreview() {
     InfoRow(
-        icon = com.ovasta.logisticsapp.R.drawable.ic_location,
+        icon = Res.drawable.ic_location,
         label = "123 Main St, Springfield"
     )
 }

@@ -1,5 +1,16 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.confirm_delivery
+import com.ovasta.logisticsapp.shared.resources.confirm_pickup
+import com.ovasta.logisticsapp.shared.resources.ic_address
+import com.ovasta.logisticsapp.shared.resources.ic_count
+import com.ovasta.logisticsapp.shared.resources.ic_hash
+import com.ovasta.logisticsapp.shared.resources.ic_price
+import com.ovasta.logisticsapp.shared.resources.no_address
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.products_count
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,9 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray800
@@ -73,7 +83,7 @@ fun TaskCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 InfoRow(
-                    icon = R.drawable.ic_hash,
+                    icon = Res.drawable.ic_hash,
                     label = homeTask.taskId.toString(),
                     modifier = Modifier
                         .weight(1f)
@@ -90,29 +100,25 @@ fun TaskCard(
             Spacer(modifier = Modifier.height(8.sdp))
 
             InfoRow(
-                icon = R.drawable.ic_address,
-                label = homeTask.customerAddress?.ifEmpty { stringResource(R.string.no_address) }
-                    ?: stringResource(R.string.no_address),
+                icon = Res.drawable.ic_address,
+                label = homeTask.customerAddress?.ifEmpty { stringResource(Res.string.no_address) }
+                    ?: stringResource(Res.string.no_address),
                 modifier = Modifier.testTag("clientAddress")
             )
 
             Spacer(modifier = Modifier.height(8.sdp))
 
             InfoRow(
-                icon = R.drawable.ic_count,
-                label = stringResource(R.string.products_count, homeTask.itemsCount.toString()),
+                icon = Res.drawable.ic_count,
+                label = stringResource(Res.string.products_count, homeTask.itemsCount.toString()),
                 modifier = Modifier.testTag("productCount")
             )
 
             Spacer(modifier = Modifier.height(8.sdp))
 
             InfoRow(
-                icon = R.drawable.ic_price,
-                label = String.format(
-                    stringResource(R.string.price_currency),
-                    homeTask.totalPrice.toString(),
-                    currency
-                ),
+                icon = Res.drawable.ic_price,
+                label = stringResource(Res.string.price_currency, homeTask.totalPrice.toString(), currency),
                 textStyle = mdMedium.copy(color = Gray800),
                 modifier = Modifier.testTag("totalPrice")
             )
@@ -164,8 +170,8 @@ fun TaskCard(
                 ) {
                     Text(
                         text = when (nextStep) {
-                            is OrderSteps.Picked -> stringResource(R.string.confirm_pickup)
-                            is OrderSteps.Delivered -> stringResource(R.string.confirm_delivery)
+                            is OrderSteps.Picked -> stringResource(Res.string.confirm_pickup)
+                            is OrderSteps.Delivered -> stringResource(Res.string.confirm_delivery)
                             else -> ""
                         }
                     )

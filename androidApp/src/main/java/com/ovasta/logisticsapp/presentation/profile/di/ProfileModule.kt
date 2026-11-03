@@ -14,7 +14,7 @@ import org.koin.dsl.module
 
 val profileModule = module {
     single<AppLanguageStore> { LocaleHelperLanguageStore(androidContext()) }
-    single { LocationTrackingSwitch { get<IHomeRepository>().stopLocationTracking(androidContext()) } }
+    single { LocationTrackingSwitch { get<IHomeRepository>().stopLocationTracking() } }
     viewModel { ProfileViewModel(get(), get(), get()) }
     viewModel { WalletViewModel(get(), get()) }
     viewModel { ChargeViewModel(get()) }

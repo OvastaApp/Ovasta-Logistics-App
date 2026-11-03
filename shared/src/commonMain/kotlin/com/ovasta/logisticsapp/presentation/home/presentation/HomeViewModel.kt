@@ -1,21 +1,27 @@
 package com.ovasta.logisticsapp.presentation.home.presentation
 
-import android.util.Log
+import com.ovasta.logisticsapp.base.ext.currentTimeMillis
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.delivery_fees_updated_successfully
+import com.ovasta.logisticsapp.shared.resources.enable_location_to_go_online
+import com.ovasta.logisticsapp.shared.resources.location_not_available
+import com.ovasta.logisticsapp.shared.resources.order_created_successfully
+import com.ovasta.logisticsapp.shared.resources.phone_number_not_available
+
 import androidx.lifecycle.viewModelScope
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.BaseViewModel
-import com.ovasta.logisticsapp.base.ext.OrderAlarmSound
-import com.ovasta.logisticsapp.base.services.LocationManager
 import com.ovasta.logisticsapp.data.User
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
+import com.ovasta.logisticsapp.presentation.home.data.DeviceLocation
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
+import com.ovasta.logisticsapp.presentation.home.data.OrderAlarm
+import com.ovasta.logisticsapp.presentation.home.data.SeenTaskStore
 import com.ovasta.logisticsapp.presentation.home.data.model.FirebaseProduct
 import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import android.content.Context
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
 import com.ovasta.logisticsapp.base.ext.ToastEvent
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
@@ -27,11 +33,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 class HomeViewModel(
-    private val context: Context,
     val homeRepository: IHomeRepository,
     val settingsRepository: ISettingsRepository,
-    private val orderAlarmSound: OrderAlarmSound,
-    private val locationManager: LocationManager
+    private val orderAlarm: OrderAlarm,
+    private val deviceLocation: DeviceLocation,
+    private val seenTaskStore: SeenTaskStore,
 ) : BaseViewModel() {
     private val _viewState = MutableStateFlow(HomeViewState())
     val viewState = _viewState.asStateFlow()
@@ -44,13 +50,11 @@ class HomeViewModel(
 
     // Foreground-aware timer: only count down while app is in foreground
     private val _elapsedAlertTime = mutableMapOf<Int, Long>() // accumulated ms per task
-    private var _lastResumeTime: Long = System.currentTimeMillis()
+    private var _lastResumeTime: Long = currentTimeMillis()
     private var _isAppInForeground: Boolean = true
 
     // Persist seen task IDs across app restarts
-    private val prefs = context.getSharedPreferences("delivery_alerts", Context.MODE_PRIVATE)
-    private val _seenTaskIds = prefs.getStringSet("seen_task_ids", emptySet())!!
-        .mapTo(mutableSetOf()) { it.toInt() }
+    private val _seenTaskIds = seenTaskStore.load()
 
 
     private val _currency = MutableStateFlow("")
@@ -77,7 +81,6 @@ class HomeViewModel(
                 )
                     .collect { tasks ->
                         _viewState.update { it.copy(isAvailableTasksLoading = false) }
-                        Log.d("listenToNewDeliveryTasks", "Received new delivery tasks: $tasks")
 
                         // Cleanup stale IDs (tasks no longer in Firebase)
                         val currentTaskIds = tasks.map { it.orderId }.toSet()
@@ -117,9 +120,9 @@ class HomeViewModel(
                                     // No task showing → show first one immediately
                                     val firstTask = newTasks.first()
                                     _taskAlertTimestamps[firstTask.orderId] =
-                                        System.currentTimeMillis()
+                                        currentTimeMillis()
                                     _elapsedAlertTime[firstTask.orderId] = 0L
-                                    _lastResumeTime = System.currentTimeMillis()
+                                    _lastResumeTime = currentTimeMillis()
                                     state.copy(
                                         currentAlertTask = firstTask,
                                         alertQueue = state.alertQueue + newTasks.drop(1),
@@ -134,7 +137,7 @@ class HomeViewModel(
                                 }
                             }
                             // Start alarm sound when new tasks arrive
-                            orderAlarmSound.startAlarm()
+                            orderAlarm.startAlarm()
                         }
                     }
             } catch (ex: Exception) {
@@ -151,7 +154,6 @@ class HomeViewModel(
             _viewState.update { it.copy(isTasksLoading = true) }
             try {
                 val currentUserData = settingsRepository.getUseData()
-                Log.d("HomeViewModel", "Fetching assigned orders for userId=${currentUserData?.deliveryId}, userType=${currentUserData?.userTypeId}, districtId=${settingsRepository.getUseData()?.districtId}")
                 homeRepository.getAssignedOrders(
                     userId = currentUserData?.deliveryId ?: 0,
                     userType = currentUserData?.userTypeId ?: 0,
@@ -292,11 +294,11 @@ class HomeViewModel(
                 val currentTask = _viewState.value.currentAlertTask
                 if (currentTask != null) {
                     val accumulated = _elapsedAlertTime[currentTask.orderId] ?: 0L
-                    val sinceLastResume = System.currentTimeMillis() - _lastResumeTime
+                    val sinceLastResume = currentTimeMillis() - _lastResumeTime
                     val totalElapsed = accumulated + sinceLastResume
                     // Update taskAlertTimestamps for UI progress bar (store effective start time)
                     _taskAlertTimestamps[currentTask.orderId] =
-                        System.currentTimeMillis() - totalElapsed
+                        currentTimeMillis() - totalElapsed
                     if (totalElapsed >= 30_000) {
                         // Current task expired → mark as seen and pop next from queue
                         _seenTaskIds.add(currentTask.orderId)
@@ -316,10 +318,10 @@ class HomeViewModel(
             if (nextTask != null) {
                 // Pop from queue, set as current with fresh timer
                 _elapsedAlertTime[nextTask.orderId] = 0L
-                _lastResumeTime = System.currentTimeMillis()
-                _taskAlertTimestamps[nextTask.orderId] = System.currentTimeMillis()
+                _lastResumeTime = currentTimeMillis()
+                _taskAlertTimestamps[nextTask.orderId] = currentTimeMillis()
                 // Restart alarm for the next task
-                orderAlarmSound.startAlarm()
+                orderAlarm.startAlarm()
                 state.copy(
                     currentAlertTask = nextTask,
                     alertQueue = state.alertQueue.drop(1),
@@ -327,7 +329,7 @@ class HomeViewModel(
                 )
             } else {
                 // Queue empty → clear current task, stop alarm
-                orderAlarmSound.stopAlarm()
+                orderAlarm.stopAlarm()
                 state.copy(
                     currentAlertTask = null,
                     bottomSheetMinimized = false
@@ -337,13 +339,12 @@ class HomeViewModel(
     }
 
     private fun persistSeenTaskIds() {
-        prefs.edit().putStringSet("seen_task_ids", _seenTaskIds.map { it.toString() }.toSet())
-            .apply()
+        seenTaskStore.save(_seenTaskIds)
     }
 
     fun onAppForeground() {
         _isAppInForeground = true
-        _lastResumeTime = System.currentTimeMillis()
+        _lastResumeTime = currentTimeMillis()
     }
 
     fun onAppBackground() {
@@ -351,7 +352,7 @@ class HomeViewModel(
         // Accumulate elapsed time for the current task before going to background
         val currentTask = _viewState.value.currentAlertTask
         if (currentTask != null && _elapsedAlertTime.containsKey(currentTask.orderId)) {
-            val now = System.currentTimeMillis()
+            val now = currentTimeMillis()
             _elapsedAlertTime[currentTask.orderId] =
                 (_elapsedAlertTime[currentTask.orderId] ?: 0L) + (now - _lastResumeTime)
         }
@@ -431,7 +432,7 @@ class HomeViewModel(
         when (taskItemAction) {
             is HomeItemActions.OpenContactBottomSheet -> {
                 if (taskItemAction.homeTask.clientPhone.isNullOrBlank()) {
-                    updateUiState(viewState.value.copy(showToastMessage = R.string.phone_number_not_available))
+                    updateUiState(viewState.value.copy(showToastMessage = Res.string.phone_number_not_available))
                 } else {
                     _showContactSheet.value = taskItemAction.homeTask
                 }
@@ -439,7 +440,7 @@ class HomeViewModel(
 
             is HomeItemActions.OpenDirection -> {
                 if (taskItemAction.lat == 0.0 || taskItemAction.lng == 0.0) {
-                    updateUiState(_viewState.value.copy(showToastMessage = R.string.location_not_available))
+                    updateUiState(_viewState.value.copy(showToastMessage = Res.string.location_not_available))
                 } else {
                     viewModelScope.launch {
                         _taskItemActions.emit(taskItemAction)
@@ -449,7 +450,7 @@ class HomeViewModel(
 
             is HomeItemActions.CallRetailer -> {
                 if (taskItemAction.clientPhone.isBlank()) {
-                    updateUiState(viewState.value.copy(showToastMessage = R.string.phone_number_not_available))
+                    updateUiState(viewState.value.copy(showToastMessage = Res.string.phone_number_not_available))
                 } else {
                     viewModelScope.launch {
                         _taskItemActions.emit(taskItemAction)
@@ -459,7 +460,7 @@ class HomeViewModel(
 
             is HomeItemActions.WhatsAppRetailer -> {
                 if (taskItemAction.clientWhatsapp.isBlank()) {
-                    updateUiState(viewState.value.copy(showToastMessage = R.string.phone_number_not_available))
+                    updateUiState(viewState.value.copy(showToastMessage = Res.string.phone_number_not_available))
                 } else {
                     viewModelScope.launch {
                         _taskItemActions.emit(taskItemAction)
@@ -532,7 +533,7 @@ class HomeViewModel(
     private fun startTracking() {
         viewModelScope.launch {
             try {
-                homeRepository.startLocationTracking(context)
+                homeRepository.startLocationTracking()
                 updateUiState(_viewState.value.copy(isTracking = true))
 
                 // If there are waiting tasks not yet seen, queue them
@@ -544,9 +545,9 @@ class HomeViewModel(
                         if (state.currentAlertTask == null) {
                             // Show first task immediately
                             val firstTask = unseenTasks.first()
-                            _taskAlertTimestamps[firstTask.orderId] = System.currentTimeMillis()
+                            _taskAlertTimestamps[firstTask.orderId] = currentTimeMillis()
                             _elapsedAlertTime[firstTask.orderId] = 0L
-                            _lastResumeTime = System.currentTimeMillis()
+                            _lastResumeTime = currentTimeMillis()
                             state.copy(
                                 currentAlertTask = firstTask,
                                 alertQueue = state.alertQueue + unseenTasks.drop(1),
@@ -561,12 +562,11 @@ class HomeViewModel(
                         }
                     }
                     // Start alarm
-                    orderAlarmSound.startAlarm()
+                    orderAlarm.startAlarm()
                 }
             } catch (ex: Exception) {
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
                 updateUiState(_viewState.value.copy(isTracking = false))
-                Log.e("HomeViewModel", "Failed to start tracking", ex)
                 updateViewStateWithFail(ex)
             }
         }
@@ -576,7 +576,7 @@ class HomeViewModel(
     private fun restartLocationTracking() {
         viewModelScope.launch {
             kotlin.runCatching {
-                homeRepository.startLocationTracking(context)
+                homeRepository.startLocationTracking()
             }.onFailure {
                 updateViewStateWithFail(it)
             }
@@ -586,16 +586,15 @@ class HomeViewModel(
     private fun stopTracking() {
         viewModelScope.launch {
             try {
-                homeRepository.stopLocationTracking(context)
+                homeRepository.stopLocationTracking()
                 updateUiState(_viewState.value.copy(isTracking = false))
                 // Stop alarm when tracking is disabled
-                orderAlarmSound.stopAlarm()
+                orderAlarm.stopAlarm()
                 // Clear current task and queue
                 _viewState.update { it.copy(currentAlertTask = null, alertQueue = emptyList()) }
             } catch (ex: Exception) {
                 if (ex is kotlinx.coroutines.CancellationException) throw ex
                 updateUiState(_viewState.value.copy(isTracking = true))
-                Log.e("HomeViewModel", "Failed to stop tracking", ex)
                 updateViewStateWithFail(ex)
             }
         }
@@ -632,13 +631,13 @@ class HomeViewModel(
 
     private fun changePartnerStatus(isOnline: Boolean) {
         if (isOnline && !isLocationEnabled()) {
-            updateUiState(_viewState.value.copy(showToastMessage = R.string.enable_location_to_go_online))
+            updateUiState(_viewState.value.copy(showToastMessage = Res.string.enable_location_to_go_online))
             return
         }
         viewModelScope.launch {
             setComposeUILoading(true)
             kotlin.runCatching {
-                val location = if (isOnline) locationManager.getCurrentLocation() else null
+                val location = if (isOnline) deviceLocation.currentLocation() else null
                 homeRepository.changePartnerStatus(
                     isOnline = isOnline,
                     lat = location?.latitude,
@@ -771,7 +770,7 @@ class HomeViewModel(
             }.onSuccess {
                 setComposeUILoading(false)
                 // Stop alarm sound immediately on accept
-                orderAlarmSound.stopAlarm()
+                orderAlarm.stopAlarm()
 
                 // Mark as seen and persist
                 _seenTaskIds.add(orderId)
@@ -808,13 +807,7 @@ class HomeViewModel(
         emitComposeUIExceptionEvent(throwable.toComposeUIException())
     }
 
-    private fun isLocationEnabled(): Boolean {
-        val locationManager =
-            context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
-        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            android.location.LocationManager.NETWORK_PROVIDER
-        )
-    }
+    private fun isLocationEnabled(): Boolean = deviceLocation.isLocationEnabled()
 
     fun updateUiState(homeViewState: HomeViewState) {
         _viewState.value = homeViewState
@@ -842,7 +835,7 @@ class HomeViewModel(
                 )
             }.onSuccess {
                 setComposeUILoading(false)
-                updateUiState(_viewState.value.copy(showToastMessage = R.string.order_created_successfully))
+                updateUiState(_viewState.value.copy(showToastMessage = Res.string.order_created_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
                 updateViewStateWithFail(it)
@@ -860,7 +853,7 @@ class HomeViewModel(
                 )
             }.onSuccess {
                 setComposeUILoading(false)
-                updateUiState(_viewState.value.copy(showToastMessage = R.string.delivery_fees_updated_successfully))
+                updateUiState(_viewState.value.copy(showToastMessage = Res.string.delivery_fees_updated_successfully))
                 getAssignedDeliveryOrders()
             }.onFailure {
                 updateViewStateWithFail(it)
@@ -871,6 +864,6 @@ class HomeViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        orderAlarmSound.stopAlarm()
+        orderAlarm.stopAlarm()
     }
 }

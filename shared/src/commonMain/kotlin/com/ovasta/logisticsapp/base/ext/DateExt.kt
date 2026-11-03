@@ -66,3 +66,7 @@ fun String.toDisplayTime(): String? = toDeviceDateTime()?.time?.format(DISPLAY_T
 private fun String.toDeviceDateTime(): LocalDateTime? = toEpochMillisOrNull()?.let {
     Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
 }
+
+/** Milliseconds since the epoch, like `System.currentTimeMillis()`. */
+@OptIn(ExperimentalTime::class)
+fun currentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()

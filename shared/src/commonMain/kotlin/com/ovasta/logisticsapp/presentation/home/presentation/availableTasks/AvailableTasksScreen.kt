@@ -1,5 +1,9 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.availableTasks
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.available_orders
+import com.ovasta.logisticsapp.shared.resources.no_tasks_available
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray500
@@ -48,7 +51,7 @@ fun AvailableTasksScreen(viewModel: AvailableTasksViewModel, onOrderAccepted: ()
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 CenteredTextAppBar(
-                    title = stringResource(R.string.available_orders),
+                    title = stringResource(Res.string.available_orders),
                     showBackButton = true,
                     onBackButtonPressed = { navigator.pop() }
                 )
@@ -71,7 +74,7 @@ fun AvailableTasksScreen(viewModel: AvailableTasksViewModel, onOrderAccepted: ()
                             contentAlignment = Alignment.TopCenter
                         ) {
                             Text(
-                                text = stringResource(R.string.no_tasks_available),
+                                text = stringResource(Res.string.no_tasks_available),
                                 style = mdRegular.copy(color = Gray500)
                             )
                         }

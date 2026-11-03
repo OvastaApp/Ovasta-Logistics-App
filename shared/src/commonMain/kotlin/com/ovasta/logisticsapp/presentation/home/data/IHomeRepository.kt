@@ -1,0 +1,70 @@
+package com.ovasta.logisticsapp.presentation.home.data
+
+import kotlinx.serialization.json.JsonElement
+import com.ovasta.logisticsapp.data.ApiResponse
+import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
+import com.ovasta.logisticsapp.presentation.home.data.model.HomeData
+import com.ovasta.logisticsapp.presentation.home.data.model.HomeTask
+import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
+import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatus
+import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
+import com.ovasta.logisticsapp.presentation.home.data.model.UpdateFeesRequest
+import kotlinx.coroutines.flow.Flow
+
+interface IHomeRepository {
+    suspend fun getAssignedOrders(
+        userId: Int,
+        userType: Int,
+        districtId: Int
+    ): Flow<List<HomeTask>>
+
+    suspend fun listenToNewDeliveryTasks(
+        userId: Int, districtId: Int
+    ): Flow<List<DeliveryTask>>
+
+    /**
+     * Starts location tracking by launching the LocationTrackerService
+     */
+    suspend fun startLocationTracking()
+
+    /**
+     * Stops location tracking by stopping the LocationTrackerService
+     */
+    suspend fun stopLocationTracking()
+
+    /**
+     * Checks if location tracking is currently active
+     * @return Boolean indicating if tracking is active
+     */
+
+    suspend fun sendLocation(lat: Double, long: Double)
+
+    suspend fun changePartnerStatus(isOnline: Boolean, lat: Double? = null, long: Double? = null)
+
+    suspend fun getPartnerStatus(): ApiResponse<PartnerStatus>
+
+    suspend fun getPartnerStatistics(
+        month: Int,
+        year: Int,
+    ): ApiResponse<PartnerStatistics>
+
+    /** The courier's account and wallet state, including whether they are an outsource agent. */
+    suspend fun getHome(): ApiResponse<HomeData?>
+
+    suspend fun getAssignedDeliveryOrders(): List<AssignedDeliveryTask>
+
+    /** Marks an assigned (sales) order as started; called when the agent first opens it. */
+    suspend fun startSalesOrder(orderId: Int)
+
+    suspend fun changeOrderStatus(orderId: Int, status: OrderSteps): ApiResponse<JsonElement>
+    suspend fun createDeliveryOrder(
+        deliveryPrice: Double,
+        receiverMobile: String?,
+        toAddress: String?,
+        note: String?,
+    )
+
+    suspend fun updateDeliveryOrderFees(orderId: Int, deliveryFees: Double)
+
+}

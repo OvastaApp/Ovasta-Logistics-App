@@ -1,8 +1,14 @@
 package com.ovasta.logisticsapp.presentation.home.presentation
 
-import android.app.Activity
-import android.os.Build
-import android.view.WindowManager
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.ic_location
+import com.ovasta.logisticsapp.shared.resources.location_consent_message
+import com.ovasta.logisticsapp.shared.resources.location_consent_not_now
+import com.ovasta.logisticsapp.shared.resources.location_consent_ok
+import com.ovasta.logisticsapp.shared.resources.location_consent_title
+import com.ovasta.logisticsapp.shared.resources.view_order_details_message
+import com.ovasta.logisticsapp.shared.resources.view_order_details_title
+
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -21,22 +27,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
-import com.ovasta.logisticsapp.base.ext.makePhoneCall
-import com.ovasta.logisticsapp.base.ext.navigateToLocationClick
-import com.ovasta.logisticsapp.base.ext.openWhatsApp
+import com.ovasta.logisticsapp.base.PlatformAction
+import com.ovasta.logisticsapp.base.WakeScreenEffect
+import com.ovasta.logisticsapp.base.rememberPlatformActions
 import com.ovasta.logisticsapp.presentation.home.data.model.Incentives
 import com.ovasta.logisticsapp.presentation.home.data.model.Milestones
 import com.ovasta.logisticsapp.presentation.home.data.model.PartnerStatistics
 import com.ovasta.logisticsapp.presentation.home.data.model.DeliveryTask
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseDialog
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
 import com.ovasta.logisticsapp.presentation.home.presentation.components.TasksContent
 import com.ovasta.logisticsapp.presentation.nav.AvailableTasks
@@ -46,7 +50,7 @@ import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel) {
-    val context = LocalContext.current
+    val platformActions = rememberPlatformActions()
     val navigator = LocalNavigator.current
     val viewState by viewModel.viewState.collectAsState()
     val currency by viewModel.currency.collectAsState()
@@ -73,15 +77,15 @@ fun HomeScreen(viewModel: HomeViewModel) {
                     when (event) {
 
                         is HomeItemActions.OpenDirection -> {
-                            context.navigateToLocationClick(event.lat, event.lng)
+                            platformActions(PlatformAction.OpenMaps(event.lat, event.lng))
                         }
 
                         is HomeItemActions.CallRetailer -> {
-                            context.makePhoneCall(event.clientPhone)
+                            platformActions(PlatformAction.Call(event.clientPhone))
                         }
 
                         is HomeItemActions.WhatsAppRetailer -> {
-                            context.openWhatsApp(event.clientWhatsapp)
+                            platformActions(PlatformAction.OpenWhatsApp(event.clientWhatsapp))
                         }
 
                         is HomeItemActions.NavigateToAvailableTasks -> {
@@ -110,9 +114,9 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
         viewState.orderToStart?.let { order ->
             ConfirmDialog(
-                title = stringResource(R.string.view_order_details_title),
+                title = stringResource(Res.string.view_order_details_title),
                 message = stringResource(
-                    R.string.view_order_details_message,
+                    Res.string.view_order_details_message,
                     // Customer name, or the order number when the order has none
                     // Customer name, or the order number when the order has none
                     order.customerName?.takeIf { it.isNotBlank() } ?: "#${order.taskId}"
@@ -126,11 +130,11 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
         if (viewState.isLocationConsentDialogVisible) {
             BaseDialog(
-                icon = painterResource(R.drawable.ic_location),
-                title = stringResource(R.string.location_consent_title),
-                message = stringResource(R.string.location_consent_message),
-                primaryButtonText = stringResource(R.string.location_consent_ok),
-                secondaryButtonText = stringResource(R.string.location_consent_not_now),
+                icon = painterResource(Res.drawable.ic_location),
+                title = stringResource(Res.string.location_consent_title),
+                message = stringResource(Res.string.location_consent_message),
+                primaryButtonText = stringResource(Res.string.location_consent_ok),
+                secondaryButtonText = stringResource(Res.string.location_consent_not_now),
                 onPrimaryClick = { viewModel.onTasksScreenAction(HomeScreenActions.AcceptLocationConsent) },
                 onSecondaryClick = { viewModel.onTasksScreenAction(HomeScreenActions.DismissLocationConsent) },
                 onDismiss = { viewModel.onTasksScreenAction(HomeScreenActions.DismissLocationConsent) },
@@ -237,39 +241,9 @@ fun TasksContentPreview() {
 }
 
 @Composable
-internal fun ScreenFlashOverlay() {
-    val context = LocalContext.current
-    val activity = context as? Activity
-
-    // Wake screen and keep it on while alert is active
-    DisposableEffect(Unit) {
-        activity?.window?.addFlags(
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            activity?.setTurnScreenOn(true)
-            activity?.setShowWhenLocked(true)
-        } else {
-            @Suppress("DEPRECATION")
-            activity?.window?.addFlags(
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-            )
-        }
-        onDispose {
-            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                activity?.setTurnScreenOn(false)
-                activity?.setShowWhenLocked(false)
-            } else {
-                @Suppress("DEPRECATION")
-                activity?.window?.clearFlags(
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                )
-            }
-        }
-    }
+fun ScreenFlashOverlay() {
+    // Wake the screen and keep it on while the alert is shown
+    WakeScreenEffect()
 
     val infiniteTransition = rememberInfiniteTransition(label = "flash")
     val alpha by infiniteTransition.animateFloat(

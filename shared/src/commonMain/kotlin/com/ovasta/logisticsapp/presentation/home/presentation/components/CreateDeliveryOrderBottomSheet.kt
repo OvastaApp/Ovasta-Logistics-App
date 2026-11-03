@@ -1,5 +1,17 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.cancel
+import com.ovasta.logisticsapp.shared.resources.create
+import com.ovasta.logisticsapp.shared.resources.create_delivery_order_subtitle
+import com.ovasta.logisticsapp.shared.resources.create_delivery_order_title
+import com.ovasta.logisticsapp.shared.resources.delivery_price_hint
+import com.ovasta.logisticsapp.shared.resources.ic_delivery_truck
+import com.ovasta.logisticsapp.shared.resources.note_hint
+import com.ovasta.logisticsapp.shared.resources.receiver_mobile_error
+import com.ovasta.logisticsapp.shared.resources.receiver_mobile_hint
+import com.ovasta.logisticsapp.shared.resources.to_address_hint
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,13 +42,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray500
 import com.ovasta.logisticsapp.base.Gray900
@@ -89,7 +100,7 @@ fun CreateDeliveryOrderBottomSheet(
                 .padding(bottom = 16.sdp)
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_delivery_truck),
+                painter = painterResource(Res.drawable.ic_delivery_truck),
                 contentDescription = null,
                 tint = Color.Unspecified,
                 modifier = Modifier
@@ -101,7 +112,7 @@ fun CreateDeliveryOrderBottomSheet(
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.create_delivery_order_title),
+                text = stringResource(Res.string.create_delivery_order_title),
                 style = lgMedium.copy(color = Gray900),
                 textAlign = TextAlign.Center,
             )
@@ -110,7 +121,7 @@ fun CreateDeliveryOrderBottomSheet(
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.create_delivery_order_subtitle),
+                text = stringResource(Res.string.create_delivery_order_subtitle),
                 style = smNormal.copy(color = Gray500),
                 textAlign = TextAlign.Center,
             )
@@ -121,7 +132,7 @@ fun CreateDeliveryOrderBottomSheet(
                 value = priceText,
                 textStyle = mdMedium,
                 onValueChange = { input -> if (isValidPriceInput(input)) priceText = input },
-                label = { Text(stringResource(R.string.delivery_price_hint), style = xsMedium) },
+                label = { Text(stringResource(Res.string.delivery_price_hint), style = xsMedium) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
@@ -137,11 +148,11 @@ fun CreateDeliveryOrderBottomSheet(
                         receiverMobile = input
                     }
                 },
-                label = { Text(stringResource(R.string.receiver_mobile_hint), style = xsMedium) },
+                label = { Text(stringResource(Res.string.receiver_mobile_hint), style = xsMedium) },
                 singleLine = true,
                 isError = !isMobileValid,
                 supportingText = if (!isMobileValid) {
-                    { Text(stringResource(R.string.receiver_mobile_error), style = xsMedium) }
+                    { Text(stringResource(Res.string.receiver_mobile_error), style = xsMedium) }
                 } else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.fillMaxWidth()
@@ -153,7 +164,7 @@ fun CreateDeliveryOrderBottomSheet(
                 value = toAddress,
                 textStyle = mdMedium,
                 onValueChange = { toAddress = it },
-                label = { Text(stringResource(R.string.to_address_hint), style = xsMedium) },
+                label = { Text(stringResource(Res.string.to_address_hint), style = xsMedium) },
                 singleLine = false,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -164,7 +175,7 @@ fun CreateDeliveryOrderBottomSheet(
                 value = note,
                 textStyle = mdMedium,
                 onValueChange = { note = it },
-                label = { Text(stringResource(R.string.note_hint), style = xsMedium) },
+                label = { Text(stringResource(Res.string.note_hint), style = xsMedium) },
                 singleLine = false,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -182,7 +193,7 @@ fun CreateDeliveryOrderBottomSheet(
                     shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
+                        text = stringResource(Res.string.cancel),
                         style = xsMedium.copy(color = Primary)
                     )
                 }
@@ -209,7 +220,7 @@ fun CreateDeliveryOrderBottomSheet(
                     ),
                 ) {
                     Text(
-                        text = stringResource(R.string.create),
+                        text = stringResource(Res.string.create),
                         style = xsMedium.copy(
                             color = if (isValid) Base_white else Base_white.copy(alpha = 0.7f)
                         )

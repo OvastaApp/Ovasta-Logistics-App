@@ -1,5 +1,17 @@
 package com.ovasta.logisticsapp.presentation.home.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.confirm_delivery
+import com.ovasta.logisticsapp.shared.resources.confirm_pickup
+import com.ovasta.logisticsapp.shared.resources.delivery_fees
+import com.ovasta.logisticsapp.shared.resources.edit_delivery_fees
+import com.ovasta.logisticsapp.shared.resources.ic_edit_task
+import com.ovasta.logisticsapp.shared.resources.notes
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.receiver_info
+import com.ovasta.logisticsapp.shared.resources.sender_info
+import com.ovasta.logisticsapp.shared.resources.total_price
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,12 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.*
 import com.ovasta.logisticsapp.base.ext.toEpochMillisOrNull
 import com.ovasta.logisticsapp.presentation.home.data.model.AssignedDeliveryTask
@@ -71,8 +82,8 @@ fun SellerTaskItem(
                             modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_edit_task),
-                                contentDescription = stringResource(R.string.edit_delivery_fees),
+                                painter = painterResource(Res.drawable.ic_edit_task),
+                                contentDescription = stringResource(Res.string.edit_delivery_fees),
                                 tint = Primary
                             )
                         }
@@ -100,7 +111,7 @@ fun SellerTaskItem(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = task.fromAddress.orEmpty().ifBlank { stringResource(R.string.sender_info) },
+                        text = task.fromAddress.orEmpty().ifBlank { stringResource(Res.string.sender_info) },
                         style = mdMedium,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
@@ -144,7 +155,7 @@ fun SellerTaskItem(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = task.toAddress.orEmpty().ifBlank { stringResource(R.string.receiver_info) },
+                        text = task.toAddress.orEmpty().ifBlank { stringResource(Res.string.receiver_info) },
                         style = mdMedium,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
@@ -184,19 +195,19 @@ fun SellerTaskItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(text = stringResource(R.string.delivery_fees), style = xsMedium)
+                    Text(text = stringResource(Res.string.delivery_fees), style = xsMedium)
                     Text(
-                        text = stringResource(R.string.price_currency, task.deliveryPrice ?: 0.0),
+                        text = stringResource(Res.string.price_currency, task.deliveryPrice ?: 0.0),
                         style = lgSemiBold
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = stringResource(R.string.total_price), style = xsMedium)
+                    Text(text = stringResource(Res.string.total_price), style = xsMedium)
                     val totalPrice =
                         (task.collectionAmount ?: 0.0).plus((task.deliveryPrice ?: 0.0))
                     Text(
                         text = stringResource(
-                            R.string.price_currency,
+                            Res.string.price_currency,
                             totalPrice
                         ), style = lgSemiBold
                     )
@@ -212,7 +223,7 @@ fun SellerTaskItem(
             val note = task.note
             if (!note.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = stringResource(R.string.notes), style = xsMedium)
+                Text(text = stringResource(Res.string.notes), style = xsMedium)
                 Text(text = note, style = smNormal)
             }
 
@@ -240,8 +251,8 @@ fun SellerTaskItem(
                 ) {
                     Text(
                         text = when (nextStep) {
-                            is OrderSteps.Picked -> stringResource(R.string.confirm_pickup)
-                            is OrderSteps.Delivered -> stringResource(R.string.confirm_delivery)
+                            is OrderSteps.Picked -> stringResource(Res.string.confirm_pickup)
+                            is OrderSteps.Delivered -> stringResource(Res.string.confirm_delivery)
                             else -> ""
                         },
                         color = Base_white
