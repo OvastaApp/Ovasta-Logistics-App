@@ -78,8 +78,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.navigation3.runtime)
     implementation(libs.kotlinx.serialization.core)
 
     androidTestImplementation(libs.ui.test.junit4)
@@ -93,6 +91,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(kotlin("test"))
+    testImplementation(libs.koin.test)
 
 
     //Jetpack

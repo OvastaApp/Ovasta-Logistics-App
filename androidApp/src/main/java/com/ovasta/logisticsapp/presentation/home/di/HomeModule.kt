@@ -9,10 +9,7 @@ import com.ovasta.logisticsapp.presentation.home.data.GeoPoint
 import com.ovasta.logisticsapp.presentation.home.data.HomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.home.data.SeenTaskStore
-import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewModel
-import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksViewModel
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -22,8 +19,6 @@ val homeModule = module {
     single { LocationTrackingMonitor(androidContext()) } bind LocationTrackingGuard::class
     single<DeviceLocation> { AndroidDeviceLocation(androidContext(), get()) }
     single<SeenTaskStore> { SharedPreferencesSeenTaskStore(androidContext()) }
-    viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
-    viewModel { AvailableTasksViewModel(get(), get()) }
 }
 
 /** The fused location provider for the current fix; GPS or network for "location on". */

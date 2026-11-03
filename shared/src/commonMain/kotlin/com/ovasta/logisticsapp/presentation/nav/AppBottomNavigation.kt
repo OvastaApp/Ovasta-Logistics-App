@@ -1,7 +1,13 @@
 package com.ovasta.logisticsapp.presentation.nav
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.home
+import com.ovasta.logisticsapp.shared.resources.ic_home
+import com.ovasta.logisticsapp.shared.resources.ic_profile
+import com.ovasta.logisticsapp.shared.resources.profile
+
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
@@ -12,11 +18,10 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
@@ -26,11 +31,11 @@ import com.ovasta.logisticsapp.base.xsMedium
 // Top-level screens reachable from the bottom navigation bar
 enum class BottomNavTab(
     val route: Any,
-    @DrawableRes val iconRes: Int,
-    @StringRes val labelRes: Int
+    val iconRes: DrawableResource,
+    val labelRes: StringResource
 ) {
-    HomeTab(Home, R.drawable.ic_home, R.string.home),
-    ProfileTab(Profile, R.drawable.ic_profile, R.string.profile);
+    HomeTab(Home, Res.drawable.ic_home, Res.string.home),
+    ProfileTab(Profile, Res.drawable.ic_profile, Res.string.profile);
 
     companion object {
         fun isTopLevel(route: Any?): Boolean = entries.any { it.route == route }

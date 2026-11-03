@@ -1,0 +1,203 @@
+package com.ovasta.logisticsapp.presentation.nav
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import com.ovasta.logisticsapp.base.Base_white
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.ui.NavDisplay
+import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
+import com.ovasta.logisticsapp.base.components.sharedComposable.Navigator
+import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
+import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginViewModel
+import com.ovasta.logisticsapp.presentation.auth.splash.SplashScreen
+import com.ovasta.logisticsapp.presentation.auth.splash.SplashViewModel
+import com.ovasta.logisticsapp.presentation.home.presentation.HomeItemActions
+import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreen
+import com.ovasta.logisticsapp.presentation.home.presentation.HomeScreenActions
+import com.ovasta.logisticsapp.presentation.home.presentation.HomeViewModel
+import com.ovasta.logisticsapp.presentation.home.presentation.ScreenFlashOverlay
+import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksScreen
+import com.ovasta.logisticsapp.presentation.home.presentation.availableTasks.AvailableTasksViewModel
+import com.ovasta.logisticsapp.presentation.home.presentation.components.NewDeliveryTaskBottomSheet
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.DropOfOrderDetailsScreen
+import com.ovasta.logisticsapp.presentation.orderDetails.presentation.TaskDetailsViewModel
+import com.ovasta.logisticsapp.presentation.profile.presentation.ProfileScreen
+import com.ovasta.logisticsapp.presentation.profile.presentation.ProfileViewModel
+import com.ovasta.logisticsapp.presentation.profile.presentation.charge.ChargeScreen
+import com.ovasta.logisticsapp.presentation.profile.presentation.charge.ChargeViewModel
+import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletScreen
+import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletViewModel
+import org.koin.compose.viewmodel.koinViewModel
+
+
+@Composable
+fun AppNavHost(
+    modifier: Modifier = Modifier,
+    // Explains refused order actions; Android passes its LocationBlockedDialogHost (Phase 5 shares it)
+    locationBlockedDialog: @Composable (onRestoreTracking: () -> Unit) -> Unit = {},
+) {
+    val backStack = viewModel { NavBackStackViewModel() }.backStack
+    val navigator = remember(backStack) { Navigator(backStack) }
+    
+    // HomeViewModel at nav-level — alive once Home is reached (not on Splash/Login).
+    // It and the other logged-in screens' ViewModels live in the session store, not the
+    // Activity's, so logging out destroys them.
+    val sessionStoreOwner = viewModel { SessionViewModelStoreOwner() }
+    val isLoggedIn = backStack.any { it is Home }
+    val homeViewModel: HomeViewModel? = if (isLoggedIn) {
+        koinViewModel<HomeViewModel>(viewModelStoreOwner = sessionStoreOwner)
+    } else null
+
+    // On logout (Home leaves the back stack) clear the session, so the next account gets a fresh
+    // HomeViewModel instead of the previous one's name, Firebase listeners and tracking state
+    var wasLoggedIn by remember { mutableStateOf(false) }
+    LaunchedEffect(isLoggedIn) {
+        if (wasLoggedIn && !isLoggedIn) sessionStoreOwner.clearSession()
+        wasLoggedIn = isLoggedIn
+    }
+
+    // Observe app foreground/background to pause/resume the alert countdown timer
+    if (homeViewModel != null) {
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+            homeViewModel.onAppForeground()
+        }
+        LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+            homeViewModel.onAppBackground()
+        }
+    }
+
+    val currentRoute = backStack.lastOrNull()
+
+    CompositionLocalProvider(LocalNavigator provides navigator) {
+        // Screens handle their own insets; white like the Material 1 Scaffold this replaced
+        Scaffold(containerColor = Base_white, contentWindowInsets = WindowInsets(0), bottomBar = {
+            if (BottomNavTab.isTopLevel(currentRoute)) {
+                AppBottomNavigation(
+                    currentRoute = currentRoute,
+                    onTabSelected = { tab ->
+                        // Home stays at the bottom of the back stack (it keeps the session
+                        // alive), so other tabs are pushed on top of it and back returns to Home
+                        navigator.popUpTo(Home)
+                        if (tab.route != Home) navigator.push(tab.route)
+                    }
+                )
+            }
+        }) { paddingValues ->
+            Box(Modifier.padding(paddingValues)) {
+                NavDisplay(
+                    modifier = modifier,
+                    backStack = backStack,
+                    onBack = { navigator.pop() },
+
+                    entryProvider = { key ->
+                        when (key) {
+                            is Splash -> NavEntry(key) {
+                                val viewModel: SplashViewModel = koinViewModel()
+                                SplashScreen(viewModel)
+                            }
+
+                            is Login -> NavEntry(key) {
+                                val viewModel: LoginViewModel = koinViewModel()
+                                LoginScreen(viewModel)
+                            }
+
+                            is Home -> NavEntry(key) {
+                                // Use the hoisted HomeViewModel instead of creating a new one
+                                HomeScreen(homeViewModel!!)
+                            }
+
+                            is Profile -> NavEntry(key) {
+                                val viewModel: ProfileViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                ProfileScreen(viewModel)
+                            }
+
+                            is Charge -> NavEntry(key) {
+                                val viewModel: ChargeViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                ChargeScreen(viewModel)
+                            }
+
+                            is Wallet -> NavEntry(key) {
+                                val viewModel: WalletViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                WalletScreen(viewModel)
+                            }
+
+                            is AvailableTasks -> NavEntry(key) {
+                                val viewModel: AvailableTasksViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                AvailableTasksScreen(
+                                    viewModel = viewModel,
+                                    onOrderAccepted = {
+                                        homeViewModel?.getAssignedDeliveryOrders()
+                                    }
+                                )
+                            }
+
+                            is TaskDetails -> NavEntry(key) {
+                                val viewModel: TaskDetailsViewModel =
+                                    koinViewModel(viewModelStoreOwner = sessionStoreOwner)
+                                DropOfOrderDetailsScreen(
+                                    viewModel = viewModel,
+                                    taskId = key.taskId,
+                                )
+                            }
+
+                            else -> NavEntry(Unit) { Text("Unknown route") }
+                        }
+                    }
+                )
+                
+                // Global bottom sheet overlay — shows on ANY screen after login
+                if (homeViewModel != null) {
+                    val viewState by homeViewModel.viewState.collectAsState()
+                    val currency by homeViewModel.currency.collectAsState()
+                    val currentTask = viewState.currentAlertTask
+                    
+                    if (currentTask != null && !viewState.bottomSheetMinimized && viewState.isTracking) {
+                        ScreenFlashOverlay()
+                        NewDeliveryTaskBottomSheet(
+                            task = currentTask,
+                            currency = currency,
+                            taskAlertTimestamps = homeViewModel.taskAlertTimestamps,
+                            onAccept = { orderId ->
+                                homeViewModel.onTaskItemAction(HomeItemActions.AcceptDeliveryTask(orderId))
+                            },
+                            onMinimize = {
+                                homeViewModel.onTaskItemAction(HomeItemActions.MinimizeBottomSheet)
+                            }
+                        )
+                    }
+
+                    // Explains order actions refused while the location isn't tracked, on any
+                    // screen after login (composed last so it shows above the new-order sheet)
+                    locationBlockedDialog {
+                        homeViewModel.onTasksScreenAction(HomeScreenActions.RestoreTracking)
+                    }
+                }
+            }
+        }
+    }
+}
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewHomeNavigationBar() {
+    AppNavHost()
+}

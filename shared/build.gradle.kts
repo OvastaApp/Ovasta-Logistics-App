@@ -16,7 +16,8 @@ kotlin {
     }
 
     // iOS framework linked by iosApp (see iosApp/project.yml). iOS targets only build on macOS.
-    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach { target ->
+    // No iosX64 (Intel Mac simulator): JetBrains navigation3 isn't published for it.
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
         target.binaries.framework {
             baseName = "sharedKit"
             binaryOption("bundleId", "com.ovasta.logisticsapp.shared")
@@ -39,6 +40,10 @@ kotlin {
             api(libs.jetbrains.lifecycle.viewmodel)
             // LocalLifecycleOwner for screens that react to resume/pause
             implementation(libs.jetbrains.lifecycle.runtime.compose)
+            // Navigation (AppNavHost): back stack, scoped ViewModels from Koin
+            implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+            implementation(libs.koin.compose.viewmodel)
             // Image previews (picked photos as bytes; product images in later screens)
             implementation(libs.coil.compose)
             implementation(libs.kotlinx.coroutines.core)
@@ -77,6 +82,8 @@ kotlin {
         // Tests that change the JVM default time zone
         androidUnitTest.dependencies {
             implementation(libs.junit)
+            // Koin module verification (JVM reflection)
+            implementation(libs.koin.test)
         }
     }
 }

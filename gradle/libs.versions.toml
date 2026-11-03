@@ -45,6 +45,7 @@ gitliveFirebase = "2.7.0"
 composeMpMaterial3 = "1.9.0"
 composeMpMaterialIcons = "1.7.3"
 jetbrainsLifecycle = "2.10.0"
+jetbrainsNavigation3 = "1.1.2"
 nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.11.0-alpha03"
 kotlinxSerializationCore = "1.9.0"
@@ -111,6 +112,10 @@ compose-mp-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-
 compose-mp-ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "composeMultiplatform" }
 jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "jetbrainsLifecycle" }
 jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrainsLifecycle" }
+jetbrains-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrainsLifecycle" }
+jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "jetbrainsNavigation3" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinAndroid" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koinAndroid" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
