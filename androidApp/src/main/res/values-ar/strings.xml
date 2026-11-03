@@ -17,3 +17,4 @@
     <string name="location_blocked_logging_title">لا يتم تسجيل موقعك</string>
     <string name="location_blocked_logging_message">تعذّر تسجيل موقعك مؤخرًا. تحقق من اتصالك بالإنترنت ومن الـ GPS ثم حاول مرة أخرى.</string>
     <string name="cancel">إلغاء</string>
+</resources>
