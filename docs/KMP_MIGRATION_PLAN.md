@@ -100,7 +100,9 @@ Library choices:
      - The `iosX64` target is dropped because navigation3 isn't published for it.
      - `LocationBlockedDialog` is passed in through a slot until Phase 5.
      - iOS still shows its placeholder until its Koin bindings exist (Phase 5).
-   - Left: delete the app's `res` strings and drawables that nothing uses anymore.
+   - ✅ The app's own `res` is down to the 5 strings and the logo its code still uses.
+   - Phase 5 so far: ✅ `LocationTrackingMonitor` and `LocationBlockedDialog` are shared. Permission and location-on checks go through `DeviceLocation`, and the settings buttons go through `PlatformAction`.
+   - The remaining iOS work is listed in `docs/IOS_MAC_TASKS.md`, to be done on a Mac.
      - Each screen needs an `expect` image picker or camera returning bytes, permission requests, and the `String.format` calls rewritten as resource arguments.
    - Then: `AppNavHost` on JetBrains Navigation3 1.1.x, `App()` hosting it on both platforms, and `MainActivity` reduced to `setContent { App() }`.
 5. **Platform features:** tracking and notifications, detailed below.
