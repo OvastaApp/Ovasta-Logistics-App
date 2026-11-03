@@ -10,7 +10,7 @@ import com.ovasta.logisticsapp.data.remote.networkModule
 import com.ovasta.logisticsapp.data.setting.data.datastore.SessionStore
 import com.ovasta.logisticsapp.data.setting.sessionModule
 import com.ovasta.logisticsapp.presentation.home.data.DeviceLocation
-import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
+import com.ovasta.logisticsapp.presentation.home.data.TrackingKeepAlive
 import com.ovasta.logisticsapp.presentation.home.data.OrderAlarm
 import com.ovasta.logisticsapp.presentation.home.data.SeenTaskStore
 import com.ovasta.logisticsapp.presentation.viewModelModule
@@ -34,7 +34,7 @@ class KoinModulesTest {
         Logger::class,
         SessionStore::class,
         PushTokenProvider::class,
-        IHomeRepository::class,
+        TrackingKeepAlive::class,
         OrderAlarm::class,
         DeviceLocation::class,
         SeenTaskStore::class,

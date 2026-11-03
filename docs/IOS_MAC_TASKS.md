@@ -86,19 +86,24 @@ in `App()`) from `rememberPlatformToaster()`. Then show the "not available" mess
 `PlatformAction.ios.kt` too.
 
 ## 6. Location tracking
-This one can start on Windows: the shared half is Android-testable.
-- [ ] Move the tracking pipeline out of `LocationTrackerService` into a common `LocationTracker`:
-  - [ ] the 10 m filter
-  - [ ] the `sendLocation` write with its 15 s timeout
-  - [ ] reports to `LocationTrackingMonitor`
-  - [ ] a heartbeat every 30 s while stationary, so iOS doesn't look stale after 60 s without
-        movement
-- [ ] Move `HomeRepository` to common, with `startLocationTracking` / `stopLocationTracking`
-      going through an `expect` keep-alive (Android: the foreground service).
-- [ ] iOS source, `CLLocationManager`:
+The shared half is done (task 6 on Windows):
+- `LocationTracker.track(fixes)` does the 10 m filter, the Firestore write with its 15 s
+  timeout, and the reports to `LocationTrackingMonitor` (covered by `LocationTrackerTest`).
+- `HomeRepository` is in `trackingModule`. Its start and stop go to the platform's
+  `TrackingKeepAlive`, which on Android starts and stops `LocationTrackerService`.
+
+On iOS:
+- [ ] Bind `TrackingKeepAlive` to a tracker that runs `CLLocationManager` and passes its fixes
+      to `LocationTracker.track(...)` in a coroutine. `stop()` cancels that coroutine and calls
+      `LocationTrackingMonitor.onTrackingStopped()`.
+- [ ] `CLLocationManager` settings:
   - [ ] `desiredAccuracy = kCLLocationAccuracyBest`, `distanceFilter = 10.0`, `activityType = automotiveNavigation`
   - [ ] `allowsBackgroundLocationUpdates = true`, `pausesLocationUpdatesAutomatically = false`, `showsBackgroundLocationIndicator = true`
   - [ ] "When In Use" permission only; start tracking while the app is in the foreground
+- [ ] Stationary drivers: with `distanceFilter = 10`, iOS sends no fixes while the phone isn't
+      moving, and the monitor blocks order actions after 60 s without a fix. Call
+      `requestLocation()` every 30 s and pass that fix on too. Android needs nothing here: its
+      fused fixes keep arriving every 10 s while stationary.
 - [ ] Show a one-time hint: "Don't close the app while online". Force-quitting stops tracking
       until the next launch.
 

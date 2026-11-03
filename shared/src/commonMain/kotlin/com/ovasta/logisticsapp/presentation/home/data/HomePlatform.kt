@@ -23,6 +23,16 @@ interface DeviceLocation {
     fun hasLocationPermission(): Boolean
 }
 
+/**
+ * Starts and stops what keeps location tracking alive while the driver is online: the
+ * foreground LocationTrackerService on Android, background location updates on iOS. The
+ * platform side feeds its fixes to LocationTracker.
+ */
+interface TrackingKeepAlive {
+    suspend fun start()
+    suspend fun stop()
+}
+
 /** Delivery orders the courier has already been alerted about, kept across app restarts. */
 interface SeenTaskStore {
     fun load(): MutableSet<Int>

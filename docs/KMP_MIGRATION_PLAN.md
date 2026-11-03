@@ -102,6 +102,7 @@ Library choices:
      - iOS still shows its placeholder until its Koin bindings exist (Phase 5).
    - ✅ The app's own `res` is down to the 5 strings and the logo its code still uses.
    - Phase 5 so far: ✅ `LocationTrackingMonitor` and `LocationBlockedDialog` are shared. Permission and location-on checks go through `DeviceLocation`, and the settings buttons go through `PlatformAction`.
+   - ✅ Tracking pipeline shared: `LocationTracker` (10 m filter, 15 s write timeout, monitor reports) and `HomeRepository` in `trackingModule`. The platform provides a `TrackingKeepAlive`; on Android that is the same foreground service, which now just feeds its fixes to the tracker.
    - The remaining iOS work is listed in `docs/IOS_MAC_TASKS.md`, to be done on a Mac.
      - Each screen needs an `expect` image picker or camera returning bytes, permission requests, and the `String.format` calls rewritten as resource arguments.
    - Then: `AppNavHost` on JetBrains Navigation3 1.1.x, `App()` hosting it on both platforms, and `MainActivity` reduced to `setContent { App() }`.

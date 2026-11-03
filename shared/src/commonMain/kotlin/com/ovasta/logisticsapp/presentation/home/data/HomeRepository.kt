@@ -1,22 +1,13 @@
 package com.ovasta.logisticsapp.presentation.home.data
 
-import android.app.ForegroundServiceStartNotAllowedException
-import android.content.Context
-import android.content.Intent
-import android.os.Build
-import android.util.Log
-import androidx.core.content.ContextCompat
-import com.ovasta.logisticsapp.base.services.LocationTrackerService
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
 import com.ovasta.logisticsapp.presentation.home.data.model.OrderSteps
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class HomeRepository(
     private val homeFirebaseRemoteDataSource: IHomeFirebaseRemoteDataSource,
     private val homeServerRemoteDataSource: IHomeServerRemoteDataSource,
     val settingsRepository: ISettingsRepository,
-    private val context: Context,
+    private val trackingKeepAlive: TrackingKeepAlive,
 ) : IHomeRepository {
     override suspend fun getAssignedOrders(
         userId: Int,
@@ -32,51 +23,9 @@ class HomeRepository(
         districtId = districtId
     )
 
-    override suspend fun startLocationTracking() {
-        withContext(Dispatchers.Main) {
-            try {
-                val intent = Intent(context, LocationTrackerService::class.java).apply {
-                    action = LocationTrackerService.Action.START.name
-                }
-                // Use startForegroundService for Android 8+ (API 26+)
-                // This is required for foreground services on Android 12+ (API 31+)
-                ContextCompat.startForegroundService(context, intent)
-                Log.d("LocationTrackingRepository", "Location tracking started successfully")
-            } catch (ex: Exception) {
-                // Handle Android 12+ ForegroundServiceStartNotAllowedException
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ex is ForegroundServiceStartNotAllowedException
-                ) {
-                    Log.e(
-                        "LocationTrackingRepository",
-                        "Cannot start foreground service - app must be in foreground state", ex
-                    )
-                    throw IllegalStateException(
-                        "Location tracking can only be started when the app is visible. " +
-                                "Please ensure the app is in the foreground and try again.",
-                        ex
-                    )
-                }
-                Log.e("LocationTrackingRepository", "Error starting location tracking", ex)
-                throw ex
-            }
-        }
-    }
+    override suspend fun startLocationTracking() = trackingKeepAlive.start()
 
-    override suspend fun stopLocationTracking() {
-        withContext(Dispatchers.Main) {
-            try {
-                val intent = Intent(context, LocationTrackerService::class.java).apply {
-                    action = LocationTrackerService.Action.STOP.name
-                }
-                context.stopService(intent)
-                Log.d("LocationTrackingRepository", "Location tracking stopped")
-            } catch (ex: Exception) {
-                Log.e("LocationTrackingRepository", "Error stopping location tracking", ex)
-                throw ex
-            }
-        }
-    }
+    override suspend fun stopLocationTracking() = trackingKeepAlive.stop()
 
     override suspend fun sendLocation(lat: Double, long: Double) {
         with(settingsRepository.getUseData()) {
