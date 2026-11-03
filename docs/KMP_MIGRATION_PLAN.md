@@ -81,7 +81,16 @@ Library choices:
      - `LocationTrackingGuard` stands in front of the Android tracking monitor.
      - Toasts carry a `StringResource`. iOS only logs them until Phase 5.
    - ✅ Splash and Login are in `:shared`. The back-stack keys are in a shared `NavKeys.kt`, and the FCM token comes from a `PushTokenProvider`; iOS gets its provider with the push work.
-   - Next: the remaining screens, one feature per commit: Profile/Wallet/Charge, then AvailableTasks and Home, then TaskDetails.
+   - ✅ Profile, Wallet and Charge are in `:shared`.
+     - `rememberImagePicker` returns compressed JPEG bytes. Android keeps the same gallery and camera flow; iOS is a placeholder until Phase 5.
+     - Shared `formatDecimal`.
+     - Language and tracking-stop interfaces for `ProfileViewModel`.
+   - ✅ Home and AvailableTasks are in `:shared`.
+     - `IHomeRepository` no longer takes a `Context`. The Android `HomeRepository` stays in the app with the location service.
+     - New shared interfaces: `OrderAlarm`, `DeviceLocation` and `SeenTaskStore`.
+     - New `PlatformAction`s: `Call`, `OpenMaps` and `OpenWhatsApp`, plus a `WakeScreenEffect`.
+     - Shared `formatGrouped` and `formatMonthYear`.
+   - Next: TaskDetails, using `rememberImagePicker` for the receipt and edit-request photos and `PlatformAction` for call and maps. The app's `ContactUtilExt` copy is deleted with it.
      - Each screen needs an `expect` image picker or camera returning bytes, permission requests, and the `String.format` calls rewritten as resource arguments.
    - Then: `AppNavHost` on JetBrains Navigation3 1.1.x, `App()` hosting it on both platforms, and `MainActivity` reduced to `setContent { App() }`.
 5. **Platform features:** tracking and notifications, detailed below.
