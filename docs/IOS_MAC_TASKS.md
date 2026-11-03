@@ -66,7 +66,12 @@ Then:
   - [ ] permission and `registerForRemoteNotifications`, with the APNs token passed to `Messaging`
   - [ ] the FCM token passed into Kotlin for `PushTokenProvider` and `SettingsRepository.updateFcmToken`
   - [ ] `willPresent` returns `[.banner, .sound]`; just `[.banner]` while Home's in-app alarm is playing
-  - [ ] `didReceive` passes `order_id` to navigation (`TaskDetails(id)`)
+  - [ ] `didReceive` calls `PendingOrderLink.shared.onNotificationTapped(type:orderId:)` with the
+        push's `data["type"]` and `data["order_id"]`. `AppNavHost` opens the order; a `new_order`
+        only opens the app.
+  - [ ] At launch, when a user is logged in and no token is cached, fetch the FCM token and
+        upload it. This matches `checkAndSendFcmToken()` in the Android `LogisticsApp`; the
+        refresh callback alone misses drivers whose token never changes.
 - [ ] Xcode capabilities: Push Notifications, Background Modes (location, remote notifications),
       Time Sensitive Notifications. `iosApp.entitlements` already declares these.
 - [ ] Backend: new-order pushes send `apns.payload.aps.sound = "new_order_alert.caf"` and
@@ -107,7 +112,37 @@ On iOS:
 - [ ] Show a one-time hint: "Don't close the app while online". Force-quitting stops tracking
       until the next launch.
 
-## 7. Test on a real device
+## 7. Permission requests
+Android asks for location (fine and coarse) and notifications in `MainActivity` at every
+launch. iOS needs the same, so nothing works on first launch before the driver goes online:
+- [ ] At launch: `CLLocationManager.requestWhenInUseAuthorization()`, plus the notification
+      request from task 3.
+- [ ] Camera and photos: ask when the picker opens (task 4). The usage strings are in
+      `Info.plist` already.
+- [ ] If location is denied, `LocationBlockedDialog` already offers the Settings button through
+      `PlatformAction.OpenAppSettings`.
+
+## 8. Crashlytics and the privacy manifest
+- [ ] Crashlytics user info: Android sets the user id, name and district from
+      `CrashlyticsUserInfoUseCase`. Add the same on iOS through a Kotlin → Swift bridge, the
+      seller app's `CrashlyticsBridge` pattern.
+- [ ] Add the Crashlytics `run` script build phase to `project.yml` so dSYMs are uploaded;
+      without it, iOS crash reports aren't symbolicated.
+- [ ] Add `iosApp/iosApp/PrivacyInfo.xcprivacy`, which App Store Connect requires. Declare the
+      required-reason APIs:
+  - `NSPrivacyAccessedAPICategoryUserDefaults` (CA92.1): language, seen orders
+  - `NSPrivacyAccessedAPICategorySystemBootTime` (35F9.1): `elapsedRealtimeMillis` uses the uptime
+  - `NSPrivacyAccessedAPICategoryFileTimestamp` (C617.1), if Ktor or the session file reads it
+
+  Also list the collected data types: precise location, user ID, phone number, crash data.
+  The Firebase pods ship their own manifests.
+
+## 9. App Store submission
+- [ ] Review notes: drivers share their location only while online, for dispatch and delivery
+      tracking (Guideline 2.5.4). Add a demo driver account that can go online.
+- [ ] TestFlight with a few drivers first.
+
+## 10. Test on a real device
 These don't work fully on the simulator:
 - [ ] Go online, lock the phone, and move for 15 minutes. Firestore `online_drivers` must keep
       updating, and the blue location pill must show.

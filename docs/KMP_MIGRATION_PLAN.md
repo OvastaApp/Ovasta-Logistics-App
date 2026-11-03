@@ -172,14 +172,17 @@ Move the logic into common code and keep only the "location source + keep-alive"
 }
 ```
 - `time-sensitive` breaks through Focus modes. It needs the **Time Sensitive Notifications** capability, which Apple does not have to approve. Do not plan on Critical Alerts: that entitlement is Apple-approved and normally refused for delivery apps.
-- Also add `type` and `order_id` to `data` so a tap can deep-link to TaskDetails on both platforms (there is no deep link today).
+- Also add `type` and `order_id` to `data` so a tap can open the order on both platforms. ✅ The app side is in the shared `PendingOrderLink`:
+  - `type: "new_order"` only opens the app, because the order isn't the driver's yet and Home shows its alert sheet from Firestore.
+  - Any other `type` with an `order_id` (for example an assigned or updated order) opens TaskDetails on top of Home once the driver is logged in.
+  - The backend should send `order_id` as a string, as FCM requires for data values.
 - The token upload (`POST fcm-token`) stays the same. Optionally add `platform: "ios" | "android"` so the backend can target payloads.
 
 **iOS app side (Swift `AppDelegate`, based on the seller app)**
 - `requestAuthorization([.alert, .sound, .badge])` and APNs → `Messaging.apnsToken`.
 - In `messaging(didReceiveRegistrationToken:)`, forward the token through a Kotlin bridge object, the way the seller app's `CrashlyticsBridge` works, so the shared `SettingsRepository.updateFcmToken` uploads it.
 - `willPresent`: in the foreground, return `[.banner, .sound]` so the custom sound plays. If Home is visible, the in-app alarm takes over: return `[.banner]` and let `AlarmPlayer` loop.
-- `didReceive` (tap): pass `order_id` to shared navigation.
+- `didReceive` (tap): call `PendingOrderLink.onNotificationTapped(type, orderId)` with the push's `data`.
 - Xcode capabilities: Push Notifications, Background Modes (location, remote notifications), Time Sensitive Notifications. Upload the APNs auth key to the Firebase console.
 
 **In-app looping alarm (foreground only, same as Android today)**
@@ -192,13 +195,13 @@ Move the logic into common code and keep only the "location source + keep-alive"
 - The new-task queue logic (Firestore listener, 30 s countdown, seen-IDs store) moves to common unchanged. Seen IDs move from SharedPreferences to DataStore.
 
 **Android fix included in the migration**
-- In `FcmService`, drop the broken `isAtLeast(CREATED)` branch and always post new-order messages to `delivery_task_channel_v2`.
-- Read `type` and `order_id` and add them to the tap `PendingIntent`.
-- Optionally wire the unused `OrderVibrator` into the in-app alarm.
+- ✅ In `FcmService`, drop the broken `isAtLeast(CREATED)` branch and always post new-order messages to `delivery_task_channel_v2`. The unused background channel is now deleted at startup.
+- ✅ Read `type` and `order_id` and add them to the tap `PendingIntent`. `MainActivity` is `singleTop` and hands the extras to `PendingOrderLink`, both from our notification and from the one the system shows while the app is in the background.
+- ✅ The unused `OrderVibrator` was removed rather than wired in.
 
 ## Critical files
 - Tracking: `base/services/LocationTrackerService.kt`, `LocationManager.kt`, `LocationTrackingMonitor.kt`, `presentation/home/data/HomeRepository.kt`, `HomeFirebaseRemoteDataSource.kt`, `presentation/home/presentation/HomeViewModel.kt`, `components/LocationBlockedDialog.kt`
-- Notifications: `base/services/FcmService.kt`, `app/LogisticsApp.kt` (channels), `base/ext/OrderAlarmSound.kt`, `base/ext/OrderVibrator.kt`, `HomeScreen.kt` (`ScreenFlashOverlay`), `res/raw/new_order_alert.mp3`
+- Notifications: `base/services/FcmService.kt`, `app/LogisticsApp.kt` (channels), `base/ext/OrderAlarmSound.kt`, `HomeScreen.kt` (`ScreenFlashOverlay`), `res/raw/new_order_alert.mp3`
 - Blockers: `base/ext/DateExt.kt`, `base/ext/PriceExt.kt`, `PartnerStatisticsSection.kt`, `base/encryption/Crypto.kt`, `base/ext/ImageExt.kt`, `base/di/RemoteModule.kt`, `firebaseModule.kt`
 - Reuse from the seller app (`Ovasta-Seller-App/shared/src/{android,ios}Main/.../data/platform/`): `DataStoreProvider`, `SecureStorage`, `PermissionManager` (extend with location), `HapticFeedback`, `HttpClientEngine`, `LanguageApplier`, `CrashlyticsLogger` + `CrashlyticsBridge`, `iosApp/project.yml`, `AppDelegate.swift`, Podfile (add `FirebaseFirestore` and `FirebaseAuth`)
 
@@ -211,3 +214,35 @@ Move the logic into common code and keep only the "location source + keep-alive"
    - Send the FCM v1 payload above with the app killed, in the background, in the foreground, with the silent switch on, and in a Focus mode. Confirm the custom sound plays and a tap opens the order.
    - Confirm the in-app alarm loops on Home.
 5. **TestFlight beta** with a few drivers before App Store submission. Include review notes about background location.
+
+## Gaps found after Phase 5 (2026-11-03)
+These were missing from the plan. Each is marked done, or says who owns it.
+
+**Fixed on the `kmp` branch**
+- ✅ **401 handling.** Nothing provided `LogoutListener`, so an expired token did nothing. `AppNavHost` now provides it: on the first 401 it goes to Login, stops tracking and clears the session, without calling the logout endpoint (which would be refused too). `BaseScreen` reports each 401 once instead of on every recomposition.
+- ✅ **Notification tap opens the order** (`PendingOrderLink`, see the notifications section).
+- ✅ **Background location.** `ACCESS_BACKGROUND_LOCATION` was declared but never requested. It's removed, which matches the "When In Use" decision: a location foreground service started while the app is open only needs the while-in-use permission.
+- ✅ **Tracking notification.** It's in Arabic and English ("Location sharing is on"), no longer "Location Tracker" with raw coordinates. The notification channel names are translated too.
+- ✅ **Dead code removed:** the Geocoder binding, `OrderVibrator`, `MainViewModel`, the never-used `EncryptedSharedPreferences` (and the `security-crypto` dependency), and the background notification channel.
+- ✅ **Committed build output.** `androidApp/release/app-release.aab` is no longer tracked, and `androidApp/release/` is ignored.
+- ✅ **Release build.** `assembleRelease` builds with R8 and resource shrinking. It hasn't been run on a device yet (see below).
+
+**Team**
+- [ ] **Test on an Android device** before merging: the login → online → task → photo → wallet → logout flow from step 1 of Verification, plus a 401 (an expired token) and a tapped push. Install a signed release build too, because R8 can break reflection-based code that a debug build doesn't exercise in the same way.
+- [ ] **Automated tests** (Compose UI tests of the main flow, instrumented tests) are deferred, by choice. The existing unit tests cover the network, session, number and date formats, tracking pipeline and Koin graphs.
+- [ ] **CI.** There's no `.github` yet. It would build `:androidApp` and run the unit tests on every push, plus a macOS job for `:shared:iosSimulatorArm64Test` once iOS compiles.
+- [ ] **Merge and release plan.** Merge `main` into `kmp` whenever `main` gets new commits. Ship Android from `kmp` first as a normal Play staged rollout (for example 10% → 50% → 100%) and merge into `main` once it's stable. Then ship iOS through TestFlight.
+- [ ] **Version numbers.** Keep iOS (`iosApp/project.yml`, now 1.0.22 / 22) and Android `versionName` / `versionCode` in step, so a crash report's version means the same code on both platforms.
+- [ ] **README.** Explain how to build each app: JDK 17, `google-services.json` and `GoogleService-Info.plist` (both git-ignored), `xcodegen` and `pod install`.
+- [ ] **App Review material** for iOS: background-location justification (Guideline 2.5.4) and a demo driver account that can go online.
+
+**Backend**
+- [ ] **Push payload changes.** Make a ticket for:
+  - `apns.payload.aps.sound = "new_order_alert.caf"`
+  - `interruption-level: "time-sensitive"`
+  - `data.type` and `data.order_id` on every order push, including types other than `new_order` for pushes that should open the order
+  - optionally a `platform` field on `POST fcm-token`
+
+  This blocks iOS task 3.
+
+**Mac session:** the iOS-side gaps (privacy manifest, Crashlytics on iOS, permission requests, the FCM token at startup) are in `docs/IOS_MAC_TASKS.md`.
