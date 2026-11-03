@@ -90,7 +90,14 @@ Library choices:
      - New shared interfaces: `OrderAlarm`, `DeviceLocation` and `SeenTaskStore`.
      - New `PlatformAction`s: `Call`, `OpenMaps` and `OpenWhatsApp`, plus a `WakeScreenEffect`.
      - Shared `formatGrouped` and `formatMonthYear`.
-   - Next: TaskDetails, using `rememberImagePicker` for the receipt and edit-request photos and `PlatformAction` for call and maps. The app's `ContactUtilExt` copy is deleted with it.
+   - ✅ TaskDetails is in `:shared`.
+     - The photos come from `rememberImagePicker`, and call and maps go through `PlatformAction`. `BackHandler` comes from CMP `ui-backhandler`.
+     - The OrderDetails data source and repository take bytes and are in the shared `firebaseModule`.
+     - The app's `ContactUtilExt` and `ToastHelper` are removed.
+   - Next: navigation.
+     - `AppNavHost`, `AppBottomNavigation`, `LocationBlockedDialog` and the session store owner move to JetBrains Navigation3 and `koin-compose-viewmodel`.
+     - `App()` hosts them on both platforms, and `MainActivity` becomes `setContent { App() }`.
+     - Then delete the app's unused `res` strings and drawables.
      - Each screen needs an `expect` image picker or camera returning bytes, permission requests, and the `String.format` calls rewritten as resource arguments.
    - Then: `AppNavHost` on JetBrains Navigation3 1.1.x, `App()` hosting it on both platforms, and `MainActivity` reduced to `setContent { App() }`.
 5. **Platform features:** tracking and notifications, detailed below.
