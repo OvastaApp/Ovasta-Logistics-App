@@ -28,6 +28,11 @@ kotlin {
             implementation(libs.compose.mp.runtime)
             implementation(libs.compose.mp.foundation)
             implementation(libs.compose.mp.ui)
+            implementation(libs.compose.mp.material3)
+            implementation(libs.compose.mp.material.icons.core)
+            // Res is used by :androidApp too while its screens move here
+            api(libs.compose.mp.components.resources)
+            implementation(libs.compose.mp.ui.tooling.preview)
             implementation(libs.kotlinx.coroutines.core)
             // In the API of DateExt (today() returns a LocalDate)
             api(libs.kotlinx.datetime)
@@ -80,4 +85,12 @@ android {
 
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+}
+
+// Strings (ar default, en), drawables and fonts in src/commonMain/composeResources.
+// Public so :androidApp can use Res while its screens move here.
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.ovasta.logisticsapp.shared.resources"
+    generateResClass = always
 }

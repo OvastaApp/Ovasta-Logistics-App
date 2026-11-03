@@ -40,6 +40,9 @@ coroutines = "1.10.2"
 ktor = "3.3.3"
 # 2.7.0 is built on Firebase BOM 34.18, the same major as the app (2.4.0 is on 33.x)
 gitliveFirebase = "2.7.0"
+# Compose Multiplatform UI for :shared, aligned with composeMultiplatform 1.10.3
+composeMpMaterial3 = "1.9.0"
+composeMpMaterialIcons = "1.7.3"
 nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.11.0-alpha03"
 kotlinxSerializationCore = "1.9.0"
@@ -98,6 +101,10 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 compose-mp-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 compose-mp-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 compose-mp-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
+compose-mp-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMpMaterial3" }
+compose-mp-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "composeMpMaterialIcons" }
+compose-mp-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
+compose-mp-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
