@@ -1,8 +1,14 @@
 package com.ovasta.logisticsapp.base.components.sharedComposable
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.alert_circle_red
+import com.ovasta.logisticsapp.shared.resources.an_error_occurred
+import com.ovasta.logisticsapp.shared.resources.back
+import com.ovasta.logisticsapp.shared.resources.generic_unknown_error
+import com.ovasta.logisticsapp.shared.resources.try_again
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import com.ovasta.logisticsapp.R
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -15,8 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,7 +63,7 @@ fun BaseDialog(
             Column(modifier = Modifier.padding(16.sdp)) {
 
                 Icon(
-                    painter = icon ?: painterResource(R.drawable.alert_circle_red),
+                    painter = icon ?: painterResource(Res.drawable.alert_circle_red),
                     contentDescription = null,
                     tint = Color.Unspecified,
                     modifier = Modifier
@@ -160,10 +166,10 @@ fun BaseDialog(
 @Composable
 fun PreviewBaseDialog() {
     BaseDialog(
-        title = stringResource(R.string.an_error_occurred),
-        message = stringResource(R.string.generic_unknown_error),
-        primaryButtonText = stringResource(R.string.try_again),
-        secondaryButtonText = stringResource(R.string.back),
+        title = stringResource(Res.string.an_error_occurred),
+        message = stringResource(Res.string.generic_unknown_error),
+        primaryButtonText = stringResource(Res.string.try_again),
+        secondaryButtonText = stringResource(Res.string.back),
         onPrimaryClick = {},
         onSecondaryClick = {},
         onDismiss = {})

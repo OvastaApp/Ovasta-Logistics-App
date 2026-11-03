@@ -1,6 +1,6 @@
 package com.ovasta.logisticsapp.base.components.sharedComposable
 
-import android.os.SystemClock
+import com.ovasta.logisticsapp.base.platform.elapsedRealtimeMillis
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
@@ -34,7 +34,7 @@ fun Modifier.safeClickable(
     val lastClickTime = remember { mutableLongStateOf(0L) }
 
     clickable {
-        val currentTime = SystemClock.elapsedRealtime()
+        val currentTime = elapsedRealtimeMillis()
         if (currentTime - lastClickTime.longValue >= interval) {
             lastClickTime.longValue = currentTime
             onClick()
@@ -50,7 +50,7 @@ fun rememberSafeClick(
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
     return {
-        val currentTime = SystemClock.elapsedRealtime()
+        val currentTime = elapsedRealtimeMillis()
         if (currentTime - lastClickTime >= interval) {
             lastClickTime = currentTime
             onClick()

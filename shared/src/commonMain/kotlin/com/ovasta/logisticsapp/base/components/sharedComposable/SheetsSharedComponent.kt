@@ -1,5 +1,10 @@
 package com.ovasta.logisticsapp.base.components.sharedComposable
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.confirm
+import com.ovasta.logisticsapp.shared.resources.ic_search
+import com.ovasta.logisticsapp.shared.resources.search_by_task_id
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,10 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray200
@@ -58,7 +62,7 @@ fun ConfirmButton(isEnabled: Boolean, onClick: () -> Unit) {
         shape = RoundedCornerShape(8.sdp),
     ) {
         Text(
-            text = stringResource(id = R.string.confirm),
+            text = stringResource(Res.string.confirm),
             color = if (isEnabled) Base_white else Base_white.copy(alpha = 0.7f),
             style = mdRegular
         )
@@ -101,7 +105,7 @@ fun SearchTextField(onSearchValueChange: (String) -> Unit) {
                             end = 8.sdp
                         )
                         .size(18.sdp),
-                    painter = painterResource(id = R.drawable.ic_search),
+                    painter = painterResource(Res.drawable.ic_search),
                     contentDescription = "Search icon"
                 )
 
@@ -124,7 +128,7 @@ fun SearchTextField(onSearchValueChange: (String) -> Unit) {
                         ) {
                             if (searchQuery.isEmpty()) {
                                 Text(
-                                    text = stringResource(R.string.search_by_task_id),
+                                    text = stringResource(Res.string.search_by_task_id),
                                     style = mdRegular.copy(color = Gray500)
                                 )
                             }

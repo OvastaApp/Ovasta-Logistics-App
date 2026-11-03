@@ -1,5 +1,8 @@
 package com.ovasta.logisticsapp.base
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.arrow_narrow_left
+
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Icon
@@ -11,8 +14,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import com.ovasta.logisticsapp.R
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +39,7 @@ fun CenteredTextAppBar(
             if (showBackButton) {
                 IconButton(onClick = onBackButtonPressed) {
                     Icon(
-                        painter = painterResource(R.drawable.arrow_narrow_left),
+                        painter = painterResource(Res.drawable.arrow_narrow_left),
                         contentDescription = null,
                         tint = Color.Black
                     )

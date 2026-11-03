@@ -1,5 +1,8 @@
 package com.ovasta.logisticsapp.base.components.sharedComposable
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.ic_close
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,9 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray300
 import com.ovasta.logisticsapp.base.Gray600
@@ -108,7 +110,7 @@ fun ListWithSearchBottomSheet(
                         .clickable {
                             onCloseClicked()
                         },
-                    painter = painterResource(id = R.drawable.ic_close),
+                    painter = painterResource(Res.drawable.ic_close),
                     contentDescription = "Close icon"
                 )
             }

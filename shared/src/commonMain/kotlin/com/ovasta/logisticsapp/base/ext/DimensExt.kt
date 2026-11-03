@@ -1,7 +1,7 @@
 package com.ovasta.logisticsapp.base.ext
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
+import com.ovasta.logisticsapp.base.platform.smallestScreenWidthDp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -22,7 +22,7 @@ internal fun sdpScale(smallestWidthDp: Int): Float {
 }
 
 @Composable
-private fun currentSdpScale(): Float = sdpScale(LocalConfiguration.current.smallestScreenWidthDp)
+private fun currentSdpScale(): Float = sdpScale(smallestScreenWidthDp())
 
 /** A size in dp that scales with the screen width, like the sdp library's `_Nsdp`. */
 val Int.sdp: Dp
