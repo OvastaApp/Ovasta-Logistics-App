@@ -1,6 +1,22 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation.components
 
-import android.net.Uri
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.camera
+import com.ovasta.logisticsapp.shared.resources.cancel
+import com.ovasta.logisticsapp.shared.resources.gallery
+import com.ovasta.logisticsapp.shared.resources.ic_camera
+import com.ovasta.logisticsapp.shared.resources.ic_close
+import com.ovasta.logisticsapp.shared.resources.ic_image
+import com.ovasta.logisticsapp.shared.resources.new_top_up
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.remove_image
+import com.ovasta.logisticsapp.shared.resources.send_request
+import com.ovasta.logisticsapp.shared.resources.top_up_amount
+import com.ovasta.logisticsapp.shared.resources.top_up_proof
+import com.ovasta.logisticsapp.shared.resources.top_up_proof_hint
+import com.ovasta.logisticsapp.shared.resources.top_up_proof_image
+
+import com.ovasta.logisticsapp.base.platform.PickedImage
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,13 +53,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.rememberAsyncImagePainter
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray100
 import com.ovasta.logisticsapp.base.Gray200
@@ -68,11 +84,11 @@ import com.ovasta.logisticsapp.base.ext.sdp
 fun NewTopUpBottomSheet(
     amountText: String,
     onAmountChange: (String) -> Unit,
-    proofImage: Uri?,
+    proofImage: PickedImage?,
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
     onRemoveImage: () -> Unit,
-    onSubmit: (amount: Double, proof: Uri) -> Unit,
+    onSubmit: (amount: Double, proof: PickedImage) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -96,7 +112,7 @@ fun NewTopUpBottomSheet(
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.new_top_up),
+                text = stringResource(Res.string.new_top_up),
                 style = lgMedium.copy(color = Gray900),
                 textAlign = TextAlign.Center,
             )
@@ -109,9 +125,9 @@ fun NewTopUpBottomSheet(
                 onValueChange = { input ->
                     if (isValidDecimalInput(input, maxIntegerDigits = 7, maxDecimals = 2)) onAmountChange(input)
                 },
-                label = { Text(stringResource(R.string.top_up_amount), style = xsMedium) },
+                label = { Text(stringResource(Res.string.top_up_amount), style = xsMedium) },
                 // The currency alone, without an amount
-                suffix = { Text(stringResource(R.string.price_currency, "").trim(), style = xsMedium) },
+                suffix = { Text(stringResource(Res.string.price_currency, "").trim(), style = xsMedium) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
@@ -119,7 +135,7 @@ fun NewTopUpBottomSheet(
 
             Spacer(modifier = Modifier.height(16.sdp))
 
-            Text(text = stringResource(R.string.top_up_proof), style = smMedium.copy(color = Gray800))
+            Text(text = stringResource(Res.string.top_up_proof), style = smMedium.copy(color = Gray800))
 
             Spacer(modifier = Modifier.height(8.sdp))
 
@@ -143,7 +159,7 @@ fun NewTopUpBottomSheet(
                     shape = RoundedCornerShape(8.sdp),
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
+                        text = stringResource(Res.string.cancel),
                         style = xsMedium.copy(color = Primary)
                     )
                 }
@@ -165,7 +181,7 @@ fun NewTopUpBottomSheet(
                     ),
                 ) {
                     Text(
-                        text = stringResource(R.string.send_request),
+                        text = stringResource(Res.string.send_request),
                         style = xsMedium.copy(
                             color = if (isValid) Base_white else Base_white.copy(alpha = 0.7f)
                         )
@@ -187,7 +203,7 @@ private fun ProofImageSourceButtons(onCameraClick: () -> Unit, onGalleryClick: (
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.top_up_proof_hint),
+            text = stringResource(Res.string.top_up_proof_hint),
             style = xsMedium.copy(color = Gray500),
             textAlign = TextAlign.Center
         )
@@ -198,14 +214,14 @@ private fun ProofImageSourceButtons(onCameraClick: () -> Unit, onGalleryClick: (
         ) {
             ImageSourceButton(
                 modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_camera,
-                label = stringResource(R.string.camera),
+                icon = Res.drawable.ic_camera,
+                label = stringResource(Res.string.camera),
                 onClick = onCameraClick
             )
             ImageSourceButton(
                 modifier = Modifier.weight(1f),
-                icon = R.drawable.ic_image,
-                label = stringResource(R.string.gallery),
+                icon = Res.drawable.ic_image,
+                label = stringResource(Res.string.gallery),
                 onClick = onGalleryClick
             )
         }
@@ -214,7 +230,7 @@ private fun ProofImageSourceButtons(onCameraClick: () -> Unit, onGalleryClick: (
 
 @Composable
 private fun ImageSourceButton(
-    icon: Int,
+    icon: DrawableResource,
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -237,7 +253,7 @@ private fun ImageSourceButton(
 }
 
 @Composable
-private fun ProofImagePreview(image: Uri, onRemove: () -> Unit) {
+private fun ProofImagePreview(image: PickedImage, onRemove: () -> Unit) {
     val shape = RoundedCornerShape(8.sdp)
     Box(
         modifier = Modifier
@@ -252,8 +268,8 @@ private fun ProofImagePreview(image: Uri, onRemove: () -> Unit) {
             )
     ) {
         Image(
-            painter = rememberAsyncImagePainter(image),
-            contentDescription = stringResource(R.string.top_up_proof_image),
+            painter = rememberAsyncImagePainter(image.jpeg),
+            contentDescription = stringResource(Res.string.top_up_proof_image),
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -267,8 +283,8 @@ private fun ProofImagePreview(image: Uri, onRemove: () -> Unit) {
                 .background(Base_white.copy(alpha = 0.9f))
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_close),
-                contentDescription = stringResource(R.string.remove_image),
+                painter = painterResource(Res.drawable.ic_close),
+                contentDescription = stringResource(Res.string.remove_image),
                 tint = Gray800,
                 modifier = Modifier.size(14.sdp)
             )

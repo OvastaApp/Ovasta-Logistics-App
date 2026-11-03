@@ -1,5 +1,16 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.arrow_narrow_left
+import com.ovasta.logisticsapp.shared.resources.charge
+import com.ovasta.logisticsapp.shared.resources.ic_logout
+import com.ovasta.logisticsapp.shared.resources.ic_profile
+import com.ovasta.logisticsapp.shared.resources.language
+import com.ovasta.logisticsapp.shared.resources.logout
+import com.ovasta.logisticsapp.shared.resources.profile
+import com.ovasta.logisticsapp.shared.resources.profile_image
+import com.ovasta.logisticsapp.shared.resources.wallet
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,13 +45,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
@@ -89,13 +99,13 @@ fun ProfileContent(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenteredTextAppBar(
-                title = stringResource(R.string.profile),
+                title = stringResource(Res.string.profile),
                 showBackButton = false,
                 actions = {
                     IconButton(onClick = { isLogoutDialogVisible = true }) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_logout),
-                            contentDescription = stringResource(R.string.logout),
+                            painter = painterResource(Res.drawable.ic_logout),
+                            contentDescription = stringResource(Res.string.logout),
                             tint = Color.Black,
                             modifier = Modifier.size(24.sdp)
                         )
@@ -141,14 +151,14 @@ fun ProfileContent(
 
             if (viewState.isOutsource) {
                 ProfileItemCard(
-                    title = stringResource(R.string.charge),
+                    title = stringResource(Res.string.charge),
                     onClick = onChargeClick
                 )
 
                 Spacer(modifier = Modifier.height(10.sdp))
 
                 ProfileItemCard(
-                    title = stringResource(R.string.wallet),
+                    title = stringResource(Res.string.wallet),
                     onClick = onWalletClick
                 )
 
@@ -156,7 +166,7 @@ fun ProfileContent(
             }
 
             ProfileItemCard(
-                title = stringResource(R.string.language),
+                title = stringResource(Res.string.language),
                 value = stringResource(viewState.language.nameRes),
                 onClick = { isLanguageSheetVisible = true }
             )
@@ -197,8 +207,8 @@ private fun ProfileImagePlaceholder() {
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_profile),
-            contentDescription = stringResource(R.string.profile_image),
+            painter = painterResource(Res.drawable.ic_profile),
+            contentDescription = stringResource(Res.string.profile_image),
             tint = Gray500,
             modifier = Modifier.size(36.sdp)
         )
@@ -229,7 +239,7 @@ private fun ProfileItemCard(title: String, value: String? = null, onClick: () ->
                 }
                 // The back arrow flipped, so it points forward in both LTR and RTL
                 Icon(
-                    painter = painterResource(R.drawable.arrow_narrow_left),
+                    painter = painterResource(Res.drawable.arrow_narrow_left),
                     contentDescription = null,
                     tint = Gray600,
                     modifier = Modifier.scale(scaleX = -1f, scaleY = 1f)

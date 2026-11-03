@@ -1,15 +1,14 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.PlatformAction
 import com.ovasta.logisticsapp.base.ScreenDirection
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
+import com.ovasta.logisticsapp.base.services.LocationTrackingSwitch
 import com.ovasta.logisticsapp.base.local.AppLanguage
-import com.ovasta.logisticsapp.base.local.LocaleHelper
+import com.ovasta.logisticsapp.base.local.AppLanguageStore
 import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
-import com.ovasta.logisticsapp.presentation.home.data.IHomeRepository
 import com.ovasta.logisticsapp.presentation.nav.Login
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,13 +16,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val context: Context,
+    private val languageStore: AppLanguageStore,
     private val settingsRepository: ISettingsRepository,
-    private val homeRepository: IHomeRepository
+    private val locationTrackingSwitch: LocationTrackingSwitch
 ) : BaseViewModel() {
 
     private val _viewState = MutableStateFlow(
-        ProfileViewState(language = AppLanguage.fromCode(LocaleHelper.getLanguage(context)))
+        ProfileViewState(language = AppLanguage.fromCode(languageStore.language()))
     )
     val viewState = _viewState.asStateFlow()
 
@@ -46,7 +45,7 @@ class ProfileViewModel(
 
     fun changeLanguage(language: AppLanguage) {
         if (language == _viewState.value.language) return
-        LocaleHelper.setLanguage(context, language.code)
+        languageStore.setLanguage(language.code)
         _viewState.update { it.copy(language = language) }
         // Recreating the Activity reloads every screen in the new language and layout direction
         emitPlatformAction(PlatformAction.LanguageChanged)
@@ -59,7 +58,7 @@ class ProfileViewModel(
                 settingsRepository.logout()
             }.onSuccess {
                 setComposeUILoading(false)
-                homeRepository.stopLocationTracking(context)
+                locationTrackingSwitch.stopLocationTracking()
                 settingsRepository.clearUserData()
                 // Replacing the whole back stack removes Home, which ends the session: its
                 // ViewModels are cleared, stopping the Firebase listeners and the order alarm

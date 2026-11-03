@@ -1,5 +1,8 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.ic_price
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -25,9 +28,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray500
@@ -89,7 +91,7 @@ fun EmptyListMessage(message: String) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_price),
+            painter = painterResource(Res.drawable.ic_price),
             contentDescription = null,
             tint = Gray500,
             modifier = Modifier.size(28.sdp)

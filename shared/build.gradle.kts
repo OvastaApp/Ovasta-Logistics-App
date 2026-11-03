@@ -35,6 +35,8 @@ kotlin {
             implementation(libs.compose.mp.ui.tooling.preview)
             // BaseViewModel; the app's ViewModels extend it
             api(libs.jetbrains.lifecycle.viewmodel)
+            // Image previews (picked photos as bytes; product images in later screens)
+            implementation(libs.coil.compose)
             implementation(libs.kotlinx.coroutines.core)
             // In the API of DateExt (today() returns a LocalDate)
             api(libs.kotlinx.datetime)
@@ -60,6 +62,10 @@ kotlin {
             implementation(libs.squareup.okhttp)
             // The session's encrypted DataStore file (createAndroidSessionStore)
             implementation(libs.androidx.datastore.preferences)
+            // Image picker: gallery/camera launchers, FileProvider, upright JPEGs (ImageExt)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.exifinterface)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

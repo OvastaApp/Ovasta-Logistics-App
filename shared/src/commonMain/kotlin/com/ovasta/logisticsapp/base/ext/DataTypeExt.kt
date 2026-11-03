@@ -1,7 +1,5 @@
 package com.ovasta.logisticsapp.base.ext
 
-import java.math.BigDecimal
-import java.math.RoundingMode
 import kotlin.text.matches
 
 /**
@@ -9,9 +7,7 @@ import kotlin.text.matches
  * digits: 2.0 -> "2", 0.250 -> "0.25", 20.25 -> "20.25". Also hides floating-point noise
  * such as 0.30000000000000004.
  */
-fun Double.formatDecimal(maxDecimals: Int = 3): String =
-    BigDecimal.valueOf(this).setScale(maxDecimals, RoundingMode.HALF_UP)
-        .stripTrailingZeros().toPlainString()
+expect fun Double.formatDecimal(maxDecimals: Int = 3): String
 
 /**
  * Whether [input] is an empty string or a number being typed with up to [maxIntegerDigits]

@@ -1,9 +1,12 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.logout
+import com.ovasta.logisticsapp.shared.resources.logout_message
+
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.components.sharedComposable.ConfirmDialog
 
 @Composable
@@ -14,8 +17,8 @@ fun LogoutDialog(
 ) {
     if (isVisible == true) {
         ConfirmDialog(
-            title = stringResource(R.string.logout),
-            message = stringResource(R.string.logout_message),
+            title = stringResource(Res.string.logout),
+            message = stringResource(Res.string.logout_message),
             onPrimaryClick = {
                 onConfirm()
             },

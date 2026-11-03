@@ -1,5 +1,17 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation.wallet
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.ic_add
+import com.ovasta.logisticsapp.shared.resources.ic_minus
+import com.ovasta.logisticsapp.shared.resources.ic_price
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.wallet
+import com.ovasta.logisticsapp.shared.resources.wallet_balance
+import com.ovasta.logisticsapp.shared.resources.wallet_credit
+import com.ovasta.logisticsapp.shared.resources.wallet_debit
+import com.ovasta.logisticsapp.shared.resources.wallet_placeholder
+import com.ovasta.logisticsapp.shared.resources.wallet_transactions
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,11 +43,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Gray100
@@ -102,7 +113,7 @@ fun WalletContent(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenteredTextAppBar(
-                title = stringResource(R.string.wallet),
+                title = stringResource(Res.string.wallet),
                 onBackButtonPressed = onBackClick
             )
         }
@@ -132,14 +143,14 @@ fun WalletContent(
 
                     item(key = "transactions_header") {
                         ListSectionHeader(
-                            title = stringResource(R.string.wallet_transactions),
+                            title = stringResource(Res.string.wallet_transactions),
                             count = viewState.totalCount
                         )
                     }
 
                     if (transactions.isEmpty()) {
                         item(key = "empty") {
-                            EmptyListMessage(message = stringResource(R.string.wallet_placeholder))
+                            EmptyListMessage(message = stringResource(Res.string.wallet_placeholder))
                         }
                     } else {
                         items(transactions) { transaction -> TransactionItem(transaction) }
@@ -165,19 +176,19 @@ private fun BalanceCard(balance: Double) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_price),
+            painter = painterResource(Res.drawable.ic_price),
             contentDescription = null,
             tint = Base_white,
             modifier = Modifier.size(28.sdp)
         )
         Spacer(modifier = Modifier.height(8.sdp))
         Text(
-            text = stringResource(R.string.wallet_balance),
+            text = stringResource(Res.string.wallet_balance),
             style = smNormal.copy(color = Base_white.copy(alpha = 0.85f))
         )
         Spacer(modifier = Modifier.height(4.sdp))
         Text(
-            text = stringResource(R.string.price_currency, formatAmount(balance)),
+            text = stringResource(Res.string.price_currency, formatAmount(balance)),
             style = xlSemiBold.copy(color = Base_white)
         )
     }
@@ -203,7 +214,7 @@ private fun TransactionItem(transaction: WalletTransaction) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(if (isCredit) R.drawable.ic_add else R.drawable.ic_minus),
+                painter = painterResource(if (isCredit) Res.drawable.ic_add else Res.drawable.ic_minus),
                 contentDescription = null,
                 tint = color,
                 modifier = Modifier.size(18.sdp)
@@ -215,7 +226,7 @@ private fun TransactionItem(transaction: WalletTransaction) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = transaction.description?.takeIf { it.isNotBlank() }
-                    ?: stringResource(if (isCredit) R.string.wallet_credit else R.string.wallet_debit),
+                    ?: stringResource(if (isCredit) Res.string.wallet_credit else Res.string.wallet_debit),
                 style = smMedium.copy(color = Gray800),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -229,7 +240,7 @@ private fun TransactionItem(transaction: WalletTransaction) {
         Spacer(modifier = Modifier.width(8.sdp))
 
         Text(
-            text = stringResource(R.string.price_currency, formatAmount(amount, showPlus = true)),
+            text = stringResource(Res.string.price_currency, formatAmount(amount, showPlus = true)),
             style = smSemiBold.copy(color = color)
         )
     }

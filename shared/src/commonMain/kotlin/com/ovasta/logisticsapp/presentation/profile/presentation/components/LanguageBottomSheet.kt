@@ -1,5 +1,8 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation.components
 
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.language
+
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,10 +30,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.Gray200
 import com.ovasta.logisticsapp.base.Gray900
@@ -73,7 +75,7 @@ fun LanguageBottomSheet(
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.language),
+                    text = stringResource(Res.string.language),
                     style = lgMedium.copy(color = Gray900),
                     textAlign = TextAlign.Center,
                 )

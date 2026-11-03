@@ -1,40 +1,45 @@
-package com.ovasta.logisticsapp.presentation.profile.presentation.charge
+package com.ovasta.logisticsapp.presentation.profile.presentation.wallet
 
-import com.ovasta.logisticsapp.shared.resources.Res
-import com.ovasta.logisticsapp.shared.resources.top_up_request_sent
-
-import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.ovasta.logisticsapp.base.BaseViewModel
 import com.ovasta.logisticsapp.base.exception.toComposeUIException
-import com.ovasta.logisticsapp.base.ext.ToastEvent
+import com.ovasta.logisticsapp.presentation.home.data.IHomeServerRemoteDataSource
 import com.ovasta.logisticsapp.presentation.profile.data.IWalletRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ChargeViewModel(
-    private val walletRepository: IWalletRepository
+class WalletViewModel(
+    private val walletRepository: IWalletRepository,
+    private val homeServerRemoteDataSource: IHomeServerRemoteDataSource
 ) : BaseViewModel() {
 
-    private val _viewState = MutableStateFlow(ChargeViewState())
+    private val _viewState = MutableStateFlow(WalletViewState())
     val viewState = _viewState.asStateFlow()
 
     /**
-     * (Re)loads the top-up requests from the first page, keeping what is on screen until it
-     * arrives. Later pages are added by [loadNextPage].
+     * (Re)loads the balance (from `home`) and the first page of transactions together, keeping
+     * what is on screen until they arrive. Later pages are added by [loadNextPage].
      */
-    fun loadTopUpRequests() {
+    fun loadWallet() {
         if (_viewState.value.isLoading) return
         _viewState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             kotlin.runCatching {
-                walletRepository.getTopUpRequests(page = FIRST_PAGE)
-            }.onSuccess { page ->
+                coroutineScope {
+                    val home = async { homeServerRemoteDataSource.getHome() }
+                    val firstPage = async { walletRepository.getWalletTransactions(page = FIRST_PAGE) }
+                    home.await().data to firstPage.await()
+                }
+            }.onSuccess { (home, page) ->
                 _viewState.update {
                     it.copy(
-                        topUpRequests = page.data.orEmpty(),
+                        balance = home?.walletBalance ?: 0.0,
+                        walletWarning = home?.walletWarning?.takeIf { warning -> warning.isNotBlank() },
+                        transactions = page.data.orEmpty(),
                         totalCount = page.total ?: page.data.orEmpty().size,
                         currentPage = FIRST_PAGE,
                         hasNextPage = page.hasNextPage,
@@ -48,7 +53,7 @@ class ChargeViewModel(
         }
     }
 
-    /** Appends the next page of top-up requests, if there is one and nothing is loading. */
+    /** Appends the next page of transactions, if there is one and nothing is loading. */
     fun loadNextPage() {
         val state = _viewState.value
         if (state.isLoading || state.isLoadingMore || !state.hasNextPage) return
@@ -56,14 +61,14 @@ class ChargeViewModel(
         _viewState.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
             kotlin.runCatching {
-                walletRepository.getTopUpRequests(page = nextPage)
+                walletRepository.getWalletTransactions(page = nextPage)
             }.onSuccess { page ->
                 _viewState.update {
                     it.copy(
-                        // A request sent since the first page was loaded shifts every page by
-                        // one, repeating the previous page's last request on this one
-                        topUpRequests = (it.topUpRequests.orEmpty() + page.data.orEmpty())
-                            .distinctBy { request -> request.id },
+                        // A transaction made since the first page was loaded shifts every page
+                        // by one, repeating the previous page's last transaction on this one
+                        transactions = (it.transactions.orEmpty() + page.data.orEmpty())
+                            .distinctBy { transaction -> transaction.id },
                         totalCount = page.total ?: it.totalCount,
                         currentPage = nextPage,
                         hasNextPage = page.hasNextPage,
@@ -75,28 +80,6 @@ class ChargeViewModel(
                 emitComposeUIExceptionEvent(it.toComposeUIException())
             }
         }
-    }
-
-    /** Sends a top-up request for [amount] with the transfer photo [proof], then reloads the list. */
-    fun createTopUpRequest(amount: Double, proof: Uri) {
-        viewModelScope.launch {
-            setComposeUILoading(true)
-            kotlin.runCatching {
-                walletRepository.createTopUpRequest(amount, proof)
-            }.onSuccess {
-                setComposeUILoading(false)
-                _viewState.update { it.copy(isTopUpSent = true) }
-                emitToastEvent(ToastEvent.ResourceToastEvent(Res.string.top_up_request_sent))
-                loadTopUpRequests()
-            }.onFailure {
-                setComposeUILoading(false)
-                emitComposeUIExceptionEvent(it.toComposeUIException())
-            }
-        }
-    }
-
-    fun onTopUpSentHandled() {
-        _viewState.update { it.copy(isTopUpSent = false) }
     }
 
     private companion object {

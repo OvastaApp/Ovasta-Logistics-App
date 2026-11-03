@@ -8,7 +8,11 @@ import com.ovasta.logisticsapp.presentation.home.data.HomeApi
 import com.ovasta.logisticsapp.presentation.home.data.HomeServerRemoteDataSource
 import com.ovasta.logisticsapp.presentation.home.data.IHomeServerRemoteDataSource
 import com.ovasta.logisticsapp.presentation.orderDetails.data.OrderDetailsApi
+import com.ovasta.logisticsapp.presentation.profile.data.IWalletRemoteDataSource
+import com.ovasta.logisticsapp.presentation.profile.data.IWalletRepository
 import com.ovasta.logisticsapp.presentation.profile.data.WalletApi
+import com.ovasta.logisticsapp.presentation.profile.data.WalletRemoteDataSource
+import com.ovasta.logisticsapp.presentation.profile.data.WalletRepository
 import org.koin.dsl.module
 
 /**
@@ -27,4 +31,6 @@ val networkModule = module {
 
     single<IHomeServerRemoteDataSource> { HomeServerRemoteDataSource(get()) }
     single<ISettingsRemoteDataSource> { SettingsRemoteDataSource(get()) }
+    single<IWalletRemoteDataSource> { WalletRemoteDataSource(get()) }
+    single<IWalletRepository> { WalletRepository(get()) }
 }

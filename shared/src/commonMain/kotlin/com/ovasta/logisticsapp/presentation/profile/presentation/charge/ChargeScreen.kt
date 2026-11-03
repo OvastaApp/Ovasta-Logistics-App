@@ -1,9 +1,15 @@
 package com.ovasta.logisticsapp.presentation.profile.presentation.charge
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.approved_amount
+import com.ovasta.logisticsapp.shared.resources.charge
+import com.ovasta.logisticsapp.shared.resources.charge_placeholder
+import com.ovasta.logisticsapp.shared.resources.ic_add
+import com.ovasta.logisticsapp.shared.resources.new_top_up
+import com.ovasta.logisticsapp.shared.resources.price_currency
+import com.ovasta.logisticsapp.shared.resources.rejection_reason
+import com.ovasta.logisticsapp.shared.resources.top_up_requests
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,11 +44,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.ovasta.logisticsapp.R
 import com.ovasta.logisticsapp.base.Base_white
 import com.ovasta.logisticsapp.base.CenteredTextAppBar
 import com.ovasta.logisticsapp.base.Error500
@@ -55,8 +59,9 @@ import com.ovasta.logisticsapp.base.StatusCanceled
 import com.ovasta.logisticsapp.base.StatusDelivered
 import com.ovasta.logisticsapp.base.StatusPending
 import com.ovasta.logisticsapp.base.components.sharedComposable.BaseScreen
+import com.ovasta.logisticsapp.base.platform.PickedImage
+import com.ovasta.logisticsapp.base.platform.rememberImagePicker
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
-import com.ovasta.logisticsapp.base.ext.createImageCaptureUri
 import com.ovasta.logisticsapp.base.lgSemiBold
 import com.ovasta.logisticsapp.base.mdMedium
 import com.ovasta.logisticsapp.base.xsMedium
@@ -73,34 +78,26 @@ import com.ovasta.logisticsapp.presentation.profile.presentation.components.form
 import com.ovasta.logisticsapp.presentation.profile.presentation.components.walletCardSurface
 import com.ovasta.logisticsapp.base.ext.sdp
 
+/** Largest top-up proof we upload: under 100 KB (99,999 bytes, so it fits either KB definition). */
+private const val MAX_PROOF_IMAGE_BYTES = 99_999
+
 @Composable
 fun ChargeScreen(viewModel: ChargeViewModel) {
     val viewState by viewModel.viewState.collectAsState()
     val navigator = LocalNavigator.current
-    val context = LocalContext.current
-
-    // The new top-up form is saveable, like the camera file below, because the camera / gallery
-    // app can push this screen out of memory
+    // The new top-up form is saveable because the camera / gallery app can push this screen out
+    // of memory
     var isTopUpSheetVisible by rememberSaveable { mutableStateOf(false) }
     var amountText by rememberSaveable { mutableStateOf("") }
-    var proofImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
-    // File the camera app writes the captured photo into
-    var cameraImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var proofImage by rememberSaveable(stateSaver = PickedImage.Saver) { mutableStateOf<PickedImage?>(null) }
 
     fun closeTopUpSheet() {
         isTopUpSheetVisible = false
         amountText = ""
-        proofImageUri = null
+        proofImage = null
     }
 
-    val galleryLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { image ->
-            if (image != null) proofImageUri = image
-        }
-    val cameraLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
-            if (saved) proofImageUri = cameraImageUri
-        }
+    val imagePicker = rememberImagePicker(maxBytes = MAX_PROOF_IMAGE_BYTES) { proofImage = it }
 
     // The ViewModel outlives the screen, so refresh on every visit
     LaunchedEffect(Unit) {
@@ -127,19 +124,10 @@ fun ChargeScreen(viewModel: ChargeViewModel) {
             NewTopUpBottomSheet(
                 amountText = amountText,
                 onAmountChange = { amountText = it },
-                proofImage = proofImageUri,
-                onCameraClick = {
-                    val captureUri = context.createImageCaptureUri()
-                    cameraImageUri = captureUri
-                    // No camera app on the device: nothing gets attached
-                    runCatching { cameraLauncher.launch(captureUri) }
-                },
-                onGalleryClick = {
-                    galleryLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                },
-                onRemoveImage = { proofImageUri = null },
+                proofImage = proofImage,
+                onCameraClick = imagePicker::capturePhoto,
+                onGalleryClick = imagePicker::pickFromGallery,
+                onRemoveImage = { proofImage = null },
                 onSubmit = viewModel::createTopUpRequest,
                 onDismiss = { closeTopUpSheet() }
             )
@@ -168,7 +156,7 @@ fun ChargeContent(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenteredTextAppBar(
-                title = stringResource(R.string.charge),
+                title = stringResource(Res.string.charge),
                 onBackButtonPressed = onBackClick
             )
         },
@@ -193,14 +181,14 @@ fun ChargeContent(
                 if (requests != null) {
                     item(key = "header") {
                         ListSectionHeader(
-                            title = stringResource(R.string.top_up_requests),
+                            title = stringResource(Res.string.top_up_requests),
                             count = viewState.totalCount
                         )
                     }
 
                     if (requests.isEmpty()) {
                         item(key = "empty") {
-                            EmptyListMessage(message = stringResource(R.string.charge_placeholder))
+                            EmptyListMessage(message = stringResource(Res.string.charge_placeholder))
                         }
                     } else {
                         items(requests) { request -> TopUpRequestCard(request = request) }
@@ -239,14 +227,14 @@ private fun NewTopUpBar(onClick: () -> Unit) {
             )
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_add),
+                painter = painterResource(Res.drawable.ic_add),
                 contentDescription = null,
                 tint = Base_white,
                 modifier = Modifier.size(18.sdp)
             )
             Spacer(modifier = Modifier.width(6.sdp))
             Text(
-                text = stringResource(R.string.new_top_up),
+                text = stringResource(Res.string.new_top_up),
                 style = mdMedium.copy(color = Base_white)
             )
         }
@@ -267,7 +255,7 @@ private fun TopUpRequestCard(request: TopUpRequest) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.price_currency, formatAmount(request.amount ?: 0.0)),
+                text = stringResource(Res.string.price_currency, formatAmount(request.amount ?: 0.0)),
                 style = lgSemiBold.copy(color = Primary)
             )
             if (status != null) TopUpStatusTag(status = status)
@@ -283,8 +271,8 @@ private fun TopUpRequestCard(request: TopUpRequest) {
             Spacer(modifier = Modifier.height(4.sdp))
             Text(
                 text = stringResource(
-                    R.string.approved_amount,
-                    stringResource(R.string.price_currency, formatAmount(adjustedAmount))
+                    Res.string.approved_amount,
+                    stringResource(Res.string.price_currency, formatAmount(adjustedAmount))
                 ),
                 style = xsMedium.copy(color = StatusDelivered)
             )
@@ -297,7 +285,7 @@ private fun TopUpRequestCard(request: TopUpRequest) {
             request.rejectionReason?.takeIf { it.isNotBlank() }?.let { reason ->
                 Spacer(modifier = Modifier.height(4.sdp))
                 Text(
-                    text = stringResource(R.string.rejection_reason, reason),
+                    text = stringResource(Res.string.rejection_reason, reason),
                     style = xsMedium.copy(color = Error500)
                 )
             }

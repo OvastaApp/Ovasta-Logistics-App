@@ -1,6 +1,5 @@
 package com.ovasta.logisticsapp.presentation.profile.data
 
-import android.net.Uri
 import com.ovasta.logisticsapp.data.PaginatedData
 import com.ovasta.logisticsapp.presentation.profile.data.model.TopUpRequest
 import com.ovasta.logisticsapp.presentation.profile.data.model.WalletTransaction
@@ -13,5 +12,5 @@ interface IWalletRemoteDataSource {
     suspend fun getTopUpRequests(page: Int): PaginatedData<TopUpRequest>
 
     /** Sends a top-up request for [amount], uploading [proof] (the transfer photo) with it. */
-    suspend fun createTopUpRequest(amount: Double, proof: Uri)
+    suspend fun createTopUpRequest(amount: Double, proof: ByteArray)
 }
