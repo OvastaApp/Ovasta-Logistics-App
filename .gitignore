@@ -22,3 +22,6 @@ iosApp/build/
 iosApp/iosApp/GoogleService-Info.plist
 xcuserdata/
 DerivedData/
+
+# Locally built release bundles and APKs
+androidApp/release/

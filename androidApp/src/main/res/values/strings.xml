@@ -4,4 +4,9 @@
     <string name="timeout_error_message">An error has occurred, please try again later</string>
     <string name="generic_unknown_error">An unknown error has occurred</string>
     <string name="new_delivery_tasks">New Delivery Tasks</string>
+    <string name="location_tracking_title">Location sharing is on</string>
+    <string name="location_tracking_text">Your location is shared while you\'re online</string>
+    <string name="channel_location">Location tracking</string>
+    <string name="channel_delivery_tasks">Delivery tasks</string>
+    <string name="channel_delivery_tasks_description">New delivery task notifications</string>
 </resources>

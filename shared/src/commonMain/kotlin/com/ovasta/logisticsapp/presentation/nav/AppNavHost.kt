@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +24,10 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.ovasta.logisticsapp.base.components.sharedComposable.LocalNavigator
 import com.ovasta.logisticsapp.base.components.sharedComposable.Navigator
+import com.ovasta.logisticsapp.base.services.LocationTrackingSwitch
+import com.ovasta.logisticsapp.data.setting.data.ISettingsRepository
+import com.ovasta.logisticsapp.listener.LocalLogoutListener
+import com.ovasta.logisticsapp.listener.LogoutListener
 import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginScreen
 import com.ovasta.logisticsapp.presentation.auth.login.presentation.LoginViewModel
 import com.ovasta.logisticsapp.presentation.auth.splash.SplashScreen
@@ -44,6 +49,8 @@ import com.ovasta.logisticsapp.presentation.profile.presentation.charge.ChargeSc
 import com.ovasta.logisticsapp.presentation.profile.presentation.charge.ChargeViewModel
 import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletScreen
 import com.ovasta.logisticsapp.presentation.profile.presentation.wallet.WalletViewModel
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -81,7 +88,41 @@ fun AppNavHost(modifier: Modifier = Modifier) {
 
     val currentRoute = backStack.lastOrNull()
 
-    CompositionLocalProvider(LocalNavigator provides navigator) {
+    // A tapped notification's order opens on top of Home once logged in. On the login screen
+    // it's dropped, so it can't open for whichever account logs in next.
+    val pendingOrderId by PendingOrderLink.orderId.collectAsState()
+    LaunchedEffect(pendingOrderId, isLoggedIn, currentRoute) {
+        val orderId = pendingOrderId ?: return@LaunchedEffect
+        when {
+            currentRoute == Login -> PendingOrderLink.consume()
+            isLoggedIn -> {
+                navigator.popUpTo(Home)
+                navigator.push(TaskDetails(orderId))
+                PendingOrderLink.consume()
+            }
+        }
+    }
+
+    // A 401 means the session token is no longer valid: end the session as logout does, without
+    // the logout request (it would be refused too)
+    val settingsRepository: ISettingsRepository = koinInject()
+    val locationTrackingSwitch: LocationTrackingSwitch = koinInject()
+    val scope = rememberCoroutineScope()
+    val logoutListener = remember(navigator) {
+        object : LogoutListener {
+            override fun onUnauthorized() {
+                // Several requests can fail at once; only the first one logs out
+                if (backStack.none { it is Home }) return
+                navigator.replaceAll(Login)
+                scope.launch {
+                    locationTrackingSwitch.stopLocationTracking()
+                    settingsRepository.clearUserData()
+                }
+            }
+        }
+    }
+
+    CompositionLocalProvider(LocalNavigator provides navigator, LocalLogoutListener provides logoutListener) {
         // Screens handle their own insets; white like the Material 1 Scaffold this replaced
         Scaffold(containerColor = Base_white, contentWindowInsets = WindowInsets(0), bottomBar = {
             if (BottomNavTab.isTopLevel(currentRoute)) {

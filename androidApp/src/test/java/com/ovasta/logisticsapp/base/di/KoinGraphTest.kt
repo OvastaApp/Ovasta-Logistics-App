@@ -3,7 +3,6 @@ package com.ovasta.logisticsapp.base.di
 import android.app.Application
 import android.content.Context
 import io.ktor.client.plugins.logging.Logger
-import java.util.Locale
 import org.junit.Test
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.module
@@ -16,9 +15,8 @@ class KoinGraphTest {
     @Test
     fun `app modules resolve`() {
         module { includes(appModules) }.verify(
-            // Context comes from androidContext(); the Logger only exists in debug builds; the
-            // Geocoder gets its Locale directly, not from Koin
-            extraTypes = listOf(Context::class, Application::class, Logger::class, Locale::class)
+            // Context comes from androidContext(); the Logger only exists in debug builds
+            extraTypes = listOf(Context::class, Application::class, Logger::class)
         )
     }
 }

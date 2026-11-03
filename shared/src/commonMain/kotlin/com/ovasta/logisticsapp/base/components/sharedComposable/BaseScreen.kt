@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,7 +40,11 @@ fun BaseScreen(
     val exceptionState by viewModel.composeUIExceptionEvent.collectAsState(null)
     exceptionState?.let { exception ->
         if (exception.code == RemoteConstants.UNAUTHORIZED_CODE) {
-            logoutListener?.onUnauthorized()
+            // Once per exception, not on every recomposition
+            LaunchedEffect(exception) {
+                logoutListener?.onUnauthorized()
+                viewModel.emitComposeUIExceptionEvent(null)
+            }
         } else {
             BaseDialog(
                 icon = painterResource(Res.drawable.ic_error),

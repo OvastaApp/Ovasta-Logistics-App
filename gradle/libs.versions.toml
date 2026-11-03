@@ -23,7 +23,6 @@ lifecycleViewmodelKtxVersion = "2.9.3"
 navigationCompose = "2.9.3"
 navigationUi = "2.9.3"
 okhttp = "5.1.0"
-securityCrypto = "1.1.0-alpha06"
 uiTestManifest = "1.8.3"
 compose-ui = "1.8.3"
 compose-material3 = "1.3.1"
@@ -73,7 +72,6 @@ koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndr
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroid" }
 #koin-androidx-scope = { module = "io.insert-koin:koin-androidx-scope", version.ref = "koinAndroidxScope" }
 #koin-androidx-viewmodel = { module = "io.insert-koin:koin-androidx-viewmodel", version.ref = "koinAndroid" }
-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

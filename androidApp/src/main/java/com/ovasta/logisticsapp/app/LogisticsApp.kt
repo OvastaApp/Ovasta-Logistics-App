@@ -43,7 +43,7 @@ class LogisticsApp : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 LocationTrackerService.LOCATION_CHANNEL,
-                "Location",
+                getString(R.string.channel_location),
                 NotificationManager.IMPORTANCE_LOW
             )
 
@@ -55,33 +55,25 @@ class LogisticsApp : Application() {
 
             val orderChannel = NotificationChannel(
                 DELIVERY_TASK_CHANNEL,
-                "Delivery Tasks",
+                getString(R.string.channel_delivery_tasks),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setSound(soundUri, audioAttributes)
                 enableVibration(true)
-                description = "New delivery task notifications"
-            }
-
-            val backgroundChannel = NotificationChannel(
-                DELIVERY_TASK_BACKGROUND_CHANNEL,
-                "Delivery Tasks (Background)",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                enableVibration(true)
-                description = "Delivery task notifications when app is in background"
+                description = getString(R.string.channel_delivery_tasks_description)
             }
 
             val notificationManager =
                 getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-            // Delete old channels so sound settings take effect
+            // Delete old channels so sound settings take effect. The background channel was
+            // never posted to: every new-order notification uses the channel with the sound.
             notificationManager.deleteNotificationChannel("delivery_task_channel")
             notificationManager.deleteNotificationChannel("delivery_task_channel_v1")
+            notificationManager.deleteNotificationChannel("delivery_task_background_channel")
 
             notificationManager.createNotificationChannel(channel)
             notificationManager.createNotificationChannel(orderChannel)
-            notificationManager.createNotificationChannel(backgroundChannel)
         }
 
         checkAndSendFcmToken()
@@ -120,6 +112,5 @@ class LogisticsApp : Application() {
     }
     companion object {
         const val DELIVERY_TASK_CHANNEL = "delivery_task_channel_v2"
-        const val DELIVERY_TASK_BACKGROUND_CHANNEL = "delivery_task_background_channel"
     }
 }

@@ -1,6 +1,5 @@
 package com.ovasta.logisticsapp.base.services
 
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -54,9 +53,9 @@ class LocationTrackerService() : Service(), KoinComponent {
         val notification = NotificationCompat
             .Builder(this, LOCATION_CHANNEL)
             .setSmallIcon(R.drawable.logo)
-            .setContentTitle("Location Tracker")
-            .setContentText("Initializing location tracking...")
-            .setStyle(NotificationCompat.BigTextStyle())
+            .setContentTitle(getString(R.string.location_tracking_title))
+            .setContentText(getString(R.string.location_tracking_text))
+            .setOngoing(true)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
@@ -75,24 +74,11 @@ class LocationTrackerService() : Service(), KoinComponent {
 
         val locationManager: LocationManager by inject()
 
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // LocationTracker filters, logs and reports each fix; the service only shows it
+        // LocationTracker filters, logs and reports each fix; the service only keeps it running
         trackingJob = scope.launch {
             locationTracker.track(
                 fixes = locationManager.trackLocation().map { GeoPoint(it.latitude, it.longitude) }
-            ) { fix ->
-                val updatedNotification = NotificationCompat
-                    .Builder(this@LocationTrackerService, LOCATION_CHANNEL)
-                    .setSmallIcon(R.drawable.logo)
-                    .setContentTitle("Location Tracker")
-                    .setContentText("Location: ${fix.latitude} / ${fix.longitude}")
-                    .setStyle(NotificationCompat.BigTextStyle())
-                    .build()
-
-                notificationManager.notify(NOTIFICATION_ID, updatedNotification)
-            }
+            )
         }
 
     }

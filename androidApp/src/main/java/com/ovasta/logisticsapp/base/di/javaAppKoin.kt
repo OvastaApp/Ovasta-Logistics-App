@@ -17,7 +17,6 @@ import org.koin.core.logger.Level
 
 /** The shared modules plus the Android bindings they need (checked by KoinGraphTest). */
 val appModules = listOf(
-    localModule,
     remoteModule,
     networkModule,
     sessionModule,

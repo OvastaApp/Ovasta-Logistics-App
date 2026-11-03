@@ -4,4 +4,9 @@
     <string name="timeout_error_message">حدث خطأ، يرجى المحاولة لاحقًا</string>
     <string name="generic_unknown_error">حدث خطأ غير معروف</string>
     <string name="new_delivery_tasks">طلبات توصيل جديدة</string>
+    <string name="location_tracking_title">مشاركة الموقع مفعّلة</string>
+    <string name="location_tracking_text">تتم مشاركة موقعك أثناء اتصالك</string>
+    <string name="channel_location">تتبع الموقع</string>
+    <string name="channel_delivery_tasks">مهام التوصيل</string>
+    <string name="channel_delivery_tasks_description">إشعارات مهام التوصيل الجديدة</string>
 </resources>

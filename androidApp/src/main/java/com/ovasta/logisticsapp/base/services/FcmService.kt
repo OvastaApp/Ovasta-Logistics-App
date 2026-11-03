@@ -45,11 +45,16 @@ class FcmService : FirebaseMessagingService() {
         val title = message.notification?.title ?: message.data["title"] ?: getString(R.string.new_delivery_tasks)
         val body = message.notification?.body ?: message.data["body"] ?: ""
 
+        // The push's data (type, order_id) goes along so MainActivity can open the order
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
+            message.data.forEach { (key, value) -> putExtra(key, value) }
         }
+        // Its own request code per notification, so a newer push doesn't replace an older one's extras
+        val notificationId = System.currentTimeMillis().toInt()
         val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         // On API 26+ the channel decides the sound; setSound only applies below that
@@ -64,6 +69,6 @@ class FcmService : FirebaseMessagingService() {
             .setSound(soundUri)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
+        notificationManager.notify(notificationId, builder.build())
     }
 }
