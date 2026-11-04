@@ -19,8 +19,13 @@ The Xcode app itself hasn't been built yet: it needs CocoaPods and `GoogleServic
       `libs.versions.toml`). Unpinned, CocoaPods would pick 12.x.
 - [x] Run `cd iosApp && xcodegen && pod install` and open `iosApp.xcworkspace`. `Podfile.lock`
       is committed, so every Mac gets the same pods.
-- [ ] Get a 1024px app icon into `Assets.xcassets/AppIcon.appiconset`. Signing is Automatic for
-      now (team `H8X427WWQW`); fastlane/match comes in Phase 6.
+- [x] 1024px app icon in `Assets.xcassets/AppIcon.appiconset`, rendered from the vector
+      `logo.xml` on white, like the Android launcher icon; opaque, as App Store Connect requires.
+      Xcode generates the smaller sizes. Signing is Automatic for now (team `H8X427WWQW`);
+      fastlane/match comes in Phase 6.
+- [x] Vector drawables in `composeResources` must use literal colors. Thirteen icons used
+      `@android:color/white|black`, which Android resolves but the iOS vector parser rejects
+      (`Invalid color value`), crashing Home on iOS right after login.
 - [ ] Simulators: Apple Silicon only. There is no `iosX64` target, because JetBrains
       navigation3 isn't published for it.
 
