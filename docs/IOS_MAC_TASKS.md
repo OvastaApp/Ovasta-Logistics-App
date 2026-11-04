@@ -61,43 +61,41 @@ none has run yet:
       `iosApp/Pods` after `pod install`), or CI skips this task and builds the app instead.
 
 ## 2. Koin on iOS, then show the real app
-Add `fun initKoin()` in `iosMain`. It starts `networkModule`, `sessionModule`, `firebaseModule`,
-`trackingModule` and `viewModelModule`, plus iOS bindings for every type in
-`KoinModulesTest.platformBindings`:
+✅ Written and linked (2026-11-04); not run yet, which needs the pods and
+`GoogleService-Info.plist` from task 0. `initKoin()` in `shared/KoinIos.kt` starts the shared
+modules with these iOS bindings, one for every type in `KoinModulesTest.platformBindings`:
 
 | Binding | iOS implementation |
 |---|---|
 | `HttpClientEngine` | `createIosHttpEngine()` |
-| `NetworkErrorMessages` | the `timeout_error_message` / `generic_unknown_error` Res strings, read once at start (`getString` is suspend) |
+| `NetworkErrorMessages` | `IosNetworkErrorMessages`: the Res strings, loaded at start and on every new Compose view (`getString` is suspend), English until loaded |
 | `SessionStore` | `FileSessionStore()` |
-| `PushTokenProvider` | the FCM token the AppDelegate hands over (task 3) |
-| `TrackingKeepAlive` | the `CLLocationManager` tracker from task 6 |
-| `Logger` | optional: Ktor request logging, debug builds only, as on Android |
-| `OrderAlarm` | `AVAudioPlayer` looping `new_order_alert.caf` (`numberOfLoops = -1`), `AVAudioSession` category `.playback` |
-| `DeviceLocation` | `CLLocationManager`: `requestLocation()` for the current fix, `locationServicesEnabled()`, authorization status for the permission |
-| `SeenTaskStore` | `NSUserDefaults` key `seen_task_ids` |
-| `LocationTrackingSwitch` | stops the tracker from task 6 |
-| `AppLanguageStore` | `NSUserDefaults` plus `AppleLanguages` (the seller app's `LanguageApplier`) |
+| `PushTokenProvider` | `PushTokenBridge.token`, which the AppDelegate sets (task 3) |
+| `TrackingKeepAlive` | `IosTrackingKeepAlive` (task 6) |
+| `Logger` | `println`, debug builds only, as on Android |
+| `OrderAlarm` | `IosOrderAlarm`: `AVAudioPlayer` looping `new_order_alert.caf`, session category `.playback` |
+| `DeviceLocation` | `IosDeviceLocation`: `requestLocation()` with a 10 s timeout, `locationServicesEnabled()`, "When In Use" status |
+| `SeenTaskStore` | `UserDefaultsSeenTaskStore`, key `seen_task_ids` |
+| `LocationTrackingSwitch` | stops tracking through `IHomeRepository`, as on Android |
+| `AppLanguageStore` | `UserDefaultsLanguageStore`: `userLanguageKey` plus `AppleLanguages` (the seller app's `LanguageApplier`) |
 
-Then:
-- [ ] After starting Koin, `initKoin()` calls `SessionHeaderCache.initialize(sessionStore)`, as
-      `LogisticsApp.onCreate` does on Android. `AccessTokenProvider` reads the token from that
-      cache. Without it, every request after a relaunch goes out without a token, gets a 401,
-      and the 401 handler logs the driver out.
-- [ ] Make `MainViewController()` call `App()` instead of the placeholder.
-- [ ] Call `initKoin()` in `AppDelegate.application(_:didFinishLaunchingWithOptions:)`, right after
-      `FirebaseApp.configure()` (`MainViewControllerKt.doInitKoin()`, or wherever `initKoin` ends
-      up). Not in `iOSApp.init()`: SwiftUI runs that before the AppDelegate, so Firebase isn't
-      configured yet. It would only work while nothing resolves Firestore or Auth at startup.
-- [ ] In `ContentView`, recreate `ComposeView` on `LANGUAGE_CHANGED_NOTIFICATION`, the way the seller app does.
+- [x] `initKoin()` runs `SessionHeaderCache.initialize(sessionStore)` before anything can send
+      a request, so the saved token goes out after a relaunch. (Android starts it in the
+      background, so its first request can race it.)
+- [x] `MainViewController()` shows `App()`. It applies the saved language (Arabic by default),
+      sets RTL for Arabic, and asks for location permission (task 7).
+- [x] The AppDelegate calls `KoinIosKt.doInitKoin()` right after `FirebaseApp.configure()`.
+- [x] `ContentView` builds a new `ComposeView` on `LANGUAGE_CHANGED_NOTIFICATION`.
+- [ ] Run it in the simulator: login, Home, TaskDetails, Profile, a language switch.
 
 ## 3. Push and the custom sound
-- [ ] Convert the sound and add it to the app bundle:
+- [x] `iosApp/iosApp/new_order_alert.caf`, converted with
       `afconvert androidApp/src/main/res/raw/new_order_alert.mp3 iosApp/iosApp/new_order_alert.caf -d ima4 -f caff -v`.
-      It must be ≤ 30 s; pad it to about 25 s for an alarm-like effect.
+      It's 10 s, within the 30 s limit. Optionally pad it to about 25 s for an alarm-like push.
 - [ ] Use the seller app's AppDelegate pattern:
   - [ ] permission and `registerForRemoteNotifications`, with the APNs token passed to `Messaging`
-  - [ ] the FCM token passed into Kotlin for `PushTokenProvider` and `SettingsRepository.updateFcmToken`
+  - [ ] the FCM token passed into Kotlin: `PushTokenBridge.shared.token = fcmToken` for
+        `PushTokenProvider`, and `SettingsRepository.updateFcmToken`
   - [ ] `willPresent` returns `[.banner, .sound]`; just `[.banner]` while Home's in-app alarm is playing
   - [ ] `didReceive` calls `PendingOrderLink.shared.onNotificationTapped(type:orderId:)` with the
         push's `data["type"]` and `data["order_id"]`. `AppNavHost` opens the order; a `new_order`
@@ -130,26 +128,30 @@ The shared half is done (task 6 on Windows):
 - `HomeRepository` is in `trackingModule`. Its start and stop go to the platform's
   `TrackingKeepAlive`, which on Android starts and stops `LocationTrackerService`.
 
-On iOS:
-- [ ] Bind `TrackingKeepAlive` to a tracker that runs `CLLocationManager` and passes its fixes
-      to `LocationTracker.track(...)` in a coroutine. `stop()` cancels that coroutine and calls
-      `LocationTrackingMonitor.onTrackingStopped()`.
-- [ ] `CLLocationManager` settings:
-  - [ ] `desiredAccuracy = kCLLocationAccuracyBest`, `distanceFilter = 10.0`, `activityType = automotiveNavigation`
-  - [ ] `allowsBackgroundLocationUpdates = true`, `pausesLocationUpdatesAutomatically = false`, `showsBackgroundLocationIndicator = true`
-  - [ ] "When In Use" permission only; start tracking while the app is in the foreground
-- [ ] Stationary drivers: with `distanceFilter = 10`, iOS sends no fixes while the phone isn't
-      moving, and the monitor blocks order actions after 60 s without a fix. Call
-      `requestLocation()` every 30 s and pass that fix on too. Android needs nothing here: its
-      fused fixes keep arriving every 10 s while stationary.
+On iOS (`base/platform/IosLocation.kt`, written with task 2 and not run yet):
+- [x] `IosTrackingKeepAlive` runs `CLLocationManager` and passes its fixes to
+      `LocationTracker.track(...)` in a coroutine. `stop()` cancels that coroutine and calls
+      `LocationTrackingMonitor.onTrackingStopped()`. It gets `LocationTracker` lazily, because
+      `LocationTracker` → `IHomeRepository` → `TrackingKeepAlive` would otherwise be a cycle.
+- [x] `CLLocationManager` settings:
+  - [x] `desiredAccuracy = kCLLocationAccuracyBest`, `distanceFilter = 10.0`, `activityType = automotiveNavigation`
+  - [x] `allowsBackgroundLocationUpdates = true`, `pausesLocationUpdatesAutomatically = false`, `showsBackgroundLocationIndicator = true`
+  - [x] "When In Use" permission only; tracking starts from Home, so while the app is in the foreground
+- [x] Stationary drivers: with `distanceFilter = 10`, iOS sends no fixes while the phone isn't
+      moving, and the monitor blocks order actions after 60 s without a fix. When the last fix is
+      30 s old, it is passed on again. That refreshes the monitor; `LocationTracker` doesn't write
+      it, since it hasn't moved 10 m (as on Android). Android needs nothing here: its fused fixes
+      keep arriving every 10 s while stationary.
+- [ ] Simulator check with Features ▸ Location ▸ Freeway Drive, then the device test in task 10.
 - [ ] Show a one-time hint: "Don't close the app while online". Force-quitting stops tracking
       until the next launch.
 
 ## 7. Permission requests
 Android asks for location (fine and coarse) and notifications in `MainActivity` at every
 launch. iOS needs the same, so nothing works on first launch before the driver goes online:
-- [ ] At launch: `CLLocationManager.requestWhenInUseAuthorization()`, plus the notification
-      request from task 3.
+- [x] At launch: `requestWhenInUseAuthorization()` when the permission was never asked
+      (`MainViewController()`). Without it, Settings has no location switch for the app.
+- [ ] The notification request from task 3.
 - [ ] Camera: ask when the camera opens (task 4). The usage string is in `Info.plist` already.
       The gallery needs no permission: `PHPickerViewController` runs outside the app and only
       returns the photos the driver picks.

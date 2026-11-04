@@ -1,5 +1,6 @@
 import UIKit
 import FirebaseCore
+import sharedKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -14,6 +15,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         } else {
             print("GoogleService-Info.plist is missing, so Firebase is not configured")
         }
+        // After Firebase, before the first screen. Not in iOSApp.init(), which SwiftUI runs
+        // before this method.
+        KoinIosKt.doInitKoin()
         return true
     }
 }
