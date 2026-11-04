@@ -1,0 +1,5 @@
+CFBundleDisplayName = "OvaStar";
+NSLocationWhenInUseUsageDescription = "يستخدم OvaStar موقعك أثناء اتصالك، حتى عندما يعمل التطبيق في الخلفية، لتتبع الشحنات وإظهار موقعك لفريق التوصيل.";
+NSLocationAlwaysAndWhenInUseUsageDescription = "يستخدم OvaStar موقعك أثناء اتصالك، حتى عندما يعمل التطبيق في الخلفية، لتتبع الشحنات وإظهار موقعك لفريق التوصيل.";
+NSCameraUsageDescription = "يستخدم OvaStar الكاميرا لتصوير الطلبات وإثباتات الدفع.";
+NSPhotoLibraryUsageDescription = "يتيح لك OvaStar اختيار صور الطلبات وإثباتات الدفع من مكتبة الصور.";

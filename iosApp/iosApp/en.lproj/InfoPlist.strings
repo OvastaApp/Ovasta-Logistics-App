@@ -1,0 +1,5 @@
+CFBundleDisplayName = "OvaStar";
+NSLocationWhenInUseUsageDescription = "OvaStar uses your location while you are online, including when the app is in the background, to track deliveries and show your position to the delivery team.";
+NSLocationAlwaysAndWhenInUseUsageDescription = "OvaStar uses your location while you are online, including when the app is in the background, to track deliveries and show your position to the delivery team.";
+NSCameraUsageDescription = "OvaStar uses the camera to photograph orders and payment proofs.";
+NSPhotoLibraryUsageDescription = "OvaStar lets you choose order and payment proof photos from your library.";
