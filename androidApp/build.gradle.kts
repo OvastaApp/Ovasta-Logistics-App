@@ -1,5 +1,6 @@
 import org.gradle.kotlin.dsl.androidTestImplementation
 import org.gradle.kotlin.dsl.implementation
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 
 plugins {
@@ -52,15 +53,19 @@ android {
         // kotlinx-datetime runs on java.time, which needs desugaring below API 26
         isCoreLibraryDesugaringEnabled = true
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         buildConfig = true
         compose = true
     }
     androidResources {
         generateLocaleConfig = true
+    }
+}
+
+// kotlinOptions { jvmTarget } is an error from Kotlin 2.3
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

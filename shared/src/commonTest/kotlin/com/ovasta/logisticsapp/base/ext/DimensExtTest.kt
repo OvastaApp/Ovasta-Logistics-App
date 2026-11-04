@@ -1,7 +1,7 @@
 package com.ovasta.logisticsapp.base.ext
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class DimensExtTest {
 

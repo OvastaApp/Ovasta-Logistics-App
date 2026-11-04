@@ -20,6 +20,9 @@ kotlin {
     listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
         target.binaries.framework {
             baseName = "sharedKit"
+            // Static, so the Firebase symbols GitLive uses resolve when Xcode links the app
+            // against the pods. A dynamic framework fails: "framework 'FirebaseCore' not found".
+            isStatic = true
             binaryOption("bundleId", "com.ovasta.logisticsapp.shared")
         }
     }
