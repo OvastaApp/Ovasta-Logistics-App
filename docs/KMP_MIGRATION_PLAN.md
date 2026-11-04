@@ -234,7 +234,7 @@ These were missing from the plan. Each is marked done, or says who owns it.
 - [ ] **Automated tests** (Compose UI tests of the main flow, instrumented tests) are deferred, by choice. The existing unit tests cover the network, session, number and date formats, tracking pipeline and Koin graphs.
 - [ ] **CI.** There's no `.github` yet. It would build `:androidApp` and run the unit tests on every push, plus a macOS job that builds the iOS app. `:shared:iosSimulatorArm64Test` can't link yet: the test executable needs the Firebase frameworks on its linker path (`docs/IOS_MAC_TASKS.md`, task 1).
 - [ ] **Merge and release plan.** Merge `main` into `kmp` whenever `main` gets new commits. Ship Android from `kmp` first as a normal Play staged rollout (for example 10% → 50% → 100%) and merge into `main` once it's stable. Then ship iOS through TestFlight.
-- [ ] **Version numbers.** Keep iOS (`iosApp/project.yml`, now 1.0.23 / 23) and Android `versionName` / `versionCode` in step, so a crash report's version means the same code on both platforms.
+- [ ] **Version numbers.** Keep iOS (`iosApp/project.yml`, now 1.0.24 / 24) and Android `versionName` / `versionCode` in step, so a crash report's version means the same code on both platforms.
 - [ ] **README.** Explain how to build each app: JDK 17, `google-services.json` and `GoogleService-Info.plist` (both git-ignored), `xcodegen` and `pod install`.
 - [ ] **App Review material** for iOS: background-location justification (Guideline 2.5.4) and a demo driver account that can go online.
 
