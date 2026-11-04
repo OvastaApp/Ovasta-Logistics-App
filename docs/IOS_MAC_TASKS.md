@@ -101,8 +101,13 @@ modules with these iOS bindings, one for every type in `KoinModulesTest.platform
       navigation3 1.1.2 lifts the Compose runtime to 1.11 while Compose Multiplatform UI was
       1.10.3. Fixed by moving Compose Multiplatform to 1.11.1. Android wasn't affected, because
       androidx Compose aligns runtime and UI (both 1.11.2).
-- [ ] Log in with a driver account and go through Home, TaskDetails, Profile and a language
-      switch.
+- [x] Logged in (test account): Home loads in Arabic, online status restores on launch, and
+      the statistics and available-orders cards show.
+- [x] New-order alert (2026-11-04): the flash overlay and alarm ran but the sheet stayed hidden,
+      because `NewDeliveryTaskBottomSheet` used `confirmValueChange = { false }`, which also
+      refuses the sheet's own opening. Now it refuses only `Hidden`, so it still can't be swiped
+      or tapped away. Checked: the sheet shows the order, fees, Accept and the 30 s countdown.
+- [ ] TaskDetails, Profile, wallet, charge and a language switch.
 
 ## 3. Push and the custom sound
 - [x] `iosApp/iosApp/new_order_alert.caf`, converted with
@@ -158,7 +163,10 @@ On iOS (`base/platform/IosLocation.kt`, written with task 2 and not run yet):
       30 s old, it is passed on again. That refreshes the monitor; `LocationTracker` doesn't write
       it, since it hasn't moved 10 m (as on Android). Android needs nothing here: its fused fixes
       keep arriving every 10 s while stationary.
-- [ ] Simulator check with Features ▸ Location ▸ Freeway Drive, then the device test in task 10.
+- [x] Simulator check (2026-11-04), with a temporary log in `LocationTracker`: a simulated drive
+      gave 45 fixes in 90 s and 44 Firestore writes, none failed. In the background and not
+      moving, the 30 s re-send kept fixes coming without extra writes.
+- [ ] Device test in task 10 (locked phone, real movement, the blue location indicator).
 - [ ] Show a one-time hint: "Don't close the app while online". Force-quitting stops tracking
       until the next launch.
 

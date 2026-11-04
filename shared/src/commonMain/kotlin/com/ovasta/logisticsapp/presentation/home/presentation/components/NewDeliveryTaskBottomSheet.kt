@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -73,9 +74,11 @@ fun NewDeliveryTaskBottomSheet(
     onAccept: (Int) -> Unit,
     onMinimize: () -> Unit
 ) {
+    // The driver can't swipe or tap the sheet away, only minimize it. Refusing every change
+    // ({ false }) also refuses the sheet's own opening, so on iOS it stayed hidden.
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { false }
+        confirmValueChange = { it != SheetValue.Hidden }
     )
 
     ModalBottomSheet(
