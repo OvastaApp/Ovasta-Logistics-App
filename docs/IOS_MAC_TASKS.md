@@ -7,14 +7,18 @@ The first Mac pass (2026-11-04) got `sharedKit` to compile and link for the simu
 The Xcode app itself hasn't been built yet: it needs CocoaPods and `GoogleService-Info.plist`.
 
 ## 0. One-time setup
-- [ ] Install Xcode, `brew install xcodegen cocoapods`, and JDK 17 (JDK 21 also runs the build).
-- [ ] In the Firebase console, add the iOS app `com.ovasta.logisticsapp`:
-  - put its `GoogleService-Info.plist` in `iosApp/iosApp/`; git ignores it
-  - upload the APNs auth key
+- [x] Install Xcode, `brew install xcodegen cocoapods`, and JDK 17 (JDK 21 also runs the build).
+      Installing Homebrew can point `xcode-select` at the Command Line Tools, which breaks
+      `simctl` and Xcode builds from the terminal. Switch back with
+      `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
+- [x] In the Firebase console, add the iOS app `com.ovasta.logisticsapp` and put its
+      `GoogleService-Info.plist` in `iosApp/iosApp/`; git ignores it.
+- [ ] Upload the APNs auth key to Firebase (Project settings ▸ Cloud Messaging).
 - [x] In `iosApp/Podfile`, pin the Firebase pods to the Firebase iOS SDK version that GitLive
       2.7.0 was built against: `~> 11.8.0` (`firebase-cocoapods` in GitLive's
       `libs.versions.toml`). Unpinned, CocoaPods would pick 12.x.
-- [ ] Run `cd iosApp && xcodegen && pod install` and open `iosApp.xcworkspace`.
+- [x] Run `cd iosApp && xcodegen && pod install` and open `iosApp.xcworkspace`. `Podfile.lock`
+      is committed, so every Mac gets the same pods.
 - [ ] Get a 1024px app icon into `Assets.xcassets/AppIcon.appiconset`. Signing is Automatic for
       now (team `H8X427WWQW`); fastlane/match comes in Phase 6.
 - [ ] Simulators: Apple Silicon only. There is no `iosX64` target, because JetBrains
@@ -86,7 +90,14 @@ modules with these iOS bindings, one for every type in `KoinModulesTest.platform
       sets RTL for Arabic, and asks for location permission (task 7).
 - [x] The AppDelegate calls `KoinIosKt.doInitKoin()` right after `FirebaseApp.configure()`.
 - [x] `ContentView` builds a new `ComposeView` on `LANGUAGE_CHANGED_NOTIFICATION`.
-- [ ] Run it in the simulator: login, Home, TaskDetails, Profile, a language switch.
+- [x] First simulator run (2026-11-04): the app builds with the pods, asks for location, and
+      shows Login in Arabic, right to left. It first crashed at launch with
+      `CompositionLocal LocalHostDefaultProvider not present`, from Navigation3's back handler:
+      navigation3 1.1.2 lifts the Compose runtime to 1.11 while Compose Multiplatform UI was
+      1.10.3. Fixed by moving Compose Multiplatform to 1.11.1. Android wasn't affected, because
+      androidx Compose aligns runtime and UI (both 1.11.2).
+- [ ] Log in with a driver account and go through Home, TaskDetails, Profile and a language
+      switch.
 
 ## 3. Push and the custom sound
 - [x] `iosApp/iosApp/new_order_alert.caf`, converted with

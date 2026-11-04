@@ -35,14 +35,16 @@ firebaseCrashlytics = "3.0.7"
 playServicesLocation = "21.2.0"
 kotlinxDatetime = "0.7.1"
 desugarJdkLibs = "2.1.5"
-# Compose Multiplatform for :shared. 1.10 is what JetBrains navigation3 1.1.x is built on,
-# so AppNavHost can keep Navigation3 when the UI moves to commonMain
-composeMultiplatform = "1.10.3"
+# Compose Multiplatform for :shared. 1.11+: navigation3 1.1.2 (via navigationevent 1.1.0) lifts
+# the Compose runtime to 1.11, and a 1.10 UI host doesn't provide what the 1.11 runtime reads
+# (iOS crashed at launch: "CompositionLocal LocalHostDefaultProvider not present"). Android
+# didn't show it, because androidx Compose aligns runtime and ui.
+composeMultiplatform = "1.11.1"
 coroutines = "1.10.2"
 ktor = "3.3.3"
 # 2.7.0 is built on Firebase BOM 34.18, the same major as the app (2.4.0 is on 33.x)
 gitliveFirebase = "2.7.0"
-# Compose Multiplatform UI for :shared, aligned with composeMultiplatform 1.10.3
+# Compose Multiplatform UI for :shared (versioned apart from composeMultiplatform)
 composeMpMaterial3 = "1.9.0"
 composeMpMaterialIcons = "1.7.3"
 jetbrainsLifecycle = "2.10.0"
