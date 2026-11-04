@@ -3,22 +3,43 @@
 The Windows side (Phases 1–4 and the shared part of 5) is done. Everything below needs a Mac
 with Xcode. `docs/KMP_MIGRATION_PLAN.md` has the design behind each item.
 
+The first Mac pass (2026-11-04) got `sharedKit` to compile and link for the simulator (task 1).
+The Xcode app itself hasn't been built yet: it needs CocoaPods and `GoogleService-Info.plist`.
+
 ## 0. One-time setup
-- [ ] Install Xcode, `brew install xcodegen cocoapods`, and JDK 17.
+- [ ] Install Xcode, `brew install xcodegen cocoapods`, and JDK 17 (JDK 21 also runs the build).
 - [ ] In the Firebase console, add the iOS app `com.ovasta.logisticsapp`:
   - put its `GoogleService-Info.plist` in `iosApp/iosApp/`; git ignores it
   - upload the APNs auth key
-- [ ] In `iosApp/Podfile`, pin the Firebase pods to the Firebase iOS SDK version that GitLive
-      2.7.0 was built against (see GitLive's release notes). Then run
-      `cd iosApp && xcodegen && pod install` and open `iosApp.xcworkspace`.
+- [x] In `iosApp/Podfile`, pin the Firebase pods to the Firebase iOS SDK version that GitLive
+      2.7.0 was built against: `~> 11.8.0` (`firebase-cocoapods` in GitLive's
+      `libs.versions.toml`). Unpinned, CocoaPods would pick 12.x.
+- [ ] Run `cd iosApp && xcodegen && pod install` and open `iosApp.xcworkspace`.
 - [ ] Get a 1024px app icon into `Assets.xcassets/AppIcon.appiconset`. Signing is Automatic for
       now (team `H8X427WWQW`); fastlane/match comes in Phase 6.
 - [ ] Simulators: Apple Silicon only. There is no `iosX64` target, because JetBrains
       navigation3 isn't published for it.
 
 ## 1. Compile the iOS code written without a compiler
-Run `./gradlew :shared:linkDebugFrameworkIosSimulatorArm64` and fix what breaks. These files
-were written on Windows, where iOS targets don't build:
+✅ `./gradlew :shared:linkDebugFrameworkIosSimulatorArm64` builds. What it took:
+- Kotlin 2.2.20 → 2.3.20. The iOS klibs of JetBrains navigation3 1.1.2 are built with 2.3.20,
+  and Kotlin/Native 2.2.20 skips them ("incompatible ABI version"). Android builds with the older
+  Kotlin anyway, so only an iOS build shows it. Kotlin 2.3 also makes `kotlinOptions { jvmTarget }`
+  an error, so `:androidApp` sets it through `compilerOptions`.
+- `DataTypeExt.ios.kt`: Kotlin/Native imports the rounding mode as `NSRoundingMode.NSRoundPlain`.
+- `FirestoreExt.ios.kt`: GitLive's `ios` accessor needs `@OptIn(ExperimentalForeignApi::class)`.
+- `sharedKit` is a static framework. Linked as a dynamic one it fails with
+  `framework 'FirebaseCore' not found`, because the Firebase frameworks only exist in the app's
+  pods. The seller app never hit this: it doesn't use Firestore or Auth on iOS.
+- `gradlew` is executable in git (mode 755). It was committed as 644, so `./gradlew`, and with it
+  the Xcode build phase that runs `embedAndSignAppleFrameworkForXcode`, failed with "permission
+  denied".
+- `DimensExtTest` (commonTest) uses `kotlin.test` instead of JUnit, which only exists on the JVM.
+- `project.yml` sets `TARGETED_DEVICE_FAMILY: "1"` (iPhone only). xcodegen's default, iPhone and
+  iPad, would mean iPad review and iPad screenshots.
+
+These files were written on Windows, where iOS targets don't build. They compile now, but
+none has run yet:
 
 | File (`shared/src/iosMain/kotlin/com/ovasta/logisticsapp/`) | What it does |
 |---|---|
@@ -33,7 +54,11 @@ were written on Windows, where iOS targets don't build:
 | `data/setting/data/datastore/FileSessionStore.kt` | session JSON in Application Support, protected until first unlock |
 | `shared/MainViewController.kt`, `shared/Platform.ios.kt` | placeholder screen |
 
-Also run the shared tests on iOS: `./gradlew :shared:iosSimulatorArm64Test`.
+- [ ] Run the shared tests on iOS: `./gradlew :shared:iosSimulatorArm64Test`. The tests
+      compile, but the test executable fails to link with `framework 'FirebaseCore' not found`.
+      Unlike the framework, it can't leave Firebase to Xcode. It needs the Firebase frameworks on
+      its linker path (for example `linkerOpts("-F<dir>")` on the test binary, pointing at
+      `iosApp/Pods` after `pod install`), or CI skips this task and builds the app instead.
 
 ## 2. Koin on iOS, then show the real app
 Add `fun initKoin()` in `iosMain`. It starts `networkModule`, `sessionModule`, `firebaseModule`,
@@ -46,7 +71,8 @@ Add `fun initKoin()` in `iosMain`. It starts `networkModule`, `sessionModule`, `
 | `NetworkErrorMessages` | the `timeout_error_message` / `generic_unknown_error` Res strings, read once at start (`getString` is suspend) |
 | `SessionStore` | `FileSessionStore()` |
 | `PushTokenProvider` | the FCM token the AppDelegate hands over (task 3) |
-| `IHomeRepository` | see task 6: move the Android `HomeRepository` logic to common first |
+| `TrackingKeepAlive` | the `CLLocationManager` tracker from task 6 |
+| `Logger` | optional: Ktor request logging, debug builds only, as on Android |
 | `OrderAlarm` | `AVAudioPlayer` looping `new_order_alert.caf` (`numberOfLoops = -1`), `AVAudioSession` category `.playback` |
 | `DeviceLocation` | `CLLocationManager`: `requestLocation()` for the current fix, `locationServicesEnabled()`, authorization status for the permission |
 | `SeenTaskStore` | `NSUserDefaults` key `seen_task_ids` |
@@ -54,8 +80,15 @@ Add `fun initKoin()` in `iosMain`. It starts `networkModule`, `sessionModule`, `
 | `AppLanguageStore` | `NSUserDefaults` plus `AppleLanguages` (the seller app's `LanguageApplier`) |
 
 Then:
+- [ ] After starting Koin, `initKoin()` calls `SessionHeaderCache.initialize(sessionStore)`, as
+      `LogisticsApp.onCreate` does on Android. `AccessTokenProvider` reads the token from that
+      cache. Without it, every request after a relaunch goes out without a token, gets a 401,
+      and the 401 handler logs the driver out.
 - [ ] Make `MainViewController()` call `App()` instead of the placeholder.
-- [ ] Call `initKoin()` from `iOSApp.init()` in Swift (`MainViewControllerKt.doInitKoin()`, or wherever `initKoin` ends up).
+- [ ] Call `initKoin()` in `AppDelegate.application(_:didFinishLaunchingWithOptions:)`, right after
+      `FirebaseApp.configure()` (`MainViewControllerKt.doInitKoin()`, or wherever `initKoin` ends
+      up). Not in `iOSApp.init()`: SwiftUI runs that before the AppDelegate, so Firebase isn't
+      configured yet. It would only work while nothing resolves Firestore or Auth at startup.
 - [ ] In `ContentView`, recreate `ComposeView` on `LANGUAGE_CHANGED_NOTIFICATION`, the way the seller app does.
 
 ## 3. Push and the custom sound
@@ -117,8 +150,9 @@ Android asks for location (fine and coarse) and notifications in `MainActivity` 
 launch. iOS needs the same, so nothing works on first launch before the driver goes online:
 - [ ] At launch: `CLLocationManager.requestWhenInUseAuthorization()`, plus the notification
       request from task 3.
-- [ ] Camera and photos: ask when the picker opens (task 4). The usage strings are in
-      `Info.plist` already.
+- [ ] Camera: ask when the camera opens (task 4). The usage string is in `Info.plist` already.
+      The gallery needs no permission: `PHPickerViewController` runs outside the app and only
+      returns the photos the driver picks.
 - [ ] If location is denied, `LocationBlockedDialog` already offers the Settings button through
       `PlatformAction.OpenAppSettings`.
 

@@ -45,6 +45,7 @@ Library choices:
 2. **Skeleton.**
    - ✅ Renamed `:app` → `:androidApp` (`applicationId com.ovasta.logisticsapp` unchanged) and added `:shared`, with Android and iOS targets and the `sharedKit` framework.
    - ✅ Versions: Kotlin 2.2.20 and Compose Multiplatform 1.10.3, the release JetBrains Navigation3 1.1.x is built on, so `AppNavHost` keeps Navigation3. This lifts the Android app's androidx Compose from 1.9.5 to 1.10.5. AGP goes from 8.11.1 to 8.13.2, because with Kotlin 2.2.20 AGP 8.11 leaves the app classes off the unit-test compile classpath.
+   - ✅ Kotlin 2.2.20 → 2.3.20 (2026-11-04, first Mac build). Navigation3 1.1.2's iOS klibs are built with Kotlin 2.3.20, which Kotlin/Native 2.2.20 can't read. The Android build never showed it, because the JVM compiler reads metadata one version ahead. `:androidApp` now sets `jvmTarget` through `compilerOptions`, since Kotlin 2.3 makes `kotlinOptions` an error. The shared Android unit tests pass on 2.3.20. `:androidApp` still needs a build and a device run on it.
    - ✅ `DateExt` is in `shared/commonMain`, with its test in `androidUnitTest`. This proves the Android app consumes shared code. `App()` and `MainViewController()` are placeholders for the iOS app.
    - ✅ `iosApp/`: xcodegen `project.yml`, a Podfile with the Firebase pods, a SwiftUI entry and Info.plist. The Info.plist has location and camera texts in ar/en and the background modes location and remote-notification. The entitlements cover push and time-sensitive notifications. The framework is built by `embedAndSignAppleFrameworkForXcode`, which also copies Compose resources.
    - Ktor, Koin, GitLive, Coil 3 for KMP and DataStore-core enter the catalog in the phase that first uses them, so each version is checked by a real build.
@@ -230,7 +231,7 @@ These were missing from the plan. Each is marked done, or says who owns it.
 **Team**
 - [ ] **Test on an Android device** before merging: the login → online → task → photo → wallet → logout flow from step 1 of Verification, plus a 401 (an expired token) and a tapped push. Install a signed release build too, because R8 can break reflection-based code that a debug build doesn't exercise in the same way.
 - [ ] **Automated tests** (Compose UI tests of the main flow, instrumented tests) are deferred, by choice. The existing unit tests cover the network, session, number and date formats, tracking pipeline and Koin graphs.
-- [ ] **CI.** There's no `.github` yet. It would build `:androidApp` and run the unit tests on every push, plus a macOS job for `:shared:iosSimulatorArm64Test` once iOS compiles.
+- [ ] **CI.** There's no `.github` yet. It would build `:androidApp` and run the unit tests on every push, plus a macOS job that builds the iOS app. `:shared:iosSimulatorArm64Test` can't link yet: the test executable needs the Firebase frameworks on its linker path (`docs/IOS_MAC_TASKS.md`, task 1).
 - [ ] **Merge and release plan.** Merge `main` into `kmp` whenever `main` gets new commits. Ship Android from `kmp` first as a normal Play staged rollout (for example 10% → 50% → 100%) and merge into `main` once it's stable. Then ship iOS through TestFlight.
 - [ ] **Version numbers.** Keep iOS (`iosApp/project.yml`, now 1.0.22 / 22) and Android `versionName` / `versionCode` in step, so a crash report's version means the same code on both platforms.
 - [ ] **README.** Explain how to build each app: JDK 17, `google-services.json` and `GoogleService-Info.plist` (both git-ignored), `xcodegen` and `pod install`.
@@ -244,5 +245,6 @@ These were missing from the plan. Each is marked done, or says who owns it.
   - optionally a `platform` field on `POST fcm-token`
 
   This blocks iOS task 3.
+- [ ] **HTTPS.** The API is plain `http://167.172.209.252`, so driver logins and tokens travel unencrypted on both platforms. iOS accepts it (iOS 15–16 don't apply ATS to IP addresses; iOS 17+ honor the IP exception in `Info.plist`), but the API should move to HTTPS on a domain before the App Store release. Then drop the ATS exception and Android's `cleartextTrafficPermitted`.
 
 **Mac session:** the iOS-side gaps (privacy manifest, Crashlytics on iOS, permission requests, the FCM token at startup) are in `docs/IOS_MAC_TASKS.md`.
