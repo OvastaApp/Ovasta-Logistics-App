@@ -55,8 +55,8 @@ none has run yet:
 | `base/PlatformAction.ios.kt` | tel:, Google/Apple Maps, wa.me, settings URL, idle timer, language-change notification |
 | `base/ext/DataTypeExt.ios.kt` | `formatDecimal` with `NSDecimalNumber` (half-up) |
 | `base/ext/NumberFormatExt.ios.kt` | `formatGrouped`, `formatMonthYear` with Foundation formatters |
-| `base/ext/ToastEventHandler.ios.kt` | logs toasts (see task 5) |
-| `base/platform/ImagePicker.ios.kt` | placeholder (see task 4) |
+| `base/ext/ToastEventHandler.ios.kt` | sends toasts to `IosToaster`, shown by `IosToastHost` (task 5) |
+| `base/platform/ImagePicker.ios.kt` | PHPicker gallery, UIImagePickerController camera (task 4) |
 | `base/platform/PlatformUi.ios.kt` | uptime clock, smallest screen width, no dynamic color |
 | `data/remote/FirestoreExt.ios.kt` | `received_at` presence (NSNull counts as absent) |
 | `data/remote/IosHttpEngine.kt` | Ktor Darwin engine |
@@ -131,16 +131,57 @@ modules with these iOS bindings, one for every type in `KoinModulesTest.platform
       payload is in the plan doc.
 
 ## 4. Image picker
-Replace the placeholder in `ImagePicker.ios.kt`:
-- [ ] `PHPickerViewController` for the gallery and `UIImagePickerController` for the camera,
-      presented from the key window's root view controller.
-- [ ] Encode with `UIImageJPEGRepresentation`, lowering the quality and then the size until the
-      result is under `maxBytes`, as `compressImageToJpeg` does on Android.
+`ImagePicker.ios.kt` replaces the placeholder:
+- [x] `PHPickerViewController` (images, one photo; no photo library permission needed) for the
+      gallery and `UIImagePickerController` for the camera, presented from the top view
+      controller above the screen's `LocalUIViewController`. UIKit holds picker delegates
+      weakly, so the picker keeps the open one alive.
+- [x] No camera (the simulator): `capturePhoto()` shows the `camera_not_available` toast instead
+      of presenting the picker, which would throw.
+- [x] `ImageCompression.ios.kt` redraws the photo upright at up to 1600 px and encodes it with
+      `UIImageJPEGRepresentation`, lowering the quality (80 → 60) and then the size until the
+      result is under `maxBytes`, as `compressImageToJpeg` does on Android. It runs on
+      `Dispatchers.Default`.
+- [x] Simulator (2026-11-12): a photo picked from the gallery in the top-up sheet shows in the
+      sheet, and Camera shows the toast instead of crashing. Test with the top-up sheet: in order
+      details, picking a photo uploads it right away.
+- [ ] On a device: camera capture, and the camera permission prompt.
+- [x] Product images in order details: Coil only downloads URLs with a network module, and
+      `:androidApp` adds the OkHttp one, so iOS loaded none. `:shared`'s iosMain now adds
+      `coil-network-ktor3` (Darwin engine). Simulator (2026-11-12): order #356244's product
+      images load from `sfo2.digitaloceanspaces.com` (HTTPS, no ATS exception needed).
 
 ## 5. In-app toast
-iOS has no system toast. Show `ToastMsg` in an overlay (for example a `CompositionLocal` host
-in `App()`) from `rememberPlatformToaster()`. Then show the "not available" messages in
-`PlatformAction.ios.kt` too.
+iOS has no system toast; `base/ext/IosToast.kt` shows `ToastMsg` instead.
+- [x] `IosToaster.show()` queues messages; `IosToastHost`, over `App()` in `MainViewController`,
+      shows them one at a time for 2 s (Android's `LENGTH_SHORT`) with a fade. It sits 60.sdp
+      above the bottom bar, where Home shows its own toast, and above the keyboard.
+- [x] Each toast gets a new non-focusable `Popup`, so its layer is created above any dialog or
+      sheet already open. It's only as wide as its text, so taps beside it reach the screen.
+- [x] `rememberPlatformToaster()` uses it. It used to log with `NSLog("Toast: %@", message)`,
+      which hung the main thread on every toast (the freeze after confirming a pickup):
+      Kotlin/Native passes a `String` through C varargs as a Kotlin object, not an `NSString`.
+      Never pass Kotlin strings as `NSLog` format arguments.
+- [x] `PlatformAction.ios.kt` shows Android's messages: no phone or point → "not available",
+      no digits for WhatsApp → "phone number not available", and a failed open → the maps or
+      WhatsApp error.
+- [x] Simulator (2026-11-12): toasts show on Home and Profile, over the confirm-delivery dialog,
+      and a tap beside one reaches the button under it. The "not available" toasts weren't
+      triggered: they come from order details, and the test account had no order without a
+      phone or point.
+- [x] Calls did nothing on iOS: `open()` asked `canOpenURL`, which refuses `tel:` because
+      Info.plist's `LSApplicationQueriesSchemes` lists only `comgooglemaps` ("This app is not
+      allowed to query for scheme tel"). `Call` now strips the number to digits with an optional
+      leading `+` and calls `openURL` directly, which needs no declaration. iOS asks
+      "Call <number>?" first, like Android's `ACTION_DIAL`. If nothing opens it (no Phone app, as
+      on the simulator), it shows the `calls_not_available` toast.
+- [x] The app task card's Call button sent `OpenContactBottomSheet`, whose sheet was deleted in
+      c9484ca (5f4f33d brought the call back), so it did nothing on Android or iOS. It sends
+      `CallRetailer` with the client's phone again (`TasksContent.kt`).
+- [x] Simulator (2026-11-12): the order card's sender and receiver icons, the app task card's
+      Call button and the Call button in order details all open `tel:` with the right number;
+      the simulator can't (LaunchServices error 115) and shows the toast. The real call prompt
+      is in task 10.
 
 ## 6. Location tracking
 The shared half is done (task 6 on Windows):
@@ -211,3 +252,5 @@ These don't work fully on the simulator:
       the order.
 - [ ] Check the in-app alarm loops on Home, and run through login, orders, photos, wallet,
       language and logout.
+- [ ] Tap each call button (order card sender and receiver, task card, order details): iOS must
+      ask "Call <number>?" with the right number, and Cancel must leave the app as it was.

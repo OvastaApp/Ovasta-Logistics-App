@@ -60,17 +60,7 @@ class LogisticsApp : Application() {
             ).apply {
                 setSound(soundUri, audioAttributes)
                 enableVibration(true)
-                description = "New delivery task notifications"
-            }
-
-            val backgroundChannel = NotificationChannel(
-                DELIVERY_TASK_BACKGROUND_CHANNEL,
-                "Delivery Tasks (Background)",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                setSound(soundUri, audioAttributes)
-                enableVibration(true)
-                description = "Delivery task notifications when app is in background"
+                description = getString(R.string.channel_delivery_tasks_description)
             }
 
             val notificationManager =
@@ -122,6 +112,5 @@ class LogisticsApp : Application() {
     }
     companion object {
         const val DELIVERY_TASK_CHANNEL = "delivery_task_channel_v2"
-        const val DELIVERY_TASK_BACKGROUND_CHANNEL = "delivery_task_background_channel_v2"
     }
 }

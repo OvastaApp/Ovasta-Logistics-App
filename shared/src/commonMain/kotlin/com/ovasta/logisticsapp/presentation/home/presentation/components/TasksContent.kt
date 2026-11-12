@@ -231,8 +231,9 @@ fun TasksContent(
                                     onDirectionClick = { lat, lng ->
                                         onTaskItemAction(HomeItemActions.OpenDirection(lat, lng))
                                     },
-                                    onContactClick = {
-                                        onTaskItemAction(HomeItemActions.OpenContactBottomSheet(task))
+                                    // Calls the client directly; the contact sheet this used to open is gone
+                                    onContactClick = { phone ->
+                                        onTaskItemAction(HomeItemActions.CallRetailer(phone))
                                     },
                                     onWhatsAppClick = { whatsapp ->
                                         onTaskItemAction(HomeItemActions.WhatsAppRetailer(whatsapp))

@@ -123,6 +123,7 @@
     <string name="hash_task">#%1$s</string>
     <string name="no_address">No Address</string>
     <string name="phone_number_not_available">Phone number not available</string>
+    <string name="calls_not_available">Calls aren't available on this device</string>
     <string name="location_not_available">Location not available</string>
     <string name="enable_location_to_go_online">Please enable location services to go online</string>
     <string name="tasks">Tasks</string>
@@ -292,6 +293,7 @@
     <string name="add_image">Add image</string>
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
+    <string name="camera_not_available">The camera isn't available on this device</string>
     <string name="edit_request_sent">Edit request sent</string>
     <string name="receipt_uploaded">Receipt uploaded</string>
 '
