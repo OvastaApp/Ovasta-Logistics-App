@@ -63,6 +63,8 @@ class FcmService : FirebaseMessagingService() {
             LogisticsApp.DELIVERY_TASK_CHANNEL
         }
 
+        val soundUri = Uri.parse("android.resource://${packageName}/${R.raw.new_order_alert}")
+
         val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.logo)
             .setContentTitle(title)
@@ -70,15 +72,7 @@ class FcmService : FirebaseMessagingService() {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-
-        if (isAppInBackground) {
-            // App in background - use system default sound
-            builder.setDefaults(NotificationCompat.DEFAULT_SOUND)
-        } else {
-            // App destroyed - use custom sound
-            val soundUri = Uri.parse("android.resource://${packageName}/${R.raw.new_order_alert}")
-            builder.setSound(soundUri)
-        }
+            .setSound(soundUri)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
