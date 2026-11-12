@@ -81,6 +81,9 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            // Coil loads URLs (product images) only with a network module; :androidApp adds
+            // the OkHttp one, iOS uses Ktor's Darwin engine
+            implementation(libs.coil.network.ktor3)
         }
         // Tests that change the JVM default time zone
         androidUnitTest.dependencies {

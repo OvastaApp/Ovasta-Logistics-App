@@ -3,6 +3,7 @@ package com.ovasta.logisticsapp.data.remote
 import com.ovasta.logisticsapp.shared.resources.Res
 import com.ovasta.logisticsapp.shared.resources.generic_unknown_error
 import com.ovasta.logisticsapp.shared.resources.timeout_error_message
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,8 +37,16 @@ class IosNetworkErrorMessages : NetworkErrorMessages {
 
     fun reload() {
         scope.launch {
-            timeoutText = getString(Res.string.timeout_error_message)
-            unknownText = getString(Res.string.generic_unknown_error)
+            // Nothing else catches a failure on this scope, so it would end the app. The texts
+            // loaded so far (or the English ones) stay instead.
+            try {
+                timeoutText = getString(Res.string.timeout_error_message)
+                unknownText = getString(Res.string.generic_unknown_error)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                println("IosNetworkErrorMessages: couldn't load the error texts: $e")
+            }
         }
     }
 

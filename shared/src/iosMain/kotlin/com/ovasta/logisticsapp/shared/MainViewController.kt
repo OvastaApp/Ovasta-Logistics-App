@@ -1,10 +1,14 @@
 package com.ovasta.logisticsapp.shared
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.ComposeUIViewController
 import com.ovasta.logisticsapp.base.constants.LocalConstants.LANGUAGE_AR_ISO
+import com.ovasta.logisticsapp.base.ext.IosToastHost
 import com.ovasta.logisticsapp.base.local.applyAppLanguage
 import com.ovasta.logisticsapp.base.local.savedAppLanguage
 import com.ovasta.logisticsapp.base.platform.IosDeviceLocation
@@ -26,7 +30,11 @@ fun MainViewController(): UIViewController {
     val layoutDirection = if (language == LANGUAGE_AR_ISO) LayoutDirection.Rtl else LayoutDirection.Ltr
     return ComposeUIViewController {
         CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
-            App()
+            Box(Modifier.fillMaxSize()) {
+                App()
+                // iOS has no system toast
+                IosToastHost()
+            }
         }
     }
 }

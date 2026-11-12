@@ -123,6 +123,7 @@
     <string name="hash_task">#%1$s</string>
     <string name="no_address">لا يوجد عنوان</string>
     <string name="phone_number_not_available">رقم الهاتف غير متاح</string>
+    <string name="calls_not_available">المكالمات غير متاحة على هذا الجهاز</string>
     <string name="location_not_available">الموقع غير متاح</string>
     <string name="enable_location_to_go_online">يرجي تفعيل تتبع الموقع</string>
     <string name="tasks">المهام</string>
@@ -291,6 +292,7 @@
     <string name="add_image">إضافة صورة</string>
     <string name="camera">الكاميرا</string>
     <string name="gallery">المعرض</string>
+    <string name="camera_not_available">الكاميرا غير متاحة على هذا الجهاز</string>
     <string name="edit_request_sent">تم إرسال طلب التعديل</string>
     <string name="receipt_uploaded">تم رفع الفاتورة</string>
 '
