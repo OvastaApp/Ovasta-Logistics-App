@@ -1,0 +1,176 @@
+package com.ovasta.logisticsapp.base.components.sharedComposable
+
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.alert_circle_red
+import com.ovasta.logisticsapp.shared.resources.an_error_occurred
+import com.ovasta.logisticsapp.shared.resources.back
+import com.ovasta.logisticsapp.shared.resources.generic_unknown_error
+import com.ovasta.logisticsapp.shared.resources.try_again
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.ovasta.logisticsapp.base.Base_white
+import com.ovasta.logisticsapp.base.Gray500
+import com.ovasta.logisticsapp.base.Gray900
+import com.ovasta.logisticsapp.base.Primary
+import com.ovasta.logisticsapp.base.lgMedium
+import com.ovasta.logisticsapp.base.smNormal
+import com.ovasta.logisticsapp.base.xsMedium
+import com.ovasta.logisticsapp.base.ext.sdp
+
+// Material 1's button padding, which keeps the two buttons' labels from wrapping
+private val DialogButtonPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+
+@Composable
+fun BaseDialog(
+    icon: Painter? = null,
+    title: String? = null,
+    message: String? = null,
+    primaryButtonText: String? = null,
+    secondaryButtonText: String? = null,
+    onPrimaryClick: (() -> Unit)? = null,
+    onSecondaryClick: (() -> Unit)? = null,
+    onDismiss: () -> Unit,
+    dismissOnClickOutside: Boolean = true,
+) {
+    Dialog(
+        onDismissRequest = {
+            if (dismissOnClickOutside) onDismiss()
+        }
+    ) {
+        Surface(
+            shape = RoundedCornerShape(12.sdp),
+            color = Base_white,
+        ) {
+            Column(modifier = Modifier.padding(16.sdp)) {
+
+                Icon(
+                    painter = icon ?: painterResource(Res.drawable.alert_circle_red),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .size(
+                            24.sdp
+                        )
+                )
+
+                Spacer(modifier = Modifier.height(16.sdp))
+
+
+                title?.let {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = it,
+                        style = lgMedium.copy(color = Gray900),
+                        textAlign = TextAlign.Center,
+                    )
+
+                    Spacer(modifier = Modifier.height(8.sdp))
+                }
+
+                message?.let {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = it,
+                        style = smNormal.copy(color = Gray500),
+                        textAlign = TextAlign.Center,
+                    )
+
+                    Spacer(modifier = Modifier.height(12.sdp))
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    secondaryButtonText?.let {
+
+                        OutlinedButton(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 4.sdp),
+                            onClick = { onSecondaryClick?.invoke() },
+                            shape = RoundedCornerShape(8.sdp),
+                            border = BorderStroke(
+                                width = 1.sdp,
+                                color = Primary
+                            ),
+                            contentPadding = DialogButtonPadding
+                        ) {
+                            Text(
+                                text = it,
+                                style = xsMedium.copy(color = Primary)
+                            )
+                        }
+
+                        /*TextButton(
+                            onClick = {
+                            onSecondaryClick?.invoke() ?: onDismiss()
+                        }
+                        ) {
+                            Text(
+                                text = it,
+                                style = mdMedium.copy(color = Primary500)
+                            )
+                        }*/
+                    }
+
+                    primaryButtonText?.let {
+
+                        Button(
+                            modifier = Modifier
+                                .weight(1f),
+                            onClick = {
+                                onPrimaryClick?.invoke()
+                            },
+                            shape = RoundedCornerShape(8.sdp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Primary,
+                            ),
+                            contentPadding = DialogButtonPadding
+                        ) {
+                            Text(
+                                text = it,
+                                style = xsMedium.copy(color = Base_white)
+                            )
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, locale = "ar")
+@Composable
+fun PreviewBaseDialog() {
+    BaseDialog(
+        title = stringResource(Res.string.an_error_occurred),
+        message = stringResource(Res.string.generic_unknown_error),
+        primaryButtonText = stringResource(Res.string.try_again),
+        secondaryButtonText = stringResource(Res.string.back),
+        onPrimaryClick = {},
+        onSecondaryClick = {},
+        onDismiss = {})
+}

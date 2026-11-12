@@ -1,0 +1,50 @@
+# Xcode project for the iOS app. Generate it on a Mac with:
+#   cd iosApp && xcodegen && pod install
+# then open iosApp.xcworkspace.
+name: iosApp
+options:
+  bundleIdPrefix: com.ovasta
+  deploymentTarget:
+    iOS: "15.0"
+
+settings:
+  DEVELOPMENT_TEAM: H8X427WWQW
+
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources:
+      - iosApp
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.ovasta.logisticsapp
+      # iPhone only; xcodegen's default "1,2" would add iPad review and iPad screenshots
+      TARGETED_DEVICE_FAMILY: "1"
+      INFOPLIST_FILE: iosApp/Info.plist
+      GENERATE_INFOPLIST_FILE: NO
+      CODE_SIGN_ENTITLEMENTS: iosApp/iosApp.entitlements
+      CODE_SIGN_STYLE: Automatic
+      MARKETING_VERSION: "1.0.24"
+      CURRENT_PROJECT_VERSION: 24
+      VERSIONING_SYSTEM: "apple-generic"
+      # Where embedAndSignAppleFrameworkForXcode puts sharedKit.framework
+      FRAMEWORK_SEARCH_PATHS:
+        - "$(inherited)"
+        - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+      OTHER_LDFLAGS:
+        - "$(inherited)"
+        - "-framework"
+        - "sharedKit"
+      ENABLE_USER_SCRIPT_SANDBOXING: NO
+    preBuildScripts:
+      - name: "Build Kotlin Multiplatform Framework"
+        basedOnDependencyAnalysis: false
+        script: |
+          set -e
+          cd "$SRCROOT/.."
+          if [ -z "$JAVA_HOME" ] && [ -x /usr/libexec/java_home ]; then
+            export JAVA_HOME="$(/usr/libexec/java_home -v 17 2>/dev/null || /usr/libexec/java_home)"
+          fi
+          # Builds sharedKit for the current SDK, architecture and configuration, embeds it
+          # and copies its Compose resources into the app bundle
+          ./gradlew :shared:embedAndSignAppleFrameworkForXcode

@@ -1,0 +1,50 @@
+package com.ovasta.logisticsapp.presentation.home.presentation.components
+
+import com.ovasta.logisticsapp.shared.resources.Res
+import com.ovasta.logisticsapp.shared.resources.find_order
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import com.ovasta.logisticsapp.base.components.sharedComposable.SearchBox
+import com.ovasta.logisticsapp.base.ext.sdp
+
+@Composable
+fun SearchWithFilterBar(
+    searchKey: String,
+    onSearchKeyChange: (String) -> Unit,
+    onSearchTriggered: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.sdp)
+    ) {
+        SearchBox(
+            modifier = Modifier
+                .weight(1f)
+                .testTag("searchBox"),
+            searchKey,
+            hint = stringResource(Res.string.find_order),
+            onSearchKeyChange = onSearchKeyChange,
+            onSearchTriggered = onSearchTriggered,
+            keyboardType = KeyboardType.Number
+        )
+    }
+}
+
+
+@Preview
+@Composable
+fun SearchWithFilterBarPreview() {
+    SearchWithFilterBar(
+        searchKey = "",
+        onSearchKeyChange = {},
+        onSearchTriggered = {}
+    )
+}
